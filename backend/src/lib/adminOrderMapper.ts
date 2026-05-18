@@ -86,6 +86,7 @@ export function mapAdminOrderToDto(order: OrderWithRelations): AdminOrderDetailD
     shiprocketShipmentId: order.shiprocketShipmentId,
     customer: order.user,
     items: order.items.map((item) => ({
+      id: item.id,
       slug: item.slug,
       name: item.name,
       image: item.image,
@@ -95,6 +96,7 @@ export function mapAdminOrderToDto(order: OrderWithRelations): AdminOrderDetailD
       size: item.size ?? undefined,
       weight: weightDisplay(item.product),
       quantity: item.quantity,
+      price: formatPaise(item.unitPricePaise),
       unitPrice: formatPaise(item.unitPricePaise),
       lineTotal: formatPaise(item.unitPricePaise * item.quantity),
     })),

@@ -69,7 +69,7 @@ checkoutRouter.post("/razorpay/verify", requireCustomer, async (req: CustomerReq
       razorpaySignature: String(razorpaySignature),
     });
 
-    if ("error" in result) {
+    if ("error" in result && result.error) {
       const messages: Record<string, string> = {
         PAYMENT_VERIFICATION_FAILED: "Payment verification failed",
         CHECKOUT_SESSION_NOT_FOUND: "Checkout session not found",

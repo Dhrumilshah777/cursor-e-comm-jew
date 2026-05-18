@@ -80,6 +80,11 @@ authRouter.post("/verify-otp", async (req, res) => {
       return;
     }
 
+    if (!("token" in result) || !("user" in result)) {
+      res.status(500).json({ error: "Login failed" });
+      return;
+    }
+
     res.cookie(customerCookieName, result.token, customerCookieOptions());
     res.json({ user: result.user, token: result.token });
   } catch (error) {

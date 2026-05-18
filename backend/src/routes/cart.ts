@@ -53,7 +53,12 @@ cartRouter.post("/items", async (req: CustomerRequest, res) => {
 });
 
 cartRouter.delete("/items/:id", async (req: CustomerRequest, res) => {
-  const itemId = req.params.id;
+  const rawId = req.params.id;
+  const itemId = Array.isArray(rawId) ? rawId[0] : rawId;
+  if (!itemId) {
+    res.status(400).json({ error: "Item id is required" });
+    return;
+  }
 
   try {
     const result = await removeCartItem(req.customer!.userId, itemId);

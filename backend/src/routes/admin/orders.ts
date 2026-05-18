@@ -51,7 +51,7 @@ adminOrdersRouter.patch("/:id", async (req, res) => {
 
   try {
     const result = await updateAdminOrder(req.params.id, {
-      status,
+      status: status ?? undefined,
       courier: req.body?.courier,
       trackingNumber: req.body?.trackingNumber,
       expectedDelivery: req.body?.expectedDelivery,

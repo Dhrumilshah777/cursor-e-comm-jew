@@ -119,6 +119,10 @@ export async function verifyRazorpayCheckoutAndPlaceOrder(
     return result;
   }
 
+  if (!("order" in result)) {
+    return { error: "ORDER_FAILED" as const };
+  }
+
   await prisma.checkoutPayment.update({
     where: { id: session.id },
     data: {
@@ -167,6 +171,10 @@ export async function handleRazorpayWebhook(rawBody: string, signature: string) 
   });
 
   if ("error" in result) {
+    return { error: "ORDER_FAILED" as const };
+  }
+
+  if (!("order" in result)) {
     return { error: "ORDER_FAILED" as const };
   }
 
