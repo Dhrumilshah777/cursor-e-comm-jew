@@ -26,20 +26,22 @@ const app = express();
 
 const port = Number(process.env.PORT) || 4000;
 
-const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://localhost:3000";
-
-
+const allowedOrigins = (process.env.FRONTEND_ORIGIN ?? "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(
-
   cors({
-
-    origin: frontendOrigin,
-
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(null, false);
+    },
     credentials: true,
-
   }),
-
 );
 
 app.use(cookieParser());

@@ -279,6 +279,13 @@ export type AdminOrderDetail = {
     shipping: string;
     total: string;
   };
+  shipping: {
+    courier: string;
+    trackingNumber: string;
+    expectedDelivery: string;
+  };
+  shiprocketOrderId?: number | null;
+  shiprocketShipmentId?: number | null;
   statusHistory: {
     id: string;
     status: string;
