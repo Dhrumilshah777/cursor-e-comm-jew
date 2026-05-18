@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Environment & secrets (never commit)
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# Build outputs
+backend/dist/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Prisma generated client (regenerate with: npx prisma generate)
+backend/src/generated/
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# TypeScript
+*.tsbuildinfo
+
+# Vercel
+.vercel

@@ -1,0 +1,324 @@
+// Wholesale jewelry — PostgreSQL schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrderStatus {
+  PROCESSING
+  CONFIRMED
+  PACKED
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum MetalType {
+  ROSE_GOLD
+  YELLOW_GOLD
+  WHITE_GOLD
+}
+
+enum GoldPurity {
+  KT_14
+  KT_18
+  KT_22
+}
+
+enum MakingChargeKind {
+  PERCENTAGE
+  FIXED
+}
+
+enum ReturnStatus {
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  PICKUP_SCHEDULED
+  ITEM_RECEIVED
+  REFUND_PROCESSED
+}
+
+enum ReturnImageType {
+  PRODUCT
+  PACKAGING
+}
+
+enum RefundStatus {
+  PENDING
+  INITIATED
+  PROCESSED
+  FAILED
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admins")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  name      String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addresses Address[]
+  orders    Order[]
+  cart      Cart?
+  checkoutPayments CheckoutPayment[]
+
+  @@map("users")
+}
+
+model CheckoutPayment {
+  id              String   @id @default(cuid())
+  userId          String
+  razorpayOrderId String   @unique
+  addressJson     String   @db.Text
+  amountPaise     Int
+  status          String   @default("pending")
+  shopOrderId     String?
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("checkout_payments")
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  size      String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId, size])
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+  @@map("otp_codes")
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  label     String?  @default("Home")
+  name      String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  phone     String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders         Order[]
+  returnRequests ReturnRequest[]
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model Product {
+  id                String           @id @default(cuid())
+  slug              String           @unique
+  name              String
+  category          String
+  image             String
+  alt               String
+  pricePaise        Int
+  metal             MetalType
+  purity            GoldPurity
+  weightGrams       Decimal          @db.Decimal(8, 2)
+  sku               String           @unique
+  ringSize          String?
+  description       String           @db.Text
+  gallery           String[]         @default([])
+  makingChargeKind  MakingChargeKind @default(PERCENTAGE)
+  makingChargeValue Decimal          @default(0.1) @db.Decimal(8, 2)
+  gstPercent        Int              @default(3)
+  isActive          Boolean          @default(true)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  @@index([category])
+  @@map("products")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  userId          String
+  deliveryAddressId String
+  status          OrderStatus @default(PROCESSING)
+  placedAt        DateTime    @default(now())
+  totalPaise      Int
+  goldValuePaise  Int
+  makingChargePaise Int
+  gstPaise        Int
+  shippingPaise   Int
+  paymentMethod   String
+  paymentStatus   String
+  transactionId   String?
+  courier              String?
+  trackingNumber       String?
+  expectedDelivery     String?
+  shiprocketOrderId    Int?
+  shiprocketShipmentId Int?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user            User            @relation(fields: [userId], references: [id])
+  deliveryAddress Address         @relation(fields: [deliveryAddressId], references: [id])
+  items           OrderItem[]
+  returnRequests  ReturnRequest[]
+  statusEvents    OrderStatusEvent[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String     @id @default(cuid())
+  orderId      String
+  productId    String?
+  name         String
+  slug         String
+  image        String
+  metal        MetalType
+  purity       GoldPurity
+  size         String?
+  quantity     Int        @default(1)
+  unitPricePaise Int
+
+  order           Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product?         @relation(fields: [productId], references: [id], onDelete: SetNull)
+  returnRequests  ReturnRequest[]
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model OrderStatusEvent {
+  id        String      @id @default(cuid())
+  orderId   String
+  status    OrderStatus
+  label     String
+  note      String?
+  eventAt   DateTime    @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_status_events")
+}
+
+model ReturnRequest {
+  id                String       @id @default(cuid())
+  orderId           String
+  orderItemId       String
+  pickupAddressId   String
+  reason            String
+  customerNotes     String?      @db.Text
+  adminNotes        String?      @db.Text
+  status            ReturnStatus @default(UNDER_REVIEW)
+  policyConfirmed   Boolean      @default(false)
+  pickupScheduledFor        String?
+  shiprocketReturnOrderId   String?
+  shiprocketReturnShipmentId String?
+  reversePickupAt           DateTime?
+  razorpayRefundId          String?
+  refundStatus              RefundStatus?
+  refundAmountPaise         Int?
+  submittedAt               DateTime     @default(now())
+  reviewedAt                DateTime?
+  createdAt                 DateTime     @default(now())
+  updatedAt                 DateTime     @updatedAt
+
+  order         Order                 @relation(fields: [orderId], references: [id])
+  orderItem     OrderItem             @relation(fields: [orderItemId], references: [id])
+  pickupAddress Address               @relation(fields: [pickupAddressId], references: [id])
+  images        ReturnRequestImage[]
+  statusEvents  ReturnStatusEvent[]
+
+  @@index([orderId])
+  @@index([status])
+  @@map("return_requests")
+}
+
+model ReturnRequestImage {
+  id              String          @id @default(cuid())
+  returnRequestId String
+  type            ReturnImageType
+  url             String
+  fileName        String?
+  createdAt       DateTime        @default(now())
+
+  returnRequest ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+
+  @@index([returnRequestId])
+  @@map("return_request_images")
+}
+
+model ReturnStatusEvent {
+  id              String       @id @default(cuid())
+  returnRequestId String
+  status          ReturnStatus
+  label           String
+  note            String?
+  eventAt         DateTime     @default(now())
+
+  returnRequest ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+
+  @@index([returnRequestId])
+  @@map("return_status_events")
+}
