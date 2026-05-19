@@ -4,7 +4,7 @@ services:
     name: wholesale-jewelry-api
     runtime: node
     rootDir: backend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npx prisma migrate deploy && npm run build
     preDeployCommand: npx prisma migrate deploy
     startCommand: npm start
     healthCheckPath: /api/health
