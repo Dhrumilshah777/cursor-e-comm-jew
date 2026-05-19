@@ -1,7 +1,9 @@
-import type { MakingChargeKind, Product } from "../generated/prisma/client.js";
+import type { Product } from "../generated/prisma/client.js";
 import { formatPaise, metalToDisplay, purityToDisplay } from "./format.js";
 import {
   calculatePriceBreakup,
+  calculateProductPricePaise,
+  makingChargeFromDb,
   purityFromDb,
   type PriceBreakup,
   type ProductMakingCharge,
@@ -32,16 +34,6 @@ export type CollectionProductDto = {
   ringSize?: string;
 };
 
-function makingChargeFromDb(
-  kind: MakingChargeKind,
-  value: { toString(): string },
-): ProductMakingCharge {
-  return {
-    type: kind === "PERCENTAGE" ? "percentage" : "fixed",
-    value: Number.parseFloat(value.toString()),
-  };
-}
-
 function weightDisplay(grams: { toString(): string }): string {
   return `${Number.parseFloat(grams.toString()).toFixed(2)} g`;
 }
@@ -59,7 +51,7 @@ export function mapProductToDto(product: Product): CollectionProductDto {
     makingCharge,
     gstPercent: product.gstPercent,
   });
-  const pricePaise = Math.round(priceBreakup.total * 100);
+  const pricePaise = calculateProductPricePaise(product);
 
   return {
     id: product.id,

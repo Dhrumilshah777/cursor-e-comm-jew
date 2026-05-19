@@ -86,3 +86,33 @@ export function purityFromDb(purity: string): GoldPurity {
   };
   return map[purity] ?? "18kt";
 }
+
+export function makingChargeFromDb(
+  kind: "PERCENTAGE" | "FIXED",
+  value: { toString(): string },
+): ProductMakingCharge {
+  return {
+    type: kind === "PERCENTAGE" ? "percentage" : "fixed",
+    value: Number.parseFloat(value.toString()),
+  };
+}
+
+/** Live selling price in paise — same formula as product page breakup. */
+export function calculateProductPricePaise(input: {
+  weightGrams: { toString(): string };
+  purity: string;
+  makingChargeKind: "PERCENTAGE" | "FIXED";
+  makingChargeValue: { toString(): string };
+  gstPercent: number;
+}): number {
+  const breakup = calculatePriceBreakup({
+    netWeightGrams: Number.parseFloat(input.weightGrams.toString()),
+    purity: purityFromDb(input.purity),
+    makingCharge: makingChargeFromDb(
+      input.makingChargeKind,
+      input.makingChargeValue,
+    ),
+    gstPercent: input.gstPercent,
+  });
+  return Math.round(breakup.total * 100);
+}

@@ -3,6 +3,7 @@ import { mapOrderToDto } from "../lib/orderMapper.js";
 import { prisma } from "../lib/prisma.js";
 import {
   calculatePriceBreakup,
+  calculateProductPricePaise,
   purityFromDb,
   type ProductMakingCharge,
 } from "../lib/pricing.js";
@@ -130,7 +131,7 @@ export async function getCartCheckoutTotals(userId: string) {
   let subtotalPaise = 0;
 
   for (const item of cart.items as CartItemWithProduct[]) {
-    subtotalPaise += item.product.pricePaise * item.quantity;
+    subtotalPaise += calculateProductPricePaise(item.product) * item.quantity;
   }
 
   const shippingPaise = 0;
@@ -191,10 +192,11 @@ export async function placeOrderFromCart(
       gstPercent: item.product.gstPercent,
     });
 
-    const lineGold = rupeesToPaise(breakup.goldValue);
-    const lineMaking = rupeesToPaise(breakup.makingCharge);
-    const lineGst = rupeesToPaise(breakup.gst);
-    const lineTotal = item.product.pricePaise * item.quantity;
+    const unitPricePaise = calculateProductPricePaise(item.product);
+    const lineGold = rupeesToPaise(breakup.goldValue) * item.quantity;
+    const lineMaking = rupeesToPaise(breakup.makingCharge) * item.quantity;
+    const lineGst = rupeesToPaise(breakup.gst) * item.quantity;
+    const lineTotal = unitPricePaise * item.quantity;
 
     goldValuePaise += lineGold;
     makingChargePaise += lineMaking;
@@ -210,7 +212,7 @@ export async function placeOrderFromCart(
       purity: item.product.purity,
       size: item.size || null,
       quantity: item.quantity,
-      unitPricePaise: item.product.pricePaise,
+      unitPricePaise,
     };
   });
 

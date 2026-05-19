@@ -1,5 +1,6 @@
 import type { Cart, CartItem, Product } from "../generated/prisma/client.js";
 import { formatPaise } from "./format.js";
+import { calculateProductPricePaise } from "./pricing.js";
 import { mapProductToDto } from "./productMapper.js";
 
 export type CartItemDto = {
@@ -26,12 +27,12 @@ type CartWithItems = Cart & {
 export function mapCartToDto(cart: CartWithItems): CartDto {
   const items: CartItemDto[] = cart.items.map((item) => {
     const productDto = mapProductToDto(item.product);
-    const unitPaise = item.product.pricePaise;
-    const lineTotalPaise = unitPaise;
+    const unitPaise = calculateProductPricePaise(item.product);
+    const lineTotalPaise = unitPaise * item.quantity;
 
     return {
       id: item.id,
-      quantity: 1,
+      quantity: item.quantity,
       size: item.size || null,
       lineTotalPaise,
       lineTotal: formatPaise(lineTotalPaise),
