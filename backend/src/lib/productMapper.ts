@@ -59,6 +59,7 @@ export function mapProductToDto(product: Product): CollectionProductDto {
     makingCharge,
     gstPercent: product.gstPercent,
   });
+  const pricePaise = Math.round(priceBreakup.total * 100);
 
   return {
     id: product.id,
@@ -67,7 +68,7 @@ export function mapProductToDto(product: Product): CollectionProductDto {
     category: product.category,
     image: product.image,
     alt: product.alt,
-    price: formatPaise(product.pricePaise),
+    price: formatPaise(pricePaise),
     metal: metalToDisplay(product.metal),
     sku: product.sku,
     weight: weightDisplay(product.weightGrams),
