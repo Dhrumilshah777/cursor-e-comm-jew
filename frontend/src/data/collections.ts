@@ -99,7 +99,7 @@ export const collections: Record<CollectionSlug, CollectionConfig> = {
   mangalsutra: {
     slug: "mangalsutra",
     name: "Mangalsutra",
-    tagline: "Tradition woven in timeless gold",
+    tagline: "Tradition woven in timeless fashion jewelry",
     bannerImage:
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
     bannerAlt: "Mangalsutra collection banner",

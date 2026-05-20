@@ -23,7 +23,7 @@ const categories: CategoryItem[] = [
     href: "/collections/necklaces",
     image:
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
-    alt: "Gold pendant necklace",
+    alt: "Plated pendant necklace — fashion jewelry",
   },
   {
     id: "bracelets",
@@ -31,7 +31,7 @@ const categories: CategoryItem[] = [
     href: "/collections/bracelets",
     image:
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
-    alt: "Gold bracelet with pearls",
+    alt: "Plated bracelet with pearls — luxury accessories",
   },
   {
     id: "rings",
@@ -63,7 +63,7 @@ const categories: CategoryItem[] = [
     href: "/collections/mangalsutra",
     image:
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
-    alt: "Gold mangalsutra necklace",
+    alt: "Plated mangalsutra necklace — fashion jewelry",
   },
 ];
 

@@ -41,22 +41,14 @@ export default function ProductPriceBreakup({
             <p className="shrink-0 pt-0.5 text-sm font-normal text-zinc-900">
               {formatPurityLabel(breakup.purity)}
             </p>
-            <div className="ml-10 sm:ml-14">
+            <div className="ml-6 sm:ml-10">
               <p className="text-[11px] font-light uppercase tracking-[0.12em] text-zinc-500">
-                Weight
-                </p>
-                <p className="mt-0.5 text-sm font-light text-zinc-900">
-                  {breakup.netWeightGrams.toFixed(2)} g
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] font-light uppercase tracking-[0.12em] text-zinc-500">
-                  Rate
-                </p>
-                <p className="mt-0.5 text-sm font-light text-zinc-900">
-                  {formatRatePerGram(breakup.pricePerGram)}
-                </p>
-              </div>
+                Rate
+              </p>
+              <p className="mt-0.5 text-sm font-light text-zinc-900">
+                {formatRatePerGram(breakup.pricePerGram)}
+              </p>
+            </div>
           </dt>
           <dd className="shrink-0 pt-0.5 text-sm font-normal text-zinc-900">
             {formatINR(breakup.goldValue)}

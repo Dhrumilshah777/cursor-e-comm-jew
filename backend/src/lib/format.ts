@@ -14,18 +14,18 @@ export function formatDisplayDate(date: Date): string {
 
 export function metalToDisplay(metal: MetalType): string {
   const map: Record<MetalType, string> = {
-    YELLOW_GOLD: "Yellow Gold",
-    ROSE_GOLD: "Rose Gold",
-    WHITE_GOLD: "White Gold",
+    YELLOW_GOLD: "Plated finish — warm tone",
+    ROSE_GOLD: "Plated finish — rose tone",
+    WHITE_GOLD: "Plated finish — silver tone",
   };
   return map[metal];
 }
 
 export function purityToDisplay(purity: GoldPurity): string {
   const map: Record<GoldPurity, string> = {
-    KT_14: "14KT",
-    KT_18: "18KT",
-    KT_22: "22KT",
+    KT_14: "Standard plated",
+    KT_18: "Premium plated",
+    KT_22: "Deluxe plated",
   };
   return map[purity];
 }

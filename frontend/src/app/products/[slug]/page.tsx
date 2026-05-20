@@ -5,8 +5,8 @@ import AddToBagButton from "@/components/cart/AddToBagButton";
 import ProductDetailActions from "@/components/ProductDetailActions";
 import ProductImageGallery from "@/components/ProductImageGallery";
 import ProductPincodeCheck from "@/components/ProductPincodeCheck";
-import ProductPriceBreakup from "@/components/ProductPriceBreakup";
 import ProductYouMayAlsoLike from "@/components/ProductYouMayAlsoLike";
+import { softenPublicText } from "@/lib/storeCopy";
 import { getCollection } from "@/data/collections";
 import { fetchProductBySlug, fetchRelatedProducts } from "@/lib/productsApi";
 
@@ -27,7 +27,9 @@ export async function generateMetadata({ params }: PageProps) {
   const product = await fetchProductBySlug(slug);
   return {
     title: product ? `${product.name} | Jewelry` : "Product | Jewelry",
-    description: product?.description,
+    description: product?.description
+      ? softenPublicText(product.description).slice(0, 160)
+      : undefined,
   };
 }
 
@@ -111,25 +113,17 @@ export default async function ProductPage({ params }: PageProps) {
 
             <dl
               className={`mt-6 grid gap-x-3 gap-y-4 sm:max-w-xl sm:gap-x-6 ${
-                product.category === "rings"
-                  ? "grid-cols-2 sm:grid-cols-4"
-                  : "grid-cols-3"
+                product.category === "rings" && product.ringSize
+                  ? "grid-cols-2 sm:grid-cols-3"
+                  : "grid-cols-2"
               }`}
             >
               <div>
                 <dt className="text-[10px] font-normal uppercase tracking-[0.2em] text-zinc-500">
-                  Weight
+                  Plating
                 </dt>
                 <dd className="mt-1 text-sm font-light text-zinc-900">
-                  {product.weight}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[10px] font-normal uppercase tracking-[0.2em] text-zinc-500">
-                  Purity
-                </dt>
-                <dd className="mt-1 text-sm font-light text-zinc-900">
-                  {product.purity.toUpperCase()}
+                  {product.purity}
                 </dd>
               </div>
               <div>
@@ -167,11 +161,9 @@ export default async function ProductPage({ params }: PageProps) {
             Product description
           </h2>
           <p className="mt-4 max-w-none text-sm font-light leading-[1.75] text-zinc-600 sm:text-[15px]">
-            {product.description}
+            {softenPublicText(product.description)}
           </p>
         </section>
-
-        <ProductPriceBreakup breakup={product.priceBreakup} />
 
         <ProductYouMayAlsoLike products={relatedProducts} />
       </div>

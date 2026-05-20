@@ -123,7 +123,7 @@ export default function OrderDetailContent({
                 </Link>
                 <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] font-light text-zinc-600 sm:grid-cols-3">
                   <div>
-                    <dt className="uppercase tracking-[0.12em] text-zinc-400">Gold</dt>
+                    <dt className="uppercase tracking-[0.12em] text-zinc-400">Finish</dt>
                     <dd className="mt-0.5 text-zinc-800">{item.metal}</dd>
                   </div>
                   <div>
@@ -223,7 +223,7 @@ export default function OrderDetailContent({
       <section className="border border-zinc-100 px-5 py-6 sm:px-8 sm:py-8">
         <SectionTitle>Price breakdown</SectionTitle>
         <dl className="mt-4 divide-y divide-zinc-100">
-          <PriceRow label="Gold value" value={order.priceBreakdown.goldValue} />
+          <PriceRow label="Material value" value={order.priceBreakdown.goldValue} />
           <PriceRow label="Making charges" value={order.priceBreakdown.makingCharges} />
           <PriceRow label="GST" value={order.priceBreakdown.gst} />
           <PriceRow label="Shipping" value={order.priceBreakdown.shipping} />

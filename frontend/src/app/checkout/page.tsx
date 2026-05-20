@@ -8,7 +8,7 @@ const jost = Jost({
 });
 
 export const metadata = {
-  title: "Checkout | Wholesale Jewelry",
+  title: "Checkout | Fashion Jewelry",
 };
 
 export default function CheckoutPage() {

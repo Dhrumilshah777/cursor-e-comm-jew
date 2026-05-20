@@ -82,7 +82,9 @@ export function formatINR(amount: number): string {
 }
 
 export function formatPurityLabel(purity: GoldPurity): string {
-  return `${purity.toUpperCase()} Gold`;
+  if (purity === "14kt") return "Standard plated";
+  if (purity === "22kt") return "Deluxe plated";
+  return "Premium plated";
 }
 
 export function formatRatePerGram(pricePerGram: number): string {

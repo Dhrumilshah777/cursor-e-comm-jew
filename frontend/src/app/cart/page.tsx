@@ -8,7 +8,7 @@ const jost = Jost({
 });
 
 export const metadata = {
-  title: "Your bag | Wholesale Jewelry",
+  title: "Your bag | Fashion Jewelry",
 };
 
 export default function CartPage() {

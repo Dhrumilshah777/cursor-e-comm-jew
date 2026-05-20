@@ -64,7 +64,7 @@ const legalLinks = [
 
 const trustItems = [
   { icon: "fa-solid fa-lock", label: "SSL Secure" },
-  { icon: "fa-solid fa-certificate", label: "Hallmarked Gold" },
+  { icon: "fa-solid fa-certificate", label: "Quality plated finish" },
   { icon: "fa-solid fa-truck-fast", label: "Insured Shipping" },
   { icon: "fa-solid fa-shield-halved", label: "Secure Checkout" },
 ] as const;
@@ -180,7 +180,7 @@ export default function Footer() {
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
           <div className="mx-auto max-w-2xl text-center lg:max-w-3xl">
             <h2 className="text-xl font-light tracking-wide text-zinc-950 sm:text-2xl md:text-3xl">
-              Join Our World of Jewellery
+              Join Our World of Fashion Jewelry
             </h2>
             <p className="mt-2 text-sm font-light text-zinc-600">
               Be the first to discover new arrivals, exclusive offers, and
