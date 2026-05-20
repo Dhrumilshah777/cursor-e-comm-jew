@@ -60,6 +60,9 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
       const data = await fetchAdminOrderById(orderId);
       setOrder(data);
       setStatusDraft(data.statusCode);
+      if (data.shiprocketFulfillmentLog?.length) {
+        setShiprocketLog(data.shiprocketFulfillmentLog);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load order");
     } finally {
@@ -91,7 +94,11 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
       );
       setOrder(updated);
       setStatusDraft(updated.statusCode);
-      if (log?.length) setShiprocketLog(log);
+      if (log?.length) {
+        setShiprocketLog(log);
+      } else if (updated.shiprocketFulfillmentLog?.length) {
+        setShiprocketLog(updated.shiprocketFulfillmentLog);
+      }
       if (statusDraft === "SHIPPED" && updated.shipping.trackingNumber) {
         setSaveMessage(
           `Order marked shipped. AWB ${updated.shipping.trackingNumber} (${updated.shipping.courier}).`,
@@ -321,15 +328,72 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
         </dl>
       </Section>
 
-      <Section title="Shipment">
+      <Section title="Shipment & warehouse pickup">
         <dl>
           <InfoRow label="Courier" value={order.shipping.courier} />
           <InfoRow label="AWB / tracking" value={order.shipping.trackingNumber} />
           <InfoRow label="Expected delivery" value={order.shipping.expectedDelivery} />
+          <InfoRow
+            label="Warehouse pickup date"
+            value={order.warehousePickup.date}
+          />
+          <InfoRow
+            label="Warehouse pickup time"
+            value={order.warehousePickup.time}
+          />
+          {order.shiprocketOrderId ? (
+            <InfoRow
+              label="Shiprocket order ID"
+              value={String(order.shiprocketOrderId)}
+            />
+          ) : null}
+          {order.shiprocketShipmentId ? (
+            <InfoRow
+              label="Shiprocket shipment ID"
+              value={String(order.shiprocketShipmentId)}
+            />
+          ) : null}
         </dl>
+        {(order.shiprocketFulfillmentLog?.length ?? 0) > 0 ||
+        (shiprocketLog && shiprocketLog.length > 0) ? (
+          <div className="border-t border-zinc-100 pb-4">
+            <p className="py-3 text-[10px] font-normal uppercase tracking-[0.16em] text-zinc-500">
+              Shiprocket pickup log (saved)
+            </p>
+            <ul className="space-y-3">
+              {(shiprocketLog ?? order.shiprocketFulfillmentLog ?? []).map((entry) => (
+                <li
+                  key={entry.step}
+                  className={`border px-3 py-3 text-xs font-light ${
+                    entry.ok
+                      ? "border-emerald-200 bg-emerald-50/50 text-zinc-800"
+                      : "border-red-200 bg-red-50/50 text-red-900"
+                  }`}
+                >
+                  <p className="font-normal uppercase tracking-[0.12em]">
+                    {entry.step}{" "}
+                    <span className={entry.ok ? "text-emerald-700" : "text-red-700"}>
+                      {entry.ok ? "OK" : "FAILED"}
+                    </span>
+                  </p>
+                  <p className="mt-1 text-zinc-700">{entry.summary}</p>
+                  {entry.error ? (
+                    <p className="mt-1 text-red-700">{entry.error}</p>
+                  ) : null}
+                  {entry.response !== undefined ? (
+                    <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-all rounded bg-white/80 p-2 text-[10px] text-zinc-600">
+                      {JSON.stringify(entry.response, null, 2)}
+                    </pre>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <p className="border-t border-zinc-100 py-3 text-xs font-light text-zinc-500">
-          Shiprocket runs automatically when you set status to{" "}
-          <span className="text-zinc-700">Shipped</span> (once per order).
+          Shiprocket runs when you set status to{" "}
+          <span className="text-zinc-700">Shipped</span>. Pickup date and time come
+          from the schedule pickup API and stay on this order after refresh.
         </p>
       </Section>
     </div>

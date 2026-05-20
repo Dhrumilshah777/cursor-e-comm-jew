@@ -286,6 +286,12 @@ export type AdminOrderDetail = {
   };
   shiprocketOrderId?: number | null;
   shiprocketShipmentId?: number | null;
+  warehousePickup: {
+    date: string;
+    time: string;
+    scheduledAt: string | null;
+  };
+  shiprocketFulfillmentLog: ShiprocketLogEntry[] | null;
   statusHistory: {
     id: string;
     status: string;

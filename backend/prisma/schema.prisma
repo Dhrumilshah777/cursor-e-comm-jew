@@ -213,6 +213,10 @@ model Order {
   expectedDelivery     String?
   shiprocketOrderId    Int?
   shiprocketShipmentId Int?
+  pickupScheduledAt    DateTime?
+  pickupDateLabel      String?
+  pickupTimeLabel      String?
+  shiprocketFulfillmentLog Json?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 

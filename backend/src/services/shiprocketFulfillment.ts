@@ -1,5 +1,6 @@
 import type { Address, Order, OrderItem, Product, User } from "../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
+import { parseShiprocketPickupSchedule } from "../lib/shiprocketPickup.js";
 import {
   assignShiprocketAwb,
   createShiprocketAdhocOrder,
@@ -7,6 +8,7 @@ import {
   getShiprocketPickupLocation,
   isShiprocketConfigured,
 } from "../lib/shiprocket.js";
+import type { Prisma } from "../generated/prisma/client.js";
 
 const DEFAULT_DIM_CM = 12;
 const MIN_WEIGHT_KG = 0.1;
@@ -254,18 +256,21 @@ export async function fulfillOrderOnShiprocket(
     throw new ShiprocketFulfillmentError(message, log);
   }
 
-  let expectedDelivery = awbData?.etd ?? null;
+  const expectedDelivery = awbData?.etd ?? null;
+  let pickupSchedule = {
+    dateLabel: null as string | null,
+    timeLabel: null as string | null,
+    scheduledAt: null as Date | null,
+  };
 
   try {
     const pickupResponse = await generateShiprocketPickup(shipmentId);
-    const pickupDate = pickupResponse.response?.pickup_scheduled_date;
-    if (pickupDate) {
-      expectedDelivery = pickupDate;
-    }
+    pickupSchedule = parseShiprocketPickupSchedule(pickupResponse);
+    const { dateLabel, timeLabel } = pickupSchedule;
     pushLog(orderNumber, log, {
       step: "schedule_pickup",
       ok: pickupResponse.pickup_status === 1,
-      summary: `pickup_status=${pickupResponse.pickup_status ?? "—"}, date=${pickupDate ?? "—"}`,
+      summary: `pickup_status=${pickupResponse.pickup_status ?? "—"}, date=${dateLabel ?? "—"}, time=${timeLabel ?? "—"}`,
       response: pickupResponse,
     });
   } catch (pickupError) {
@@ -279,6 +284,8 @@ export async function fulfillOrderOnShiprocket(
     });
   }
 
+  const fulfillmentLog = log as unknown as Prisma.InputJsonValue;
+
   const updated = await prisma.order.update({
     where: { id: orderId },
     data: {
@@ -287,6 +294,10 @@ export async function fulfillOrderOnShiprocket(
       trackingNumber: awbCode,
       courier: courierName ?? "Shiprocket",
       expectedDelivery: expectedDelivery ?? undefined,
+      pickupScheduledAt: pickupSchedule.scheduledAt ?? undefined,
+      pickupDateLabel: pickupSchedule.dateLabel ?? undefined,
+      pickupTimeLabel: pickupSchedule.timeLabel ?? undefined,
+      shiprocketFulfillmentLog: fulfillmentLog,
     },
   });
 

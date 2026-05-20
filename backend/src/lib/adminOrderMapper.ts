@@ -16,6 +16,7 @@ import {
   purityToDisplay,
 } from "./format.js";
 import { mapOrderToDto } from "./orderMapper.js";
+import type { ShiprocketLogEntry } from "../services/shiprocketFulfillment.js";
 
 export type AdminOrderLineItemDto = {
   slug: string;
@@ -58,6 +59,12 @@ export type AdminOrderDetailDto = ReturnType<typeof mapOrderToDto> & {
     eventAt: string;
     date: string;
   }[];
+  warehousePickup: {
+    date: string;
+    time: string;
+    scheduledAt: string | null;
+  };
+  shiprocketFulfillmentLog: ShiprocketLogEntry[] | null;
 };
 
 type OrderWithRelations = Order & {
@@ -74,6 +81,37 @@ function weightDisplay(product: Product | null): string {
 
 function isPaymentPaid(paymentStatus: string): boolean {
   return paymentStatus.toLowerCase().includes("paid");
+}
+
+function formatWarehousePickupDate(order: Order): string {
+  if (order.pickupDateLabel) return order.pickupDateLabel;
+  if (order.pickupScheduledAt) return formatDisplayDate(order.pickupScheduledAt);
+  return "—";
+}
+
+function formatWarehousePickupTime(order: Order): string {
+  if (order.pickupTimeLabel) return order.pickupTimeLabel;
+  if (order.pickupScheduledAt) {
+    return order.pickupScheduledAt.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
+  return "—";
+}
+
+function parseShiprocketFulfillmentLog(value: unknown): ShiprocketLogEntry[] | null {
+  if (!Array.isArray(value)) return null;
+  const entries = value.filter(
+    (entry): entry is ShiprocketLogEntry =>
+      entry !== null &&
+      typeof entry === "object" &&
+      typeof (entry as ShiprocketLogEntry).step === "string" &&
+      typeof (entry as ShiprocketLogEntry).ok === "boolean" &&
+      typeof (entry as ShiprocketLogEntry).summary === "string",
+  );
+  return entries.length > 0 ? entries : null;
 }
 
 export function mapAdminOrderToDto(order: OrderWithRelations): AdminOrderDetailDto {
@@ -116,6 +154,12 @@ export function mapAdminOrderToDto(order: OrderWithRelations): AdminOrderDetailD
       eventAt: event.eventAt.toISOString(),
       date: formatDisplayDate(event.eventAt),
     })),
+    warehousePickup: {
+      date: formatWarehousePickupDate(order),
+      time: formatWarehousePickupTime(order),
+      scheduledAt: order.pickupScheduledAt?.toISOString() ?? null,
+    },
+    shiprocketFulfillmentLog: parseShiprocketFulfillmentLog(order.shiprocketFulfillmentLog),
   };
 }
 

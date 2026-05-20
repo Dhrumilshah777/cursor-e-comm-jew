@@ -168,7 +168,13 @@ export async function assignShiprocketAwb(shipmentId: number) {
 export async function generateShiprocketPickup(shipmentId: number) {
   return shiprocketFetch<{
     pickup_status?: number;
-    response?: { pickup_scheduled_date?: string };
+    response?: {
+      pickup_scheduled_date?: string;
+      pickup_scheduled_time?: string;
+      pickup_time?: string;
+      pickup_slot?: string;
+      [key: string]: unknown;
+    };
     message?: string;
   }>("/v1/external/courier/generate/pickup", {
     method: "POST",

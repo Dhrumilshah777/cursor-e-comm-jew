@@ -6,10 +6,10 @@
     "category": "rings",
     "image": "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     "alt": "Solitaire diamond ring",
-    "price": "₹15,965",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-RI0001",
-    "weight": "2.20 g",
+    "weight": "0.50 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
@@ -23,16 +23,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 2.2,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.5,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 14850.000000000002,
+      "goldValue": 1,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 15500.000000000002,
-      "gst": 465.00000000000006,
+      "subtotal": 651,
+      "gst": 19.529999999999998,
       "gstPercent": 3,
-      "total": 15965.000000000002
+      "total": 670.53
     },
     "ringSize": "10"
   },
@@ -43,10 +43,10 @@
     "category": "rings",
     "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     "alt": "Gold celestial band ring",
-    "price": "₹24,784",
+    "price": "₹12",
     "metal": "Rose Gold",
     "sku": "JL-RI0002",
-    "weight": "2.62 g",
+    "weight": "0.50 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
@@ -60,16 +60,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 2.62,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.501,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 21484,
-      "makingCharge": 2578.08,
+      "goldValue": 10.02,
+      "makingCharge": 1.2024,
       "makingChargeDisplay": "12%",
-      "subtotal": 24062.08,
-      "gst": 721.8624,
+      "subtotal": 11.2224,
+      "gst": 0.33667199999999997,
       "gstPercent": 3,
-      "total": 24783.9424
+      "total": 11.559072
     },
     "ringSize": "11"
   },
@@ -80,10 +80,10 @@
     "category": "rings",
     "image": "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
     "alt": "Pink gemstone gold ring",
-    "price": "₹19,454",
+    "price": "₹3,219",
     "metal": "White Gold",
     "sku": "JL-RI0003",
-    "weight": "3.04 g",
+    "weight": "0.50 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
@@ -97,16 +97,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.04,
+      "netWeightGrams": 0.503,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 16568,
-      "makingCharge": 2319.5200000000004,
+      "goldValue": 2741.35,
+      "makingCharge": 383.78900000000004,
       "makingChargeDisplay": "14%",
-      "subtotal": 18887.52,
-      "gst": 566.6256,
+      "subtotal": 3125.139,
+      "gst": 93.75417,
       "gstPercent": 3,
-      "total": 19454.1456
+      "total": 3218.8931700000003
     },
     "ringSize": "12"
   },
@@ -117,10 +117,10 @@
     "category": "rings",
     "image": "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
     "alt": "Minimal gold ring",
-    "price": "₹25,111",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-RI0004",
-    "weight": "3.46 g",
+    "weight": "0.50 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
@@ -134,16 +134,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.46,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.504,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 23355,
+      "goldValue": 1.008,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 24380,
-      "gst": 731.4,
+      "subtotal": 1026.008,
+      "gst": 30.78024,
       "gstPercent": 3,
-      "total": 25111.4
+      "total": 1056.78824
     },
     "ringSize": "13"
   },
@@ -154,10 +154,10 @@
     "category": "rings",
     "image": "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     "alt": "Stackable gold ring set",
-    "price": "₹38,669",
+    "price": "₹12",
     "metal": "Rose Gold",
     "sku": "JL-RI0005",
-    "weight": "3.88 g",
+    "weight": "0.51 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
@@ -172,16 +172,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.88,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.506,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 31816,
-      "makingCharge": 5726.88,
+      "goldValue": 10.120000000000001,
+      "makingCharge": 1.8216,
       "makingChargeDisplay": "18%",
-      "subtotal": 37542.88,
-      "gst": 1126.2864,
+      "subtotal": 11.941600000000001,
+      "gst": 0.358248,
       "gstPercent": 3,
-      "total": 38669.166399999995
+      "total": 12.299848
     },
     "ringSize": "14"
   },
@@ -192,10 +192,10 @@
     "category": "rings",
     "image": "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     "alt": "Vintage gold band ring",
-    "price": "₹26,552",
+    "price": "₹3,131",
     "metal": "White Gold",
     "sku": "JL-RI0006",
-    "weight": "4.30 g",
+    "weight": "0.51 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
@@ -210,16 +210,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 4.3,
+      "netWeightGrams": 0.507,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 23435,
-      "makingCharge": 2343.5,
+      "goldValue": 2763.15,
+      "makingCharge": 276.315,
       "makingChargeDisplay": "10%",
-      "subtotal": 25778.5,
-      "gst": 773.355,
+      "subtotal": 3039.465,
+      "gst": 91.18395,
       "gstPercent": 3,
-      "total": 26551.855
+      "total": 3130.6489500000002
     },
     "ringSize": "15"
   },
@@ -230,10 +230,10 @@
     "category": "rings",
     "image": "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
     "alt": "Pavé halo diamond ring",
-    "price": "₹33,485",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-RI0007",
-    "weight": "4.72 g",
+    "weight": "0.51 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
@@ -248,16 +248,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 4.72,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.508,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 31860,
+      "goldValue": 1.016,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 32510,
-      "gst": 975.3,
+      "subtotal": 651.016,
+      "gst": 19.530479999999997,
       "gstPercent": 3,
-      "total": 33485.3
+      "total": 670.54648
     },
     "ringSize": "16"
   },
@@ -268,10 +268,10 @@
     "category": "rings",
     "image": "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
     "alt": "Twist band gold ring",
-    "price": "₹49,490",
+    "price": "₹12",
     "metal": "Rose Gold",
     "sku": "JL-RI0008",
-    "weight": "5.14 g",
+    "weight": "0.51 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
@@ -286,16 +286,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.14,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.51,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 42148,
-      "makingCharge": 5900.72,
+      "goldValue": 10.2,
+      "makingCharge": 1.428,
       "makingChargeDisplay": "14%",
-      "subtotal": 48048.72,
-      "gst": 1441.4616,
+      "subtotal": 11.628,
+      "gst": 0.34884,
       "gstPercent": 3,
-      "total": 49490.1816
+      "total": 11.97684
     },
     "ringSize": "17"
   },
@@ -306,10 +306,10 @@
     "category": "earrings",
     "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     "alt": "Pearl drop earrings",
-    "price": "₹36,205",
+    "price": "₹3,327",
     "metal": "White Gold",
     "sku": "JL-EA0009",
-    "weight": "5.56 g",
+    "weight": "0.51 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
@@ -324,16 +324,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.56,
+      "netWeightGrams": 0.511,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 30301.999999999996,
-      "makingCharge": 4848.32,
+      "goldValue": 2784.9500000000003,
+      "makingCharge": 445.59200000000004,
       "makingChargeDisplay": "16%",
-      "subtotal": 35150.31999999999,
-      "gst": 1054.5095999999996,
+      "subtotal": 3230.5420000000004,
+      "gst": 96.91626000000001,
       "gstPercent": 3,
-      "total": 36204.82959999999
+      "total": 3327.4582600000003
     }
   },
   {
@@ -343,10 +343,10 @@
     "category": "earrings",
     "image": "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
     "alt": "Classic gold hoop earrings",
-    "price": "₹42,632",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-EA0010",
-    "weight": "5.98 g",
+    "weight": "0.51 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
@@ -360,16 +360,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.98,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.513,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 40365,
+      "goldValue": 1.026,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 41390,
-      "gst": 1241.7,
+      "subtotal": 1026.026,
+      "gst": 30.78078,
       "gstPercent": 3,
-      "total": 42631.7
+      "total": 1056.8067800000001
     }
   },
   {
@@ -379,10 +379,10 @@
     "category": "earrings",
     "image": "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     "alt": "Star charm hoop earrings",
-    "price": "₹59,460",
+    "price": "₹12",
     "metal": "Rose Gold",
     "sku": "JL-EA0011",
-    "weight": "6.40 g",
+    "weight": "0.51 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
@@ -396,16 +396,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 6.4,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.514,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 52480,
-      "makingCharge": 5248,
+      "goldValue": 10.280000000000001,
+      "makingCharge": 1.0280000000000002,
       "makingChargeDisplay": "10%",
-      "subtotal": 57728,
-      "gst": 1731.84,
+      "subtotal": 11.308000000000002,
+      "gst": 0.33924000000000004,
       "gstPercent": 3,
-      "total": 59459.84
+      "total": 11.647240000000002
     }
   },
   {
@@ -415,10 +415,10 @@
     "category": "earrings",
     "image": "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
     "alt": "Pavé huggie earrings",
-    "price": "₹42,878",
+    "price": "₹3,238",
     "metal": "White Gold",
     "sku": "JL-EA0012",
-    "weight": "6.82 g",
+    "weight": "0.52 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
@@ -433,16 +433,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 6.82,
+      "netWeightGrams": 0.515,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 37169,
-      "makingCharge": 4460.28,
+      "goldValue": 2806.75,
+      "makingCharge": 336.81,
       "makingChargeDisplay": "12%",
-      "subtotal": 41629.28,
-      "gst": 1248.8783999999998,
+      "subtotal": 3143.56,
+      "gst": 94.3068,
       "gstPercent": 3,
-      "total": 42878.1584
+      "total": 3237.8668
     }
   },
   {
@@ -452,10 +452,10 @@
     "category": "earrings",
     "image": "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     "alt": "Triangle stud earrings",
-    "price": "₹51,006",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-EA0013",
-    "weight": "7.24 g",
+    "weight": "0.52 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
@@ -469,16 +469,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 7.24,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.517,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 48870,
+      "goldValue": 1.034,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 49520,
-      "gst": 1485.6,
+      "subtotal": 651.034,
+      "gst": 19.531019999999998,
       "gstPercent": 3,
-      "total": 51005.6
+      "total": 670.56502
     }
   },
   {
@@ -488,10 +488,10 @@
     "category": "earrings",
     "image": "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     "alt": "Layered drop earrings",
-    "price": "₹75,048",
+    "price": "₹12",
     "metal": "Rose Gold",
     "sku": "JL-EA0014",
-    "weight": "7.66 g",
+    "weight": "0.52 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
@@ -505,16 +505,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 7.66,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.518,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 62812,
-      "makingCharge": 10049.92,
+      "goldValue": 10.36,
+      "makingCharge": 1.6576,
       "makingChargeDisplay": "16%",
-      "subtotal": 72861.92,
-      "gst": 2185.8576,
+      "subtotal": 12.0176,
+      "gst": 0.36052799999999996,
       "gstPercent": 3,
-      "total": 75047.7776
+      "total": 12.378128
     }
   },
   {
@@ -524,10 +524,10 @@
     "category": "earrings",
     "image": "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
     "alt": "Chandelier earrings",
-    "price": "₹53,521",
+    "price": "₹3,444",
     "metal": "White Gold",
     "sku": "JL-EA0015",
-    "weight": "8.08 g",
+    "weight": "0.52 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
@@ -542,16 +542,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 8.08,
+      "netWeightGrams": 0.52,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 44036,
-      "makingCharge": 7926.48,
+      "goldValue": 2834,
+      "makingCharge": 510.12,
       "makingChargeDisplay": "18%",
-      "subtotal": 51962.479999999996,
-      "gst": 1558.8744,
+      "subtotal": 3344.12,
+      "gst": 100.3236,
       "gstPercent": 3,
-      "total": 53521.3544
+      "total": 3444.4436
     }
   },
   {
@@ -561,10 +561,10 @@
     "category": "earrings",
     "image": "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
     "alt": "Minimal stud earrings",
-    "price": "₹16,351",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-EA0016",
-    "weight": "2.20 g",
+    "weight": "0.52 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
@@ -579,16 +579,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 2.2,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.521,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 14850.000000000002,
+      "goldValue": 1.042,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 15875.000000000002,
-      "gst": 476.25000000000006,
+      "subtotal": 1026.042,
+      "gst": 30.781259999999996,
       "gstPercent": 3,
-      "total": 16351.250000000002
+      "total": 1056.82326
     }
   },
   {
@@ -598,10 +598,10 @@
     "category": "necklaces",
     "image": "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     "alt": "Gold chain necklace",
-    "price": "₹24,784",
+    "price": "₹12",
     "metal": "Rose Gold",
     "sku": "JL-NE0017",
-    "weight": "2.62 g",
+    "weight": "0.52 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
@@ -615,16 +615,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 2.62,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.523,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 21484,
-      "makingCharge": 2578.08,
+      "goldValue": 10.46,
+      "makingCharge": 1.2552,
       "makingChargeDisplay": "12%",
-      "subtotal": 24062.08,
-      "gst": 721.8624,
+      "subtotal": 11.715200000000001,
+      "gst": 0.35145600000000005,
       "gstPercent": 3,
-      "total": 24783.9424
+      "total": 12.066656000000002
     }
   },
   {
@@ -634,10 +634,10 @@
     "category": "necklaces",
     "image": "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
     "alt": "Diamond pendant necklace",
-    "price": "₹19,454",
+    "price": "₹3,353",
     "metal": "White Gold",
     "sku": "JL-NE0018",
-    "weight": "3.04 g",
+    "weight": "0.52 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
@@ -652,16 +652,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.04,
+      "netWeightGrams": 0.524,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 16568,
-      "makingCharge": 2319.5200000000004,
+      "goldValue": 2855.8,
+      "makingCharge": 399.81200000000007,
       "makingChargeDisplay": "14%",
-      "subtotal": 18887.52,
-      "gst": 566.6256,
+      "subtotal": 3255.612,
+      "gst": 97.66835999999999,
       "gstPercent": 3,
-      "total": 19454.1456
+      "total": 3353.28036
     }
   },
   {
@@ -671,10 +671,10 @@
     "category": "necklaces",
     "image": "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     "alt": "Layered chain necklace",
-    "price": "₹24,725",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-NE0019",
-    "weight": "3.46 g",
+    "weight": "0.53 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
@@ -689,16 +689,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.46,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.525,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 23355,
+      "goldValue": 1.05,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 24005,
-      "gst": 720.15,
+      "subtotal": 651.05,
+      "gst": 19.531499999999998,
       "gstPercent": 3,
-      "total": 24725.15
+      "total": 670.5815
     }
   },
   {
@@ -708,10 +708,10 @@
     "category": "necklaces",
     "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     "alt": "Pearl strand necklace",
-    "price": "₹38,669",
+    "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-NE0020",
-    "weight": "3.88 g",
+    "weight": "0.53 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
@@ -725,16 +725,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.88,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.527,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 31816,
-      "makingCharge": 5726.88,
+      "goldValue": 10.540000000000001,
+      "makingCharge": 1.8972,
       "makingChargeDisplay": "18%",
-      "subtotal": 37542.88,
-      "gst": 1126.2864,
+      "subtotal": 12.4372,
+      "gst": 0.373116,
       "gstPercent": 3,
-      "total": 38669.166399999995
+      "total": 12.810316
     }
   },
   {
@@ -744,10 +744,10 @@
     "category": "necklaces",
     "image": "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     "alt": "Gold choker necklace",
-    "price": "₹26,552",
+    "price": "₹3,260",
     "metal": "White Gold",
     "sku": "JL-NE0021",
-    "weight": "4.30 g",
+    "weight": "0.53 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
@@ -761,16 +761,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 4.3,
+      "netWeightGrams": 0.528,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 23435,
-      "makingCharge": 2343.5,
+      "goldValue": 2877.6,
+      "makingCharge": 287.76,
       "makingChargeDisplay": "10%",
-      "subtotal": 25778.5,
-      "gst": 773.355,
+      "subtotal": 3165.3599999999997,
+      "gst": 94.96079999999999,
       "gstPercent": 3,
-      "total": 26551.855
+      "total": 3260.3207999999995
     }
   },
   {
@@ -780,10 +780,10 @@
     "category": "necklaces",
     "image": "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
     "alt": "Statement necklace",
-    "price": "₹33,872",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-NE0022",
-    "weight": "4.72 g",
+    "weight": "0.53 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
@@ -797,16 +797,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 4.72,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.53,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 31860,
+      "goldValue": 1.06,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 32885,
-      "gst": 986.55,
+      "subtotal": 1026.06,
+      "gst": 30.781799999999997,
       "gstPercent": 3,
-      "total": 33871.55
+      "total": 1056.8418
     }
   },
   {
@@ -816,10 +816,10 @@
     "category": "necklaces",
     "image": "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
     "alt": "Minimal pendant necklace",
-    "price": "₹49,490",
+    "price": "₹12",
     "metal": "Rose Gold",
     "sku": "JL-NE0023",
-    "weight": "5.14 g",
+    "weight": "0.53 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
@@ -834,16 +834,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.14,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.531,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 42148,
-      "makingCharge": 5900.72,
+      "goldValue": 10.620000000000001,
+      "makingCharge": 1.4868000000000003,
       "makingChargeDisplay": "14%",
-      "subtotal": 48048.72,
-      "gst": 1441.4616,
+      "subtotal": 12.106800000000002,
+      "gst": 0.363204,
       "gstPercent": 3,
-      "total": 49490.1816
+      "total": 12.470004000000001
     }
   },
   {
@@ -853,10 +853,10 @@
     "category": "necklaces",
     "image": "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
     "alt": "Coin necklace",
-    "price": "₹36,205",
+    "price": "₹3,464",
     "metal": "White Gold",
     "sku": "JL-NE0024",
-    "weight": "5.56 g",
+    "weight": "0.53 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
@@ -871,16 +871,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.56,
+      "netWeightGrams": 0.532,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 30301.999999999996,
-      "makingCharge": 4848.32,
+      "goldValue": 2899.4,
+      "makingCharge": 463.904,
       "makingChargeDisplay": "16%",
-      "subtotal": 35150.31999999999,
-      "gst": 1054.5095999999996,
+      "subtotal": 3363.304,
+      "gst": 100.89912,
       "gstPercent": 3,
-      "total": 36204.82959999999
+      "total": 3464.20312
     }
   },
   {
@@ -890,10 +890,10 @@
     "category": "bracelets",
     "image": "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     "alt": "Layered bracelet set",
-    "price": "₹42,245",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-BR0025",
-    "weight": "5.98 g",
+    "weight": "0.53 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
@@ -908,16 +908,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.98,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.534,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 40365,
+      "goldValue": 1.068,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 41015,
-      "gst": 1230.45,
+      "subtotal": 651.068,
+      "gst": 19.53204,
       "gstPercent": 3,
-      "total": 42245.45
+      "total": 670.60004
     }
   },
   {
@@ -927,10 +927,10 @@
     "category": "bracelets",
     "image": "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     "alt": "Gold cuff bracelet",
-    "price": "₹59,460",
+    "price": "₹12",
     "metal": "Rose Gold",
     "sku": "JL-BR0026",
-    "weight": "6.40 g",
+    "weight": "0.54 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
@@ -945,16 +945,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 6.4,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.535,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 52480,
-      "makingCharge": 5248,
+      "goldValue": 10.700000000000001,
+      "makingCharge": 1.07,
       "makingChargeDisplay": "10%",
-      "subtotal": 57728,
-      "gst": 1731.84,
+      "subtotal": 11.770000000000001,
+      "gst": 0.3531,
       "gstPercent": 3,
-      "total": 59459.84
+      "total": 12.1231
     }
   },
   {
@@ -964,10 +964,10 @@
     "category": "bracelets",
     "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     "alt": "Tennis bracelet",
-    "price": "₹42,878",
+    "price": "₹3,376",
     "metal": "White Gold",
     "sku": "JL-BR0027",
-    "weight": "6.82 g",
+    "weight": "0.54 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
@@ -982,16 +982,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 6.82,
+      "netWeightGrams": 0.537,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 37169,
-      "makingCharge": 4460.28,
+      "goldValue": 2926.65,
+      "makingCharge": 351.198,
       "makingChargeDisplay": "12%",
-      "subtotal": 41629.28,
-      "gst": 1248.8783999999998,
+      "subtotal": 3277.848,
+      "gst": 98.33543999999999,
       "gstPercent": 3,
-      "total": 42878.1584
+      "total": 3376.18344
     }
   },
   {
@@ -1001,10 +1001,10 @@
     "category": "bracelets",
     "image": "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     "alt": "Pearl bracelet",
-    "price": "₹51,392",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-BR0028",
-    "weight": "7.24 g",
+    "weight": "0.54 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
@@ -1019,16 +1019,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 7.24,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.538,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 48870,
+      "goldValue": 1.076,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 49895,
-      "gst": 1496.85,
+      "subtotal": 1026.076,
+      "gst": 30.78228,
       "gstPercent": 3,
-      "total": 51391.85
+      "total": 1056.85828
     }
   },
   {
@@ -1038,10 +1038,10 @@
     "category": "bracelets",
     "image": "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
     "alt": "Chain bracelet",
-    "price": "₹75,048",
+    "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-BR0029",
-    "weight": "7.66 g",
+    "weight": "0.54 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
@@ -1055,16 +1055,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 7.66,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.539,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 62812,
-      "makingCharge": 10049.92,
+      "goldValue": 10.780000000000001,
+      "makingCharge": 1.7248,
       "makingChargeDisplay": "16%",
-      "subtotal": 72861.92,
-      "gst": 2185.8576,
+      "subtotal": 12.504800000000001,
+      "gst": 0.37514400000000003,
       "gstPercent": 3,
-      "total": 75047.7776
+      "total": 12.879944000000002
     }
   },
   {
@@ -1074,10 +1074,10 @@
     "category": "bracelets",
     "image": "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
     "alt": "Charm bracelet",
-    "price": "₹53,521",
+    "price": "₹3,584",
     "metal": "White Gold",
     "sku": "JL-BR0030",
-    "weight": "8.08 g",
+    "weight": "0.54 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
@@ -1091,16 +1091,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 8.08,
+      "netWeightGrams": 0.541,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 44036,
-      "makingCharge": 7926.48,
+      "goldValue": 2948.4500000000003,
+      "makingCharge": 530.721,
       "makingChargeDisplay": "18%",
-      "subtotal": 51962.479999999996,
-      "gst": 1558.8744,
+      "subtotal": 3479.1710000000003,
+      "gst": 104.37513,
       "gstPercent": 3,
-      "total": 53521.3544
+      "total": 3583.54613
     }
   },
   {
@@ -1110,10 +1110,10 @@
     "category": "bracelets",
     "image": "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
     "alt": "Bangle bracelet",
-    "price": "₹15,965",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-BR0031",
-    "weight": "2.20 g",
+    "weight": "0.54 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
@@ -1128,16 +1128,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 2.2,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.542,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 14850.000000000002,
+      "goldValue": 1.084,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 15500.000000000002,
-      "gst": 465.00000000000006,
+      "subtotal": 651.084,
+      "gst": 19.532519999999998,
       "gstPercent": 3,
-      "total": 15965.000000000002
+      "total": 670.6165199999999
     }
   },
   {
@@ -1147,10 +1147,10 @@
     "category": "bracelets",
     "image": "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
     "alt": "Minimal gold bracelet",
-    "price": "₹24,784",
+    "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-BR0032",
-    "weight": "2.62 g",
+    "weight": "0.54 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
@@ -1165,16 +1165,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 2.62,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.544,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 21484,
-      "makingCharge": 2578.08,
+      "goldValue": 10.88,
+      "makingCharge": 1.3056,
       "makingChargeDisplay": "12%",
-      "subtotal": 24062.08,
-      "gst": 721.8624,
+      "subtotal": 12.1856,
+      "gst": 0.365568,
       "gstPercent": 3,
-      "total": 24783.9424
+      "total": 12.551168
     }
   },
   {
@@ -1184,10 +1184,10 @@
     "category": "pendants",
     "image": "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
     "alt": "Heart pendant",
-    "price": "₹19,454",
+    "price": "₹3,488",
     "metal": "White Gold",
     "sku": "JL-PE0033",
-    "weight": "3.04 g",
+    "weight": "0.55 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
@@ -1201,16 +1201,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.04,
+      "netWeightGrams": 0.545,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 16568,
-      "makingCharge": 2319.5200000000004,
+      "goldValue": 2970.25,
+      "makingCharge": 415.83500000000004,
       "makingChargeDisplay": "14%",
-      "subtotal": 18887.52,
-      "gst": 566.6256,
+      "subtotal": 3386.085,
+      "gst": 101.58255,
       "gstPercent": 3,
-      "total": 19454.1456
+      "total": 3487.66755
     }
   },
   {
@@ -1220,10 +1220,10 @@
     "category": "pendants",
     "image": "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     "alt": "Initial pendant",
-    "price": "₹25,111",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-PE0034",
-    "weight": "3.46 g",
+    "weight": "0.55 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
@@ -1238,16 +1238,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.46,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.546,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 23355,
+      "goldValue": 1.092,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 24380,
-      "gst": 731.4,
+      "subtotal": 1026.092,
+      "gst": 30.782760000000003,
       "gstPercent": 3,
-      "total": 25111.4
+      "total": 1056.8747600000002
     }
   },
   {
@@ -1257,10 +1257,10 @@
     "category": "pendants",
     "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     "alt": "Solitaire pendant",
-    "price": "₹38,669",
+    "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-PE0035",
-    "weight": "3.88 g",
+    "weight": "0.55 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
@@ -1275,16 +1275,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.88,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.548,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 31816,
-      "makingCharge": 5726.88,
+      "goldValue": 10.96,
+      "makingCharge": 1.9728,
       "makingChargeDisplay": "18%",
-      "subtotal": 37542.88,
-      "gst": 1126.2864,
+      "subtotal": 12.9328,
+      "gst": 0.387984,
       "gstPercent": 3,
-      "total": 38669.166399999995
+      "total": 13.320784
     }
   },
   {
@@ -1294,10 +1294,10 @@
     "category": "pendants",
     "image": "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     "alt": "Locket pendant",
-    "price": "₹26,552",
+    "price": "₹3,390",
     "metal": "White Gold",
     "sku": "JL-PE0036",
-    "weight": "4.30 g",
+    "weight": "0.55 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
@@ -1312,16 +1312,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 4.3,
+      "netWeightGrams": 0.549,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 23435,
-      "makingCharge": 2343.5,
+      "goldValue": 2992.05,
+      "makingCharge": 299.20500000000004,
       "makingChargeDisplay": "10%",
-      "subtotal": 25778.5,
-      "gst": 773.355,
+      "subtotal": 3291.255,
+      "gst": 98.73765,
       "gstPercent": 3,
-      "total": 26551.855
+      "total": 3389.99265
     }
   },
   {
@@ -1331,10 +1331,10 @@
     "category": "pendants",
     "image": "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     "alt": "Coin pendant",
-    "price": "₹33,485",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-PE0037",
-    "weight": "4.72 g",
+    "weight": "0.55 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
@@ -1349,16 +1349,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 4.72,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.551,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 31860,
+      "goldValue": 1.102,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 32510,
-      "gst": 975.3,
+      "subtotal": 651.102,
+      "gst": 19.53306,
       "gstPercent": 3,
-      "total": 33485.3
+      "total": 670.63506
     }
   },
   {
@@ -1368,10 +1368,10 @@
     "category": "pendants",
     "image": "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
     "alt": "Teardrop pendant",
-    "price": "₹49,490",
+    "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-PE0038",
-    "weight": "5.14 g",
+    "weight": "0.55 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
@@ -1385,16 +1385,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.14,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.552,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 42148,
-      "makingCharge": 5900.72,
+      "goldValue": 11.040000000000001,
+      "makingCharge": 1.5456000000000003,
       "makingChargeDisplay": "14%",
-      "subtotal": 48048.72,
-      "gst": 1441.4616,
+      "subtotal": 12.585600000000001,
+      "gst": 0.377568,
       "gstPercent": 3,
-      "total": 49490.1816
+      "total": 12.963168000000001
     }
   },
   {
@@ -1404,10 +1404,10 @@
     "category": "pendants",
     "image": "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
     "alt": "Floral pendant",
-    "price": "₹36,205",
+    "price": "₹3,607",
     "metal": "White Gold",
     "sku": "JL-PE0039",
-    "weight": "5.56 g",
+    "weight": "0.55 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
@@ -1422,16 +1422,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.56,
+      "netWeightGrams": 0.554,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 30301.999999999996,
-      "makingCharge": 4848.32,
+      "goldValue": 3019.3,
+      "makingCharge": 483.088,
       "makingChargeDisplay": "16%",
-      "subtotal": 35150.31999999999,
-      "gst": 1054.5095999999996,
+      "subtotal": 3502.3880000000004,
+      "gst": 105.07164,
       "gstPercent": 3,
-      "total": 36204.82959999999
+      "total": 3607.4596400000005
     }
   },
   {
@@ -1441,10 +1441,10 @@
     "category": "pendants",
     "image": "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
     "alt": "Minimal pendant",
-    "price": "₹42,632",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-PE0040",
-    "weight": "5.98 g",
+    "weight": "0.56 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
@@ -1459,16 +1459,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.98,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.555,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 40365,
+      "goldValue": 1.11,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 41390,
-      "gst": 1241.7,
+      "subtotal": 1026.11,
+      "gst": 30.783299999999997,
       "gstPercent": 3,
-      "total": 42631.7
+      "total": 1056.8933
     }
   },
   {
@@ -1478,10 +1478,10 @@
     "category": "mangalsutra",
     "image": "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
     "alt": "Classic mangalsutra",
-    "price": "₹59,460",
+    "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-MA0041",
-    "weight": "6.40 g",
+    "weight": "0.56 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
@@ -1496,16 +1496,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 6.4,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.556,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 52480,
-      "makingCharge": 5248,
+      "goldValue": 11.120000000000001,
+      "makingCharge": 1.112,
       "makingChargeDisplay": "10%",
-      "subtotal": 57728,
-      "gst": 1731.84,
+      "subtotal": 12.232000000000001,
+      "gst": 0.36696,
       "gstPercent": 3,
-      "total": 59459.84
+      "total": 12.598960000000002
     }
   },
   {
@@ -1515,10 +1515,10 @@
     "category": "mangalsutra",
     "image": "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
     "alt": "Diamond mangalsutra",
-    "price": "₹42,878",
+    "price": "₹3,508",
     "metal": "White Gold",
     "sku": "JL-MA0042",
-    "weight": "6.82 g",
+    "weight": "0.56 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
@@ -1533,16 +1533,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 6.82,
+      "netWeightGrams": 0.558,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 37169,
-      "makingCharge": 4460.28,
+      "goldValue": 3041.1000000000004,
+      "makingCharge": 364.932,
       "makingChargeDisplay": "12%",
-      "subtotal": 41629.28,
-      "gst": 1248.8783999999998,
+      "subtotal": 3406.032,
+      "gst": 102.18096,
       "gstPercent": 3,
-      "total": 42878.1584
+      "total": 3508.2129600000003
     }
   },
   {
@@ -1552,10 +1552,10 @@
     "category": "mangalsutra",
     "image": "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     "alt": "Minimal mangalsutra",
-    "price": "₹51,006",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-MA0043",
-    "weight": "7.24 g",
+    "weight": "0.56 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
@@ -1569,16 +1569,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 7.24,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.559,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 48870,
+      "goldValue": 1.118,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 49520,
-      "gst": 1485.6,
+      "subtotal": 651.118,
+      "gst": 19.533540000000002,
       "gstPercent": 3,
-      "total": 51005.6
+      "total": 670.6515400000001
     }
   },
   {
@@ -1588,10 +1588,10 @@
     "category": "mangalsutra",
     "image": "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     "alt": "Black bead mangalsutra",
-    "price": "₹75,048",
+    "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-MA0044",
-    "weight": "7.66 g",
+    "weight": "0.56 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
@@ -1606,16 +1606,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 7.66,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.561,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 62812,
-      "makingCharge": 10049.92,
+      "goldValue": 11.22,
+      "makingCharge": 1.7952000000000001,
       "makingChargeDisplay": "16%",
-      "subtotal": 72861.92,
-      "gst": 2185.8576,
+      "subtotal": 13.0152,
+      "gst": 0.39045599999999997,
       "gstPercent": 3,
-      "total": 75047.7776
+      "total": 13.405656
     }
   },
   {
@@ -1625,10 +1625,10 @@
     "category": "mangalsutra",
     "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     "alt": "Layered mangalsutra",
-    "price": "₹53,521",
+    "price": "₹3,723",
     "metal": "White Gold",
     "sku": "JL-MA0045",
-    "weight": "8.08 g",
+    "weight": "0.56 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
@@ -1643,16 +1643,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 8.08,
+      "netWeightGrams": 0.562,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 44036,
-      "makingCharge": 7926.48,
+      "goldValue": 3062.9,
+      "makingCharge": 551.322,
       "makingChargeDisplay": "18%",
-      "subtotal": 51962.479999999996,
-      "gst": 1558.8744,
+      "subtotal": 3614.222,
+      "gst": 108.42666,
       "gstPercent": 3,
-      "total": 53521.3544
+      "total": 3722.6486600000003
     }
   },
   {
@@ -1662,10 +1662,10 @@
     "category": "mangalsutra",
     "image": "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     "alt": "Modern mangalsutra",
-    "price": "₹16,351",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-MA0046",
-    "weight": "2.20 g",
+    "weight": "0.56 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
@@ -1679,16 +1679,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 2.2,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.563,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 14850.000000000002,
+      "goldValue": 1.126,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 15875.000000000002,
-      "gst": 476.25000000000006,
+      "subtotal": 1026.126,
+      "gst": 30.783779999999997,
       "gstPercent": 3,
-      "total": 16351.250000000002
+      "total": 1056.90978
     }
   },
   {
@@ -1698,10 +1698,10 @@
     "category": "mangalsutra",
     "image": "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
     "alt": "Gold pendant mangalsutra",
-    "price": "₹24,784",
+    "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-MA0047",
-    "weight": "2.62 g",
+    "weight": "0.56 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
@@ -1716,16 +1716,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 2.62,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.565,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 21484,
-      "makingCharge": 2578.08,
+      "goldValue": 11.299999999999999,
+      "makingCharge": 1.3559999999999999,
       "makingChargeDisplay": "12%",
-      "subtotal": 24062.08,
-      "gst": 721.8624,
+      "subtotal": 12.655999999999999,
+      "gst": 0.37967999999999996,
       "gstPercent": 3,
-      "total": 24783.9424
+      "total": 13.03568
     }
   },
   {
@@ -1735,10 +1735,10 @@
     "category": "mangalsutra",
     "image": "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
     "alt": "Delicate mangalsutra",
-    "price": "₹19,454",
+    "price": "₹3,622",
     "metal": "White Gold",
     "sku": "JL-MA0048",
-    "weight": "3.04 g",
+    "weight": "0.57 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
@@ -1753,16 +1753,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.04,
+      "netWeightGrams": 0.566,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 16568,
-      "makingCharge": 2319.5200000000004,
+      "goldValue": 3084.7,
+      "makingCharge": 431.858,
       "makingChargeDisplay": "14%",
-      "subtotal": 18887.52,
-      "gst": 566.6256,
+      "subtotal": 3516.558,
+      "gst": 105.49674,
       "gstPercent": 3,
-      "total": 19454.1456
+      "total": 3622.05474
     }
   },
   {
@@ -1772,10 +1772,10 @@
     "category": "mens",
     "image": "https://i.pinimg.com/1200x/68/03/68/680368afb5ddc5a9759a847ad600afaa.jpg",
     "alt": "Men's gold band ring and chain",
-    "price": "₹24,725",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-ME0049",
-    "weight": "3.46 g",
+    "weight": "0.57 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/68/03/68/680368afb5ddc5a9759a847ad600afaa.jpg",
@@ -1790,16 +1790,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.46,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.568,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 23355,
+      "goldValue": 1.136,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 24005,
-      "gst": 720.15,
+      "subtotal": 651.136,
+      "gst": 19.53408,
       "gstPercent": 3,
-      "total": 24725.15
+      "total": 670.67008
     }
   },
   {
@@ -1809,10 +1809,10 @@
     "category": "mens",
     "image": "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     "alt": "Men's gold chain necklace",
-    "price": "₹38,669",
+    "price": "₹14",
     "metal": "Rose Gold",
     "sku": "JL-ME0050",
-    "weight": "3.88 g",
+    "weight": "0.57 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
@@ -1827,16 +1827,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.88,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.569,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 31816,
-      "makingCharge": 5726.88,
+      "goldValue": 11.379999999999999,
+      "makingCharge": 2.0483999999999996,
       "makingChargeDisplay": "18%",
-      "subtotal": 37542.88,
-      "gst": 1126.2864,
+      "subtotal": 13.428399999999998,
+      "gst": 0.40285199999999993,
       "gstPercent": 3,
-      "total": 38669.166399999995
+      "total": 13.831251999999997
     }
   },
   {
@@ -1846,10 +1846,10 @@
     "category": "mens",
     "image": "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     "alt": "Men's gold signet ring",
-    "price": "₹26,552",
+    "price": "₹3,520",
     "metal": "White Gold",
     "sku": "JL-ME0051",
-    "weight": "4.30 g",
+    "weight": "0.57 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
@@ -1863,16 +1863,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 4.3,
+      "netWeightGrams": 0.57,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 23435,
-      "makingCharge": 2343.5,
+      "goldValue": 3106.4999999999995,
+      "makingCharge": 310.65,
       "makingChargeDisplay": "10%",
-      "subtotal": 25778.5,
-      "gst": 773.355,
+      "subtotal": 3417.1499999999996,
+      "gst": 102.51449999999998,
       "gstPercent": 3,
-      "total": 26551.855
+      "total": 3519.6644999999994
     }
   },
   {
@@ -1882,10 +1882,10 @@
     "category": "mens",
     "image": "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     "alt": "Men's gold cuff bracelet",
-    "price": "₹33,872",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-ME0052",
-    "weight": "4.72 g",
+    "weight": "0.57 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
@@ -1899,16 +1899,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 4.72,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.572,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 31860,
+      "goldValue": 1.144,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 32885,
-      "gst": 986.55,
+      "subtotal": 1026.144,
+      "gst": 30.784319999999997,
       "gstPercent": 3,
-      "total": 33871.55
+      "total": 1056.92832
     }
   },
   {
@@ -1918,10 +1918,10 @@
     "category": "mens",
     "image": "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
     "alt": "Men's minimal gold ring",
-    "price": "₹49,490",
+    "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-ME0053",
-    "weight": "5.14 g",
+    "weight": "0.57 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
@@ -1935,16 +1935,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.14,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.573,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 42148,
-      "makingCharge": 5900.72,
+      "goldValue": 11.459999999999999,
+      "makingCharge": 1.6044,
       "makingChargeDisplay": "14%",
-      "subtotal": 48048.72,
-      "gst": 1441.4616,
+      "subtotal": 13.0644,
+      "gst": 0.39193199999999995,
       "gstPercent": 3,
-      "total": 49490.1816
+      "total": 13.456332
     }
   },
   {
@@ -1954,10 +1954,10 @@
     "category": "mens",
     "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     "alt": "Men's diamond stud earring",
-    "price": "₹36,205",
+    "price": "₹3,744",
     "metal": "White Gold",
     "sku": "JL-ME0054",
-    "weight": "5.56 g",
+    "weight": "0.57 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
@@ -1971,16 +1971,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.56,
+      "netWeightGrams": 0.575,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 30301.999999999996,
-      "makingCharge": 4848.32,
+      "goldValue": 3133.7499999999995,
+      "makingCharge": 501.3999999999999,
       "makingChargeDisplay": "16%",
-      "subtotal": 35150.31999999999,
-      "gst": 1054.5095999999996,
+      "subtotal": 3635.1499999999996,
+      "gst": 109.05449999999999,
       "gstPercent": 3,
-      "total": 36204.82959999999
+      "total": 3744.2045
     }
   },
   {
@@ -1990,10 +1990,10 @@
     "category": "mens",
     "image": "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
     "alt": "Men's textured gold band",
-    "price": "₹42,245",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-ME0055",
-    "weight": "5.98 g",
+    "weight": "0.58 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
@@ -2008,16 +2008,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.98,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.576,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 40365,
+      "goldValue": 1.152,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 41015,
-      "gst": 1230.45,
+      "subtotal": 651.152,
+      "gst": 19.53456,
       "gstPercent": 3,
-      "total": 42245.45
+      "total": 670.6865600000001
     }
   },
   {
@@ -2027,10 +2027,10 @@
     "category": "mens",
     "image": "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
     "alt": "Men's gold chain bracelet",
-    "price": "₹59,460",
+    "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-ME0056",
-    "weight": "6.40 g",
+    "weight": "0.58 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
@@ -2045,16 +2045,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 6.4,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.577,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 52480,
-      "makingCharge": 5248,
+      "goldValue": 11.54,
+      "makingCharge": 1.154,
       "makingChargeDisplay": "10%",
-      "subtotal": 57728,
-      "gst": 1731.84,
+      "subtotal": 12.693999999999999,
+      "gst": 0.38081999999999994,
       "gstPercent": 3,
-      "total": 59459.84
+      "total": 13.074819999999999
     }
   },
   {
@@ -2064,10 +2064,10 @@
     "category": "womens",
     "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     "alt": "Women's pearl drop earrings",
-    "price": "₹42,878",
+    "price": "₹3,640",
     "metal": "White Gold",
     "sku": "JL-WO0057",
-    "weight": "6.82 g",
+    "weight": "0.58 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
@@ -2082,16 +2082,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 6.82,
+      "netWeightGrams": 0.579,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 37169,
-      "makingCharge": 4460.28,
+      "goldValue": 3155.5499999999997,
+      "makingCharge": 378.66599999999994,
       "makingChargeDisplay": "12%",
-      "subtotal": 41629.28,
-      "gst": 1248.8783999999998,
+      "subtotal": 3534.2159999999994,
+      "gst": 106.02647999999998,
       "gstPercent": 3,
-      "total": 42878.1584
+      "total": 3640.2424799999994
     }
   },
   {
@@ -2101,10 +2101,10 @@
     "category": "womens",
     "image": "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     "alt": "Women's gold chain necklace",
-    "price": "₹51,392",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-WO0058",
-    "weight": "7.24 g",
+    "weight": "0.58 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
@@ -2119,16 +2119,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 7.24,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.58,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 48870,
+      "goldValue": 1.16,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 49895,
-      "gst": 1496.85,
+      "subtotal": 1026.16,
+      "gst": 30.7848,
       "gstPercent": 3,
-      "total": 51391.85
+      "total": 1056.9448
     }
   },
   {
@@ -2138,10 +2138,10 @@
     "category": "womens",
     "image": "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     "alt": "Women's solitaire ring",
-    "price": "₹75,048",
+    "price": "₹14",
     "metal": "Rose Gold",
     "sku": "JL-WO0059",
-    "weight": "7.66 g",
+    "weight": "0.58 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
@@ -2155,16 +2155,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 7.66,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.582,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 62812,
-      "makingCharge": 10049.92,
+      "goldValue": 11.639999999999999,
+      "makingCharge": 1.8623999999999998,
       "makingChargeDisplay": "16%",
-      "subtotal": 72861.92,
-      "gst": 2185.8576,
+      "subtotal": 13.502399999999998,
+      "gst": 0.40507199999999993,
       "gstPercent": 3,
-      "total": 75047.7776
+      "total": 13.907471999999999
     }
   },
   {
@@ -2174,10 +2174,10 @@
     "category": "womens",
     "image": "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     "alt": "Women's layered bracelet set",
-    "price": "₹53,521",
+    "price": "₹3,862",
     "metal": "White Gold",
     "sku": "JL-WO0060",
-    "weight": "8.08 g",
+    "weight": "0.58 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
@@ -2191,16 +2191,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 8.08,
+      "netWeightGrams": 0.583,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 44036,
-      "makingCharge": 7926.48,
+      "goldValue": 3177.35,
+      "makingCharge": 571.923,
       "makingChargeDisplay": "18%",
-      "subtotal": 51962.479999999996,
-      "gst": 1558.8744,
+      "subtotal": 3749.273,
+      "gst": 112.47819,
       "gstPercent": 3,
-      "total": 53521.3544
+      "total": 3861.75119
     }
   },
   {
@@ -2210,10 +2210,10 @@
     "category": "womens",
     "image": "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
     "alt": "Women's diamond pendant",
-    "price": "₹15,965",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-WO0061",
-    "weight": "2.20 g",
+    "weight": "0.58 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
@@ -2227,16 +2227,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 2.2,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.585,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 14850.000000000002,
+      "goldValue": 1.17,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 15500.000000000002,
-      "gst": 465.00000000000006,
+      "subtotal": 651.17,
+      "gst": 19.535099999999996,
       "gstPercent": 3,
-      "total": 15965.000000000002
+      "total": 670.7050999999999
     }
   },
   {
@@ -2246,10 +2246,10 @@
     "category": "womens",
     "image": "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
     "alt": "Women's hoop earrings",
-    "price": "₹24,784",
+    "price": "₹14",
     "metal": "Rose Gold",
     "sku": "JL-WO0062",
-    "weight": "2.62 g",
+    "weight": "0.59 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
@@ -2263,16 +2263,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 2.62,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.586,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 21484,
-      "makingCharge": 2578.08,
+      "goldValue": 11.719999999999999,
+      "makingCharge": 1.4063999999999999,
       "makingChargeDisplay": "12%",
-      "subtotal": 24062.08,
-      "gst": 721.8624,
+      "subtotal": 13.126399999999999,
+      "gst": 0.3937919999999999,
       "gstPercent": 3,
-      "total": 24783.9424
+      "total": 13.520191999999998
     }
   },
   {
@@ -2282,10 +2282,10 @@
     "category": "womens",
     "image": "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
     "alt": "Women's charm necklace",
-    "price": "₹19,454",
+    "price": "₹3,756",
     "metal": "White Gold",
     "sku": "JL-WO0063",
-    "weight": "3.04 g",
+    "weight": "0.59 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
@@ -2300,16 +2300,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.04,
+      "netWeightGrams": 0.587,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 16568,
-      "makingCharge": 2319.5200000000004,
+      "goldValue": 3199.1499999999996,
+      "makingCharge": 447.881,
       "makingChargeDisplay": "14%",
-      "subtotal": 18887.52,
-      "gst": 566.6256,
+      "subtotal": 3647.0309999999995,
+      "gst": 109.41092999999998,
       "gstPercent": 3,
-      "total": 19454.1456
+      "total": 3756.4419299999995
     }
   },
   {
@@ -2319,10 +2319,10 @@
     "category": "womens",
     "image": "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
     "alt": "Women's stackable rings",
-    "price": "₹25,111",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-WO0064",
-    "weight": "3.46 g",
+    "weight": "0.59 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
@@ -2337,16 +2337,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.46,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.589,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 23355,
+      "goldValue": 1.178,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 24380,
-      "gst": 731.4,
+      "subtotal": 1026.178,
+      "gst": 30.78534,
       "gstPercent": 3,
-      "total": 25111.4
+      "total": 1056.96334
     }
   },
   {
@@ -2356,10 +2356,10 @@
     "category": "kids",
     "image": "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
     "alt": "Kids gold pendant",
-    "price": "₹38,669",
+    "price": "₹14",
     "metal": "Rose Gold",
     "sku": "JL-KI0065",
-    "weight": "3.88 g",
+    "weight": "0.59 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
@@ -2374,16 +2374,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 3.88,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.59,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 31816,
-      "makingCharge": 5726.88,
+      "goldValue": 11.799999999999999,
+      "makingCharge": 2.1239999999999997,
       "makingChargeDisplay": "18%",
-      "subtotal": 37542.88,
-      "gst": 1126.2864,
+      "subtotal": 13.924,
+      "gst": 0.41772,
       "gstPercent": 3,
-      "total": 38669.166399999995
+      "total": 14.341719999999999
     }
   },
   {
@@ -2393,10 +2393,10 @@
     "category": "kids",
     "image": "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     "alt": "Kids charm bracelet",
-    "price": "₹26,552",
+    "price": "₹3,656",
     "metal": "White Gold",
     "sku": "JL-KI0066",
-    "weight": "4.30 g",
+    "weight": "0.59 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
@@ -2410,16 +2410,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 4.3,
+      "netWeightGrams": 0.592,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 23435,
-      "makingCharge": 2343.5,
+      "goldValue": 3226.3999999999996,
+      "makingCharge": 322.64,
       "makingChargeDisplay": "10%",
-      "subtotal": 25778.5,
-      "gst": 773.355,
+      "subtotal": 3549.0399999999995,
+      "gst": 106.47119999999998,
       "gstPercent": 3,
-      "total": 26551.855
+      "total": 3655.5111999999995
     }
   },
   {
@@ -2429,10 +2429,10 @@
     "category": "kids",
     "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     "alt": "Kids stud earrings",
-    "price": "₹33,485",
+    "price": "₹671",
     "metal": "Yellow Gold",
     "sku": "JL-KI0067",
-    "weight": "4.72 g",
+    "weight": "0.59 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
@@ -2447,16 +2447,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 4.72,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.593,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 31860,
+      "goldValue": 1.186,
       "makingCharge": 650,
       "makingChargeDisplay": "₹650",
-      "subtotal": 32510,
-      "gst": 975.3,
+      "subtotal": 651.186,
+      "gst": 19.53558,
       "gstPercent": 3,
-      "total": 33485.3
+      "total": 670.72158
     }
   },
   {
@@ -2466,10 +2466,10 @@
     "category": "kids",
     "image": "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     "alt": "Kids minimal gold chain",
-    "price": "₹49,490",
+    "price": "₹14",
     "metal": "Rose Gold",
     "sku": "JL-KI0068",
-    "weight": "5.14 g",
+    "weight": "0.59 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
@@ -2484,16 +2484,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.14,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.594,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 42148,
-      "makingCharge": 5900.72,
+      "goldValue": 11.879999999999999,
+      "makingCharge": 1.6632,
       "makingChargeDisplay": "14%",
-      "subtotal": 48048.72,
-      "gst": 1441.4616,
+      "subtotal": 13.543199999999999,
+      "gst": 0.40629599999999993,
       "gstPercent": 3,
-      "total": 49490.1816
+      "total": 13.949495999999998
     }
   },
   {
@@ -2503,10 +2503,10 @@
     "category": "kids",
     "image": "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     "alt": "Kids enamel pendant",
-    "price": "₹36,205",
+    "price": "₹3,881",
     "metal": "White Gold",
     "sku": "JL-KI0069",
-    "weight": "5.56 g",
+    "weight": "0.60 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
@@ -2520,16 +2520,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.56,
+      "netWeightGrams": 0.596,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 30301.999999999996,
-      "makingCharge": 4848.32,
+      "goldValue": 3248.2,
+      "makingCharge": 519.712,
       "makingChargeDisplay": "16%",
-      "subtotal": 35150.31999999999,
-      "gst": 1054.5095999999996,
+      "subtotal": 3767.912,
+      "gst": 113.03735999999999,
       "gstPercent": 3,
-      "total": 36204.82959999999
+      "total": 3880.9493599999996
     }
   },
   {
@@ -2539,10 +2539,10 @@
     "category": "kids",
     "image": "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
     "alt": "Kids star earrings",
-    "price": "₹42,632",
+    "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-KI0070",
-    "weight": "5.98 g",
+    "weight": "0.60 g",
     "purity": "18kt",
     "gallery": [
       "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
@@ -2557,16 +2557,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 5.98,
-      "pricePerGram": 6750,
+      "netWeightGrams": 0.597,
+      "pricePerGram": 2,
       "purity": "18kt",
-      "goldValue": 40365,
+      "goldValue": 1.194,
       "makingCharge": 1025,
       "makingChargeDisplay": "₹1,025",
-      "subtotal": 41390,
-      "gst": 1241.7,
+      "subtotal": 1026.194,
+      "gst": 30.785819999999998,
       "gstPercent": 3,
-      "total": 42631.7
+      "total": 1056.97982
     }
   },
   {
@@ -2576,10 +2576,10 @@
     "category": "kids",
     "image": "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
     "alt": "Kids gold bangle",
-    "price": "₹59,460",
+    "price": "₹14",
     "metal": "Rose Gold",
     "sku": "JL-KI0071",
-    "weight": "6.40 g",
+    "weight": "0.60 g",
     "purity": "22kt",
     "gallery": [
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
@@ -2594,16 +2594,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 6.4,
-      "pricePerGram": 8200,
+      "netWeightGrams": 0.599,
+      "pricePerGram": 20,
       "purity": "22kt",
-      "goldValue": 52480,
-      "makingCharge": 5248,
+      "goldValue": 11.98,
+      "makingCharge": 1.1980000000000002,
       "makingChargeDisplay": "10%",
-      "subtotal": 57728,
-      "gst": 1731.84,
+      "subtotal": 13.178,
+      "gst": 0.39534,
       "gstPercent": 3,
-      "total": 59459.84
+      "total": 13.573340000000002
     }
   },
   {
@@ -2613,10 +2613,10 @@
     "category": "kids",
     "image": "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
     "alt": "Kids initial pendant",
-    "price": "₹42,878",
+    "price": "₹3,772",
     "metal": "White Gold",
     "sku": "JL-KI0072",
-    "weight": "6.82 g",
+    "weight": "0.60 g",
     "purity": "14kt",
     "gallery": [
       "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
@@ -2631,16 +2631,16 @@
     },
     "gstPercent": 3,
     "priceBreakup": {
-      "netWeightGrams": 6.82,
+      "netWeightGrams": 0.6,
       "pricePerGram": 5450,
       "purity": "14kt",
-      "goldValue": 37169,
-      "makingCharge": 4460.28,
+      "goldValue": 3270,
+      "makingCharge": 392.4,
       "makingChargeDisplay": "12%",
-      "subtotal": 41629.28,
-      "gst": 1248.8783999999998,
+      "subtotal": 3662.4,
+      "gst": 109.872,
       "gstPercent": 3,
-      "total": 42878.1584
+      "total": 3772.272
     }
   }
 ]

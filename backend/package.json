@@ -17,6 +17,7 @@
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
     "recalculate-product-prices": "tsx scripts/recalculate-product-prices.ts",
+    "update-product-weights": "tsx scripts/update-product-weights.ts",
     "catalog:export": "cd ../frontend && npx tsx scripts/export-catalog.ts"
   },
   "dependencies": {
