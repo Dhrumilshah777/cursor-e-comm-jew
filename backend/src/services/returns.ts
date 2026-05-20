@@ -1,3 +1,8 @@
+import {
+  notifyAdminReturnRequested,
+  notifyReturnApproved,
+  notifyReturnRejected,
+} from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
 import {
   mapReturnToAdminDto,
@@ -139,6 +144,24 @@ export async function submitReturnRequest(input: {
 
   await createReturnStatusEvent(returnRequest.id, "UNDER_REVIEW", "Return request submitted");
 
+  const orderMeta = await prisma.order.findUnique({
+    where: { id: input.orderId },
+    select: {
+      orderNumber: true,
+      user: { select: { phone: true } },
+      items: { where: { id: input.orderItemId }, select: { name: true }, take: 1 },
+    },
+  });
+
+  if (orderMeta) {
+    void notifyAdminReturnRequested({
+      orderNumber: orderMeta.orderNumber,
+      productName: orderMeta.items[0]?.name ?? "Product",
+      customerPhone: orderMeta.user.phone,
+      reason: input.reason,
+    });
+  }
+
   return { returnRequest: mapReturnToCustomerDto(returnRequest) };
 }
 
@@ -161,6 +184,14 @@ export async function approveReturnRequest(id: string) {
       include: returnInclude,
     });
     if (!returnRequest) return { error: "NOT_FOUND" as const };
+
+    const customerPhone = returnRequest.order.user.phone;
+    void notifyReturnApproved({
+      customerPhone,
+      orderNumber: returnRequest.order.orderNumber,
+      pickupScheduledFor: returnRequest.pickupScheduledFor,
+    });
+
     return {
       returnRequest: mapReturnToAdminDto(returnRequest),
       log: result.log,
@@ -223,6 +254,13 @@ export async function updateReturnStatus(
   });
 
   await createReturnStatusEvent(id, status, options?.note);
+
+  if (status === "REJECTED") {
+    void notifyReturnRejected({
+      customerPhone: updated.order.user.phone,
+      orderNumber: updated.order.orderNumber,
+    });
+  }
 
   return mapReturnToAdminDto(updated);
 }

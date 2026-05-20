@@ -1,5 +1,6 @@
 import type { MetalType, Product } from "../generated/prisma/client.js";
 import { mapOrderToDto } from "../lib/orderMapper.js";
+import { notifyOrderConfirmed } from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
 import {
   calculatePriceBreakup,
@@ -262,6 +263,19 @@ export async function placeOrderFromCart(
 
     return created;
   });
+
+  const orderWithUser = await prisma.order.findUnique({
+    where: { id: order.id },
+    include: { user: { select: { phone: true } } },
+  });
+
+  if (orderWithUser?.user.phone) {
+    void notifyOrderConfirmed({
+      customerPhone: orderWithUser.user.phone,
+      orderNumber: order.orderNumber,
+      totalPaise: order.totalPaise,
+    });
+  }
 
   return { order: mapOrderToDto(order) };
 }

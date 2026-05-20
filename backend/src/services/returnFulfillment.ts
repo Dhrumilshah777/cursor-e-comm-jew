@@ -6,6 +6,7 @@ import type {
   ReturnRequest,
   User,
 } from "../generated/prisma/client.js";
+import { notifyRefundInitiated } from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
 import { createRazorpayRefund } from "../lib/razorpay.js";
 import {
@@ -380,8 +381,23 @@ export async function initiateReturnRefundOnItemReceived(returnRequestId: string
         refundStatus,
         refundAmountPaise: lineTotalPaise,
       },
+      include: {
+        order: { include: { user: true } },
+        orderItem: true,
+        pickupAddress: true,
+        images: true,
+        statusEvents: { orderBy: { eventAt: "asc" } },
+      },
     });
   });
+
+  if (updated.order.user.phone) {
+    void notifyRefundInitiated({
+      customerPhone: updated.order.user.phone,
+      orderNumber: updated.order.orderNumber,
+      amountPaise: lineTotalPaise,
+    });
+  }
 
   return { returnRequest: updated, log, refundStatus, alreadyRefunded: false };
 }

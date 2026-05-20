@@ -8,13 +8,29 @@ import { type FormEvent, useEffect, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import {
   createRazorpayCheckoutOrder,
+  fetchCheckoutAddresses,
   verifyRazorpayPayment,
   type CheckoutAddress,
+  type SavedCheckoutAddress,
 } from "@/lib/checkoutApi";
-import { getCustomerToken } from "@/lib/customerAuth";
+import { fetchCustomerMe, getCustomerToken } from "@/lib/customerAuth";
 
 function formatPaise(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
+}
+
+function phoneFromSaved(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  return digits.length >= 10 ? digits.slice(-10) : digits;
+}
+
+function formatAddressSummary(address: SavedCheckoutAddress): string {
+  const parts = [
+    address.line1,
+    address.line2,
+    `${address.city}, ${address.state} ${address.pincode}`,
+  ].filter(Boolean);
+  return parts.join(", ");
 }
 
 export default function CheckoutPageContent() {
@@ -23,6 +39,11 @@ export default function CheckoutPageContent() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [razorpayReady, setRazorpayReady] = useState(false);
+
+  const [savedAddresses, setSavedAddresses] = useState<SavedCheckoutAddress[]>([]);
+  const [addressesLoading, setAddressesLoading] = useState(true);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
 
   const [name, setName] = useState("");
   const [line1, setLine1] = useState("");
@@ -36,10 +57,40 @@ export default function CheckoutPageContent() {
   useEffect(() => {
     if (!getCustomerToken()) {
       router.replace("/login?redirect=%2Fcheckout");
+      return;
     }
+
+    let cancelled = false;
+
+    Promise.all([fetchCheckoutAddresses(), fetchCustomerMe()])
+      .then(([addresses, user]) => {
+        if (cancelled) return;
+        setSavedAddresses(addresses);
+        if (addresses.length > 0) {
+          const defaultId =
+            addresses.find((a) => a.isDefault)?.id ?? addresses[0]!.id;
+          setSelectedAddressId(defaultId);
+          setShowNewAddressForm(false);
+        } else {
+          setShowNewAddressForm(true);
+        }
+        if (user?.phone) {
+          setPhone(phoneFromSaved(user.phone));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setShowNewAddressForm(true);
+      })
+      .finally(() => {
+        if (!cancelled) setAddressesLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
-  const getAddress = (): CheckoutAddress => ({
+  const getNewAddress = (): CheckoutAddress => ({
     name,
     line1,
     line2: line2 || undefined,
@@ -59,11 +110,37 @@ export default function CheckoutPageContent() {
       return;
     }
 
+    const useSaved =
+      !showNewAddressForm && selectedAddressId && savedAddresses.length > 0;
+
+    if (!useSaved) {
+      if (
+        !name.trim() ||
+        !line1.trim() ||
+        !city.trim() ||
+        !state.trim() ||
+        pincode.length !== 6 ||
+        phone.length !== 10
+      ) {
+        setError("Please complete the delivery address.");
+        return;
+      }
+    }
+
     setSubmitting(true);
     setError(null);
 
     try {
-      const paymentOrder = await createRazorpayCheckoutOrder(getAddress());
+      const selected = savedAddresses.find((a) => a.id === selectedAddressId);
+      const paymentOrder = await createRazorpayCheckoutOrder(
+        useSaved && selectedAddressId
+          ? { addressId: selectedAddressId }
+          : { address: getNewAddress() },
+      );
+
+      const prefillName = useSaved && selected ? selected.name : name;
+      const prefillPhone =
+        useSaved && selected ? phoneFromSaved(selected.phone) : phone;
 
       const rzp = new window.Razorpay({
         key: paymentOrder.keyId,
@@ -73,8 +150,8 @@ export default function CheckoutPageContent() {
         description: "Jewelry order payment",
         order_id: paymentOrder.razorpayOrderId,
         prefill: {
-          name,
-          contact: phone.length === 10 ? `+91${phone}` : phone,
+          name: prefillName,
+          contact: prefillPhone.length === 10 ? `+91${prefillPhone}` : prefillPhone,
         },
         theme: { color: "#18181b" },
         handler: async (response) => {
@@ -114,7 +191,7 @@ export default function CheckoutPageContent() {
     }
   };
 
-  if (loading) {
+  if (loading || addressesLoading) {
     return <p className="text-sm font-light text-zinc-500">Loading checkout…</p>;
   }
 
@@ -133,6 +210,7 @@ export default function CheckoutPageContent() {
   }
 
   const totalPaise = cart.subtotalPaise;
+  const hasSaved = savedAddresses.length > 0;
 
   return (
     <>
@@ -148,97 +226,173 @@ export default function CheckoutPageContent() {
             <h2 className="text-sm font-normal uppercase tracking-[0.2em] text-zinc-900">
               Delivery address
             </h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <label className="block sm:col-span-2">
-                <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
-                  Full name
-                </span>
-                <input
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
-                />
-              </label>
-              <label className="block sm:col-span-2">
-                <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
-                  Address line 1
-                </span>
-                <input
-                  required
-                  value={line1}
-                  onChange={(e) => setLine1(e.target.value)}
-                  className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
-                />
-              </label>
-              <label className="block sm:col-span-2">
-                <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
-                  Address line 2 (optional)
-                </span>
-                <input
-                  value={line2}
-                  onChange={(e) => setLine2(e.target.value)}
-                  className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
-                  City
-                </span>
-                <input
-                  required
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
-                  State
-                </span>
-                <input
-                  required
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
-                  Pincode
-                </span>
-                <input
-                  required
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
-                  Phone
-                </span>
-                <input
-                  required
-                  type="tel"
-                  inputMode="numeric"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                  className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
-                />
-              </label>
-            </div>
-            <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm font-light text-zinc-600">
-              <input
-                type="checkbox"
-                checked={saveAddress}
-                onChange={(e) => setSaveAddress(e.target.checked)}
-                className="h-4 w-4 border-zinc-300"
-              />
-              Save this address for next time
-            </label>
+
+            {hasSaved && !showNewAddressForm ? (
+              <div className="mt-4 space-y-3">
+                <ul className="space-y-3">
+                  {savedAddresses.map((address) => {
+                    const selected = selectedAddressId === address.id;
+                    return (
+                      <li key={address.id}>
+                        <label
+                          className={`flex cursor-pointer gap-3 border px-4 py-4 transition ${
+                            selected
+                              ? "border-zinc-900 bg-zinc-50"
+                              : "border-zinc-200 bg-white hover:border-zinc-400"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="savedAddress"
+                            checked={selected}
+                            onChange={() => setSelectedAddressId(address.id)}
+                            className="mt-1 h-4 w-4 border-zinc-300"
+                          />
+                          <span className="min-w-0 flex-1 text-sm font-light text-zinc-800">
+                            <span className="block text-[10px] font-normal uppercase tracking-[0.16em] text-zinc-500">
+                              {address.label}
+                            </span>
+                            <span className="mt-1 block font-normal text-zinc-900">
+                              {address.name}
+                            </span>
+                            <span className="mt-1 block text-zinc-600">
+                              {formatAddressSummary(address)}
+                            </span>
+                            <span className="mt-1 block text-zinc-500">
+                              {phoneFromSaved(address.phone)}
+                            </span>
+                          </span>
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNewAddressForm(true);
+                    setSelectedAddressId(null);
+                  }}
+                  className="cursor-pointer text-[11px] font-light uppercase tracking-[0.16em] text-zinc-700 underline hover:text-zinc-900"
+                >
+                  + Add a new address
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4">
+                {hasSaved ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewAddressForm(false);
+                      setSelectedAddressId(
+                        savedAddresses.find((a) => a.isDefault)?.id ??
+                          savedAddresses[0]?.id ??
+                          null,
+                      );
+                    }}
+                    className="mb-4 cursor-pointer text-[11px] font-light uppercase tracking-[0.16em] text-zinc-600 underline hover:text-zinc-900"
+                  >
+                    ← Use a saved address
+                  </button>
+                ) : null}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block sm:col-span-2">
+                    <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
+                      Full name
+                    </span>
+                    <input
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block sm:col-span-2">
+                    <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
+                      Address line 1
+                    </span>
+                    <input
+                      required
+                      value={line1}
+                      onChange={(e) => setLine1(e.target.value)}
+                      className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block sm:col-span-2">
+                    <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
+                      Address line 2 (optional)
+                    </span>
+                    <input
+                      value={line2}
+                      onChange={(e) => setLine2(e.target.value)}
+                      className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
+                      City
+                    </span>
+                    <input
+                      required
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
+                      State
+                    </span>
+                    <input
+                      required
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
+                      Pincode
+                    </span>
+                    <input
+                      required
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={pincode}
+                      onChange={(e) =>
+                        setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      }
+                      className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-[10px] font-normal uppercase tracking-[0.18em] text-zinc-500">
+                      Phone
+                    </span>
+                    <input
+                      required
+                      type="tel"
+                      inputMode="numeric"
+                      value={phone}
+                      onChange={(e) =>
+                        setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+                      }
+                      className="mt-1 w-full border border-zinc-300 px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none"
+                    />
+                  </label>
+                </div>
+                <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm font-light text-zinc-600">
+                  <input
+                    type="checkbox"
+                    checked={saveAddress}
+                    onChange={(e) => setSaveAddress(e.target.checked)}
+                    className="h-4 w-4 border-zinc-300"
+                  />
+                  Save this address for next time
+                </label>
+              </div>
+            )}
           </section>
 
           <section>

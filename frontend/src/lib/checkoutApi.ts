@@ -13,6 +13,26 @@ export type CheckoutAddress = {
   saveAddress?: boolean;
 };
 
+export type SavedCheckoutAddress = {
+  id: string;
+  label: string;
+  name: string;
+  line1: string;
+  line2: string;
+  city: string;
+  state: string;
+  pincode: string;
+  phone: string;
+  isDefault: boolean;
+};
+
+export async function fetchCheckoutAddresses() {
+  const data = await customerFetch<{ addresses: SavedCheckoutAddress[] }>(
+    "/api/checkout/addresses",
+  );
+  return data.addresses;
+}
+
 type RazorpayCreateOrderResponse = {
   keyId: string;
   razorpayOrderId: string;
@@ -25,10 +45,12 @@ type RazorpayCreateOrderResponse = {
 
 type VerifyResponse = { order: AccountOrder };
 
-export async function createRazorpayCheckoutOrder(address: CheckoutAddress) {
+export async function createRazorpayCheckoutOrder(
+  payload: { address: CheckoutAddress } | { addressId: string },
+) {
   return customerFetch<RazorpayCreateOrderResponse>("/api/checkout/razorpay/create-order", {
     method: "POST",
-    body: JSON.stringify({ address }),
+    body: JSON.stringify(payload),
   });
 }
 

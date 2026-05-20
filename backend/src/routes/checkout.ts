@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireCustomer, type CustomerRequest } from "../middleware/requireCustomer.js";
-import type { CheckoutAddressInput } from "../services/checkout.js";
+import { listSavedAddressesForUser } from "../services/addresses.js";
+import { parseCheckoutAddressPayload } from "../services/checkoutAddresses.js";
 import {
   createRazorpayCheckout,
   verifyRazorpayCheckoutAndPlaceOrder,
@@ -8,19 +9,26 @@ import {
 
 export const checkoutRouter = Router();
 
-checkoutRouter.post("/razorpay/create-order", requireCustomer, async (req: CustomerRequest, res) => {
-  const address =
-    req.body?.address && typeof req.body.address === "object"
-      ? (req.body.address as CheckoutAddressInput)
-      : undefined;
+checkoutRouter.get("/addresses", requireCustomer, async (req: CustomerRequest, res) => {
+  try {
+    const addresses = await listSavedAddressesForUser(req.customer!.userId);
+    res.json({ addresses });
+  } catch (error) {
+    console.error("GET /api/checkout/addresses failed:", error);
+    res.status(500).json({ error: "Failed to load addresses" });
+  }
+});
 
-  if (!address) {
-    res.status(400).json({ error: "Delivery address is required" });
+checkoutRouter.post("/razorpay/create-order", requireCustomer, async (req: CustomerRequest, res) => {
+  const payload = parseCheckoutAddressPayload(req.body);
+
+  if (!payload) {
+    res.status(400).json({ error: "Delivery address or addressId is required" });
     return;
   }
 
   try {
-    const result = await createRazorpayCheckout(req.customer!.userId, address);
+    const result = await createRazorpayCheckout(req.customer!.userId, payload);
 
     if ("error" in result) {
       if (result.error === "CART_EMPTY") {
@@ -29,6 +37,10 @@ checkoutRouter.post("/razorpay/create-order", requireCustomer, async (req: Custo
       }
       if (result.error === "PRODUCT_UNAVAILABLE") {
         res.status(400).json({ error: "A product in your bag is no longer available" });
+        return;
+      }
+      if (result.error === "ADDRESS_NOT_FOUND") {
+        res.status(400).json({ error: "Saved address not found" });
         return;
       }
       if (result.error === "INVALID_ADDRESS") {

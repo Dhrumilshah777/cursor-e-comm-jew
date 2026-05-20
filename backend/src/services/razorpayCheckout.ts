@@ -7,21 +7,61 @@ import {
   verifyRazorpayWebhookSignature,
 } from "../lib/razorpay.js";
 import {
+  deserializeCheckoutAddressPayload,
+  serializeCheckoutAddressPayload,
+  type CheckoutAddressPayload,
+} from "./checkoutAddresses.js";
+import {
   getCartCheckoutTotals,
   placeOrderFromCart,
-  type CheckoutAddressInput,
   validateCheckoutAddress,
 } from "./checkout.js";
+import { handleRazorpayRefundWebhook } from "./razorpayRefundWebhook.js";
 
 const CHECKOUT_TTL_MS = 30 * 60 * 1000;
 
+async function placeOrderForCheckoutSession(
+  userId: string,
+  addressJson: string,
+  paymentMethod: string,
+  transactionId: string,
+) {
+  const payload = deserializeCheckoutAddressPayload(addressJson);
+  if (!payload) {
+    return { error: "INVALID_ADDRESS" as const, message: "Invalid checkout address" };
+  }
+
+  if ("addressId" in payload) {
+    return placeOrderFromCart(userId, {
+      addressId: payload.addressId,
+      paymentMethod,
+      transactionId,
+    });
+  }
+
+  return placeOrderFromCart(userId, {
+    address: payload.address,
+    paymentMethod,
+    transactionId,
+  });
+}
+
 export async function createRazorpayCheckout(
   userId: string,
-  address: CheckoutAddressInput,
+  payload: CheckoutAddressPayload,
 ) {
-  const validationError = validateCheckoutAddress(address);
-  if (validationError) {
-    return { error: "INVALID_ADDRESS" as const, message: validationError };
+  if ("addressId" in payload) {
+    const saved = await prisma.address.findFirst({
+      where: { id: payload.addressId, userId },
+    });
+    if (!saved) {
+      return { error: "ADDRESS_NOT_FOUND" as const };
+    }
+  } else {
+    const validationError = validateCheckoutAddress(payload.address);
+    if (validationError) {
+      return { error: "INVALID_ADDRESS" as const, message: validationError };
+    }
   }
 
   const totals = await getCartCheckoutTotals(userId);
@@ -40,7 +80,7 @@ export async function createRazorpayCheckout(
     data: {
       userId,
       razorpayOrderId: razorpayOrder.id,
-      addressJson: JSON.stringify(address),
+      addressJson: serializeCheckoutAddressPayload(payload),
       amountPaise: totals.totalPaise,
       expiresAt: new Date(Date.now() + CHECKOUT_TTL_MS),
     },
@@ -107,13 +147,12 @@ export async function verifyRazorpayCheckoutAndPlaceOrder(
     return { error: "PAYMENT_AMOUNT_MISMATCH" as const };
   }
 
-  const address = JSON.parse(session.addressJson) as CheckoutAddressInput;
-
-  const result = await placeOrderFromCart(userId, {
-    address,
-    paymentMethod: "Razorpay",
-    transactionId: input.razorpayPaymentId,
-  });
+  const result = await placeOrderForCheckoutSession(
+    userId,
+    session.addressJson,
+    "Razorpay",
+    input.razorpayPaymentId,
+  );
 
   if ("error" in result) {
     return result;
@@ -143,10 +182,32 @@ export async function handleRazorpayWebhook(rawBody: string, signature: string) 
     event?: string;
     payload?: {
       payment?: { entity?: { id?: string; order_id?: string; status?: string } };
+      refund?: {
+        entity?: {
+          id?: string;
+          payment_id?: string;
+          amount?: number;
+          status?: string;
+        };
+      };
     };
   };
 
-  if (payload.event !== "payment.captured") {
+  const event = payload.event ?? "";
+
+  if (
+    event === "refund.created" ||
+    event === "refund.processed" ||
+    event === "refund.failed"
+  ) {
+    const refund = payload.payload?.refund?.entity;
+    if (!refund?.id && !refund?.payment_id) {
+      return { ok: true as const, ignored: true };
+    }
+    return handleRazorpayRefundWebhook(event, refund);
+  }
+
+  if (event !== "payment.captured") {
     return { ok: true as const, ignored: true };
   }
 
@@ -163,12 +224,12 @@ export async function handleRazorpayWebhook(rawBody: string, signature: string) 
     return { ok: true as const };
   }
 
-  const address = JSON.parse(session.addressJson) as CheckoutAddressInput;
-  const result = await placeOrderFromCart(session.userId, {
-    address,
-    paymentMethod: "Razorpay",
-    transactionId: payment.id,
-  });
+  const result = await placeOrderForCheckoutSession(
+    session.userId,
+    session.addressJson,
+    "Razorpay",
+    payment.id,
+  );
 
   if ("error" in result) {
     return { error: "ORDER_FAILED" as const };

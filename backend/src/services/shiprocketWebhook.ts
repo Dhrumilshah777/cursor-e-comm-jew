@@ -1,5 +1,6 @@
 import type { OrderStatus } from "../generated/prisma/client.js";
 import { orderStatusEventLabel } from "../lib/format.js";
+import { notifyOrderDelivered } from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
 
 export type ShiprocketWebhookPayload = Record<string, unknown>;
@@ -117,6 +118,7 @@ async function findOrderFromWebhook(payload: ShiprocketWebhookPayload) {
     where: { OR: orConditions },
     include: {
       statusEvents: { orderBy: { eventAt: "desc" }, take: 1 },
+      user: { select: { phone: true } },
     },
   });
 }
@@ -206,6 +208,13 @@ export async function handleShiprocketWebhook(payload: ShiprocketWebhookPayload)
   console.log(
     `[Shiprocket Webhook] Order ${order.orderNumber} updated: ${order.status} → ${mappedStatus}`,
   );
+
+  if (mappedStatus === "DELIVERED" && order.user.phone) {
+    void notifyOrderDelivered({
+      customerPhone: order.user.phone,
+      orderNumber: order.orderNumber,
+    });
+  }
 
   return {
     ok: true as const,
