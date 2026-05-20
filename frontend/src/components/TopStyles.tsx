@@ -4,8 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Great_Vibes, Jost } from "next/font/google";
 import { useState } from "react";
-import type { MetalType } from "@/data/collections";
-
 const jost = Jost({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
@@ -24,7 +22,7 @@ export type TopStyleProduct = {
   image: string;
   alt: string;
   price: string;
-  metal: MetalType;
+  metal: string;
 };
 
 const products: TopStyleProduct[] = [
@@ -46,7 +44,7 @@ const products: TopStyleProduct[] = [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     alt: "Gold chain necklace",
     price: "₹6,200",
-    metal: "Rose Gold",
+    metal: "Luxury accessories",
   },
   {
     id: "top-style-3",

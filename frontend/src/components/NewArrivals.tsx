@@ -4,8 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Jost } from "next/font/google";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { MetalType } from "@/data/collections";
-
 const jost = Jost({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
@@ -19,7 +17,7 @@ export type ProductItem = {
   image: string;
   alt: string;
   price: string;
-  metal: MetalType;
+  metal: string;
 };
 
 const products: ProductItem[] = [
