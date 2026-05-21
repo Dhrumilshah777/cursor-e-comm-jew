@@ -9,14 +9,13 @@ import TopStyles, { type TopStyleProduct } from "@/components/TopStyles";
 import ShopByCollection from "@/components/ShopByCollection";
 import ShopByRecipient from "@/components/ShopByRecipient";
 import { fetchHomepage } from "@/lib/homepageApi";
-import { softenPublicText } from "@/lib/storeCopy";
 
 function mapProductCards(
   items: Awaited<ReturnType<typeof fetchHomepage>>["newArrivals"],
 ): ProductItem[] {
   return items.map((item) => ({
     id: item.id,
-    name: softenPublicText(item.name),
+    name: item.name,
     href: item.href,
     image: item.image,
     alt: item.alt,
@@ -30,7 +29,7 @@ function mapTopStyles(
 ): TopStyleProduct[] {
   return items.map((item) => ({
     id: item.id,
-    name: softenPublicText(item.name),
+    name: item.name,
     href: item.href,
     image: item.image,
     alt: item.alt,

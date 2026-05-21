@@ -29,7 +29,7 @@ const products: ProductItem[] = [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     alt: "Pearl drop earrings",
     price: "₹4,850",
-    metal: "Plated jewelry",
+    metal: "Yellow Gold",
   },
   {
     id: "product-2",
@@ -39,7 +39,7 @@ const products: ProductItem[] = [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     alt: "Gold chain necklace",
     price: "₹6,200",
-    metal: "Luxury accessories",
+    metal: "Rose Gold",
   },
   {
     id: "product-3",
@@ -49,7 +49,7 @@ const products: ProductItem[] = [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     alt: "Layered bracelet set",
     price: "₹3,450",
-    metal: "Plated jewelry",
+    metal: "White Gold",
   },
   {
     id: "product-4",
@@ -59,7 +59,7 @@ const products: ProductItem[] = [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     alt: "Solitaire diamond ring",
     price: "₹12,900",
-    metal: "Plated jewelry",
+    metal: "Yellow Gold",
   },
   {
     id: "product-5",
@@ -69,7 +69,7 @@ const products: ProductItem[] = [
       "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
     alt: "Diamond pendant necklace",
     price: "₹8,750",
-    metal: "Luxury accessories",
+    metal: "Rose Gold",
   },
   {
     id: "product-6",
@@ -79,7 +79,7 @@ const products: ProductItem[] = [
       "https://i.pinimg.com/736x/49/7f/69/497f699de95ec3c83a814eeb1be0ecee.jpg",
     alt: "Gold mangalsutra necklace",
     price: "₹9,400",
-    metal: "Plated jewelry",
+    metal: "White Gold",
   },
   {
     id: "product-7",
@@ -89,7 +89,7 @@ const products: ProductItem[] = [
       "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
     alt: "Classic gold hoop earrings",
     price: "₹5,100",
-    metal: "Plated jewelry",
+    metal: "Yellow Gold",
   },
   {
     id: "product-8",
@@ -99,7 +99,7 @@ const products: ProductItem[] = [
       "https://i.pinimg.com/736x/83/25/35/832535b7d7324df0308d6e62ff04df67.jpg",
     alt: "Gold charm anklet",
     price: "₹2,980",
-    metal: "Luxury accessories",
+    metal: "Rose Gold",
   },
 ];
 

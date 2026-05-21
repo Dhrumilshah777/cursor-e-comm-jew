@@ -609,6 +609,36 @@ export async function deactivateAdminCoupon(id: string) {
   return data.coupon;
 }
 
+export type AdminAbandonedCheckout = {
+  id: string;
+  razorpayOrderId: string;
+  status: "expired" | "pending";
+  statusLabel: string;
+  startedAt: string;
+  startedOn: string;
+  startedAtLabel: string;
+  expiresAt: string;
+  expiresAtLabel: string;
+  subtotal: string;
+  discount: string | null;
+  amount: string;
+  couponCode: string | null;
+  addressSummary: string;
+  customer: {
+    id: string;
+    name: string | null;
+    phone: string;
+    email: string | null;
+  };
+};
+
+export async function fetchAdminAbandonedCheckouts() {
+  const data = await adminFetch<{ sessions: AdminAbandonedCheckout[] }>(
+    "/api/admin/abandoned-checkouts",
+  );
+  return data.sessions;
+}
+
 export async function fetchAdminCustomers() {
   const data = await adminFetch<{
     customers: {

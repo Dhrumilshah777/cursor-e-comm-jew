@@ -34,7 +34,7 @@ const products: TopStyleProduct[] = [
       "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
     alt: "Pearl drop earrings",
     price: "₹4,850",
-    metal: "Plated jewelry",
+    metal: "Yellow Gold",
   },
   {
     id: "top-style-2",
@@ -44,7 +44,7 @@ const products: TopStyleProduct[] = [
       "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
     alt: "Gold chain necklace",
     price: "₹6,200",
-    metal: "Luxury accessories",
+    metal: "Rose Gold",
   },
   {
     id: "top-style-3",
@@ -54,7 +54,7 @@ const products: TopStyleProduct[] = [
       "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
     alt: "Layered bracelet set",
     price: "₹3,450",
-    metal: "Plated jewelry",
+    metal: "White Gold",
   },
   {
     id: "top-style-4",
@@ -64,7 +64,7 @@ const products: TopStyleProduct[] = [
       "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
     alt: "Solitaire diamond ring",
     price: "₹12,900",
-    metal: "Plated jewelry",
+    metal: "Yellow Gold",
   },
 ];
 

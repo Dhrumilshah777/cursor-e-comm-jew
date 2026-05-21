@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { removeCartItem } from "@/lib/cartApi";
 import { getCustomerToken } from "@/lib/customerAuth";
-import { softenPublicText } from "@/lib/storeCopy";
 
 export default function CartPageContent() {
   const { cart, loading, setCart } = useCart();
@@ -76,7 +75,7 @@ export default function CartPageContent() {
                 href={`/products/${item.product.slug}`}
                 className="text-sm font-normal uppercase tracking-[0.12em] text-zinc-900 hover:text-zinc-600"
               >
-                {softenPublicText(item.product.name)}
+                {item.product.name}
               </Link>
               <p className="mt-1 text-xs font-light text-zinc-500">
                 {item.product.metal}

@@ -20,6 +20,7 @@ const jost = Jost({
 const navItems = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/abandoned-checkouts", label: "Abandoned checkout" },
   { href: "/admin/returns", label: "Returns" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/coupons", label: "Coupons" },

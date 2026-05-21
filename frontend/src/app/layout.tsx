@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fashion Jewelry & Luxury Accessories",
+  title: "Wholesale Gold Jewelry",
   description:
-    "Fashion jewelry and plated luxury accessories — rings, necklaces, earrings, and bracelets.",
+    "Fine gold jewelry — rings, necklaces, earrings, bracelets, and mangalsutra.",
 };
 
 export default function RootLayout({

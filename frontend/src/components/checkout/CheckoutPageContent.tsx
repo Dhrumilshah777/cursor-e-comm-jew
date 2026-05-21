@@ -222,7 +222,7 @@ export default function CheckoutPageContent() {
         key: paymentOrder.keyId,
         amount: paymentOrder.amount,
         currency: paymentOrder.currency,
-        name: "Fashion Jewelry",
+        name: "Wholesale Jewelry",
         description: "Jewelry order payment",
         order_id: paymentOrder.razorpayOrderId,
         prefill: {
@@ -500,7 +500,7 @@ export default function CheckoutPageContent() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-normal uppercase tracking-[0.1em] text-zinc-900">
-                    {item.product.name.replace(/\bgold\b/gi, "plated")}
+                    {item.product.name}
                   </p>
                   <p className="mt-0.5 text-[11px] font-light text-zinc-500">
                     Qty {item.quantity}

@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { softenPublicText } from "@/lib/storeCopy";
 import { Jost } from "next/font/google";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CollectionProduct } from "@/data/collections";
@@ -79,7 +78,7 @@ function ProductCard({ product }: { product: CollectionProduct }) {
       </div>
       <div className="space-y-1 text-left">
         <p className="text-xs font-normal uppercase tracking-[0.14em] text-zinc-900 sm:text-[13px] lg:tracking-[0.18em]">
-          {softenPublicText(product.name)}
+          {product.name}
         </p>
         <p className="text-[11px] font-light tracking-[0.08em] text-zinc-500 sm:text-xs">
           {product.metal}
