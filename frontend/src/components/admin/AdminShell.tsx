@@ -7,7 +7,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   adminLogout,
   fetchAdminMe,
-  getAdminToken,
   type AdminUser,
 } from "@/lib/adminApi";
 
@@ -35,12 +34,6 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const token = getAdminToken();
-    if (!token) {
-      router.replace("/admin/login");
-      return;
-    }
-
     fetchAdminMe()
       .then(setAdmin)
       .catch(() => router.replace("/admin/login"))

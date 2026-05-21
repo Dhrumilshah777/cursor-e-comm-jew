@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { fetchCart, type Cart } from "@/lib/cartApi";
-import { getCustomerToken } from "@/lib/customerAuth";
+import { CUSTOMER_AUTH_CHANGED_EVENT } from "@/lib/customerAuth";
 
 type CartContextValue = {
   cart: Cart | null;
@@ -27,12 +27,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refreshCart = useCallback(async () => {
-    if (!getCustomerToken()) {
-      setCart(null);
-      setLoading(false);
-      return;
-    }
-
     try {
       const next = await fetchCart();
       setCart(next);
@@ -48,13 +42,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [refreshCart]);
 
   useEffect(() => {
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === "customer_token") {
-        refreshCart();
-      }
+    const onAuthChanged = () => {
+      refreshCart();
     };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    window.addEventListener(CUSTOMER_AUTH_CHANGED_EVENT, onAuthChanged);
+    return () => window.removeEventListener(CUSTOMER_AUTH_CHANGED_EVENT, onAuthChanged);
   }, [refreshCart]);
 
   const value = useMemo(

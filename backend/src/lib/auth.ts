@@ -37,11 +37,16 @@ export function getTokenFromRequest(req: Request): string | null {
 
 export const adminCookieName = COOKIE_NAME;
 
+function isProductionEnv() {
+  return process.env.NODE_ENV === "production";
+}
+
 export function adminCookieOptions() {
+  const production = isProductionEnv();
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
+    secure: production,
+    sameSite: (production ? "none" : "lax") as const,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: "/",
   };

@@ -16,7 +16,7 @@ import {
   type CheckoutAddress,
   type SavedCheckoutAddress,
 } from "@/lib/checkoutApi";
-import { fetchCustomerMe, getCustomerToken } from "@/lib/customerAuth";
+import { fetchCustomerMe } from "@/lib/customerAuth";
 
 function formatPaise(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
@@ -72,16 +72,21 @@ export default function CheckoutPageContent() {
   const [couponsError, setCouponsError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!getCustomerToken()) {
-      router.replace("/login?redirect=%2Fcheckout");
-      return;
-    }
-
     let cancelled = false;
 
-    Promise.all([fetchCheckoutAddresses(), fetchCustomerMe()])
-      .then(([addresses, user]) => {
+    fetchCustomerMe()
+      .then((user) => {
         if (cancelled) return;
+        if (!user) {
+          router.replace("/login?redirect=%2Fcheckout");
+          return;
+        }
+
+        return Promise.all([fetchCheckoutAddresses(), Promise.resolve(user)]);
+      })
+      .then((result) => {
+        if (cancelled || !result) return;
+        const [addresses, user] = result;
         setSavedAddresses(addresses);
         if (addresses.length > 0) {
           const defaultId =

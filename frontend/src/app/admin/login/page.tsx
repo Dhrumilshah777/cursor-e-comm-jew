@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Jost } from "next/font/google";
 import { useEffect, useState, type FormEvent } from "react";
-import { adminLogin, getAdminToken } from "@/lib/adminApi";
+import { adminLogin, fetchAdminMe } from "@/lib/adminApi";
 
 const jost = Jost({
   subsets: ["latin"],
@@ -20,9 +20,9 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (getAdminToken()) {
-      router.replace("/admin");
-    }
+    fetchAdminMe()
+      .then(() => router.replace("/admin"))
+      .catch(() => undefined);
   }, [router]);
 
   const handleSubmit = async (event: FormEvent) => {

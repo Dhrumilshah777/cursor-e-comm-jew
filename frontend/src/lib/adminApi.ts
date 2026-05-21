@@ -1,6 +1,6 @@
 import { getApiBaseUrl } from "@/lib/api";
 
-const TOKEN_KEY = "admin_token";
+const LEGACY_TOKEN_KEY = "admin_token";
 
 export type AdminUser = {
   id: string;
@@ -90,29 +90,18 @@ export type AdminDashboard = {
   }[];
 };
 
-export function getAdminToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setAdminToken(token: string) {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function clearAdminToken() {
-  localStorage.removeItem(TOKEN_KEY);
+function clearLegacyAdminToken() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(LEGACY_TOKEN_KEY);
+  }
 }
 
 export async function adminFetch<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = getAdminToken();
   const headers = new Headers(options.headers);
 
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
@@ -125,7 +114,7 @@ export async function adminFetch<T>(
   });
 
   if (response.status === 401) {
-    clearAdminToken();
+    clearLegacyAdminToken();
     if (typeof window !== "undefined" && !window.location.pathname.startsWith("/admin/login")) {
       window.location.href = "/admin/login";
     }
@@ -156,8 +145,8 @@ export async function adminLogin(email: string, password: string) {
     throw new Error(body.error ?? "Invalid email or password");
   }
 
-  const data = (await response.json()) as { admin: AdminUser; token: string };
-  setAdminToken(data.token);
+  const data = (await response.json()) as { admin: AdminUser };
+  clearLegacyAdminToken();
   return data.admin;
 }
 
@@ -165,7 +154,7 @@ export async function adminLogout() {
   try {
     await adminFetch("/api/admin/auth/logout", { method: "POST" });
   } finally {
-    clearAdminToken();
+    clearLegacyAdminToken();
   }
 }
 
@@ -347,14 +336,13 @@ export class AdminOrderStatusError extends Error {
 }
 
 export async function updateAdminOrderStatus(orderId: string, status: string) {
-  const token = getAdminToken();
   const response = await fetch(
     new URL(`/api/admin/orders/${orderId}`, getApiBaseUrl()).toString(),
     {
       method: "PATCH",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({ status }),
     },

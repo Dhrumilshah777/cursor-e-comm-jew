@@ -1,20 +1,13 @@
 import { getApiBaseUrl } from "@/lib/api";
-import { getCustomerToken } from "@/lib/customerAuth";
 
 export async function customerFetch<T>(
   path: string,
   init?: RequestInit,
 ): Promise<T> {
-  const token = getCustomerToken();
-  if (!token) {
-    throw new Error("LOGIN_REQUIRED");
-  }
-
   const response = await fetch(new URL(path, getApiBaseUrl()).toString(), {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
       ...init?.headers,
     },
     credentials: "include",

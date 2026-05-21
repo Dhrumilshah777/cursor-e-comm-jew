@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { removeCartItem } from "@/lib/cartApi";
-import { getCustomerToken } from "@/lib/customerAuth";
+import { fetchCustomerMe } from "@/lib/customerAuth";
 
 export default function CartPageContent() {
   const { cart, loading, setCart } = useCart();
@@ -13,9 +13,11 @@ export default function CartPageContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!getCustomerToken()) {
-      window.location.href = "/login?redirect=%2Fcart";
-    }
+    fetchCustomerMe().then((user) => {
+      if (!user) {
+        window.location.href = "/login?redirect=%2Fcart";
+      }
+    });
   }, []);
 
   const handleRemove = async (itemId: string) => {

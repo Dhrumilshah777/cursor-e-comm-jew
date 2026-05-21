@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { addToCart } from "@/lib/cartApi";
-import { getCustomerToken } from "@/lib/customerAuth";
 
 type AddToBagButtonProps = {
   productId: string;
@@ -25,12 +24,6 @@ export default function AddToBagButton({
   const [message, setMessage] = useState<string | null>(null);
 
   const handleClick = async () => {
-    if (!getCustomerToken()) {
-      const redirect = encodeURIComponent(`/products/${productSlug}`);
-      router.push(`/login?redirect=${redirect}`);
-      return;
-    }
-
     setStatus("loading");
     setMessage(null);
 

@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { fetchCustomerMe, getCustomerToken } from "@/lib/customerAuth";
+import { fetchCustomerMe } from "@/lib/customerAuth";
 
 export default function AccountAuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -10,13 +10,6 @@ export default function AccountAuthGuard({ children }: { children: ReactNode }) 
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const token = getCustomerToken();
-    if (!token) {
-      const redirect = encodeURIComponent(pathname);
-      router.replace(`/login?redirect=${redirect}`);
-      return;
-    }
-
     fetchCustomerMe()
       .then((user) => {
         if (!user) {

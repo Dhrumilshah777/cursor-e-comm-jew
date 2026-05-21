@@ -1,8 +1,10 @@
 import { getApiBaseUrl } from "@/lib/api";
 
-const TOKEN_KEY = "customer_token";
 const PENDING_PHONE_KEY = "login_pending_phone";
 const PENDING_VERIFICATION_SID_KEY = "login_pending_verification_sid";
+const LEGACY_TOKEN_KEY = "customer_token";
+
+export const CUSTOMER_AUTH_CHANGED_EVENT = "customer-auth-changed";
 
 export type CustomerUser = {
   id: string;
@@ -11,22 +13,21 @@ export type CustomerUser = {
   email: string | null;
 };
 
+export function notifyCustomerAuthChanged() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(CUSTOMER_AUTH_CHANGED_EVENT));
+  }
+}
+
+function clearLegacyCustomerToken() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(LEGACY_TOKEN_KEY);
+  }
+}
+
 export function formatPhoneDisplay(phone: string): string {
   const digits = phone.replace(/\D/g, "").slice(-10);
   return digits.length === 10 ? digits : phone;
-}
-
-export function getCustomerToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setCustomerToken(token: string) {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function clearCustomerToken() {
-  localStorage.removeItem(TOKEN_KEY);
 }
 
 export function setPendingPhone(phone: string) {
@@ -102,7 +103,6 @@ export async function verifyLoginOtp(phone: string, otp: string) {
 
   const body = (await response.json().catch(() => ({}))) as {
     error?: string;
-    token?: string;
     user?: CustomerUser;
   };
 
@@ -110,26 +110,20 @@ export async function verifyLoginOtp(phone: string, otp: string) {
     throw new Error(body.error ?? "Failed to verify OTP");
   }
 
-  if (body.token) {
-    setCustomerToken(body.token);
-  }
-
+  clearLegacyCustomerToken();
   clearPendingPhone();
+  notifyCustomerAuthChanged();
   return body.user!;
 }
 
 export async function fetchCustomerMe(): Promise<CustomerUser | null> {
-  const token = getCustomerToken();
-  if (!token) return null;
-
   const response = await fetch(new URL("/api/auth/me", getApiBaseUrl()).toString(), {
-    headers: { Authorization: `Bearer ${token}` },
     credentials: "include",
     cache: "no-store",
   });
 
   if (response.status === 401) {
-    clearCustomerToken();
+    clearLegacyCustomerToken();
     return null;
   }
 
@@ -142,15 +136,14 @@ export async function fetchCustomerMe(): Promise<CustomerUser | null> {
 }
 
 export async function customerLogout() {
-  const token = getCustomerToken();
   try {
     await fetch(new URL("/api/auth/logout", getApiBaseUrl()).toString(), {
       method: "POST",
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       credentials: "include",
     });
   } finally {
-    clearCustomerToken();
+    clearLegacyCustomerToken();
     clearPendingPhone();
+    notifyCustomerAuthChanged();
   }
 }

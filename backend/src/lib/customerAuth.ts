@@ -39,11 +39,16 @@ export function getCustomerTokenFromRequest(req: Request): string | null {
 
 export const customerCookieName = COOKIE_NAME;
 
+function isProductionEnv() {
+  return process.env.NODE_ENV === "production";
+}
+
 export function customerCookieOptions() {
+  const production = isProductionEnv();
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
+    secure: production,
+    sameSite: (production ? "none" : "lax") as const,
     maxAge: 30 * 24 * 60 * 60 * 1000,
     path: "/",
   };

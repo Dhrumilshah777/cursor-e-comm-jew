@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import AuthPageShell from "@/components/auth/AuthPageShell";
 import PhoneLoginForm from "@/components/auth/PhoneLoginForm";
-import { fetchCustomerMe, getCustomerToken } from "@/lib/customerAuth";
+import { fetchCustomerMe } from "@/lib/customerAuth";
 
 function LoginPageContent() {
   const router = useRouter();
@@ -12,7 +12,6 @@ function LoginPageContent() {
   const redirectTo = searchParams.get("redirect") ?? "/account";
 
   useEffect(() => {
-    if (!getCustomerToken()) return;
     fetchCustomerMe()
       .then((user) => {
         if (user) router.replace(redirectTo);
