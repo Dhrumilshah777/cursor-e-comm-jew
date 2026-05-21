@@ -43,10 +43,11 @@ function isProductionEnv() {
 
 export function adminCookieOptions() {
   const production = isProductionEnv();
+  const sameSite: "none" | "lax" = production ? "none" : "lax";
   return {
     httpOnly: true,
     secure: production,
-    sameSite: (production ? "none" : "lax") as const,
+    sameSite,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: "/",
   };
