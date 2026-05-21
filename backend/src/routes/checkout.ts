@@ -2,12 +2,79 @@ import { Router } from "express";
 import { requireCustomer, type CustomerRequest } from "../middleware/requireCustomer.js";
 import { listSavedAddressesForUser } from "../services/addresses.js";
 import { parseCheckoutAddressPayload } from "../services/checkoutAddresses.js";
+import { previewCheckoutCoupon, listAvailableCheckoutCoupons } from "../services/checkout.js";
 import {
   createRazorpayCheckout,
   verifyRazorpayCheckoutAndPlaceOrder,
 } from "../services/razorpayCheckout.js";
 
 export const checkoutRouter = Router();
+
+function couponErrorResponse(
+  res: import("express").Response,
+  result: { error: string; message?: string },
+) {
+  if (result.error === "CART_EMPTY") {
+    res.status(400).json({ error: "Your bag is empty" });
+    return true;
+  }
+  if (result.error === "PRODUCT_UNAVAILABLE") {
+    res.status(400).json({ error: "A product in your bag is no longer available" });
+    return true;
+  }
+  if ("message" in result && result.message) {
+    res.status(400).json({ error: result.message });
+    return true;
+  }
+  res.status(400).json({ error: "Invalid coupon code" });
+  return true;
+}
+
+checkoutRouter.get("/coupons", requireCustomer, async (req: CustomerRequest, res) => {
+  try {
+    const result = await listAvailableCheckoutCoupons(req.customer!.userId);
+    if ("error" in result) {
+      if (result.error === "CART_EMPTY") {
+        res.status(400).json({ error: "Your bag is empty" });
+        return;
+      }
+      res.status(400).json({ error: "A product in your bag is no longer available" });
+      return;
+    }
+
+    res.json({ coupons: result.coupons });
+  } catch (error) {
+    console.error("GET /api/checkout/coupons failed:", error);
+    res.status(500).json({ error: "Failed to load coupons" });
+  }
+});
+
+checkoutRouter.post("/apply-coupon", requireCustomer, async (req: CustomerRequest, res) => {
+  const code = typeof req.body?.code === "string" ? req.body.code.trim() : "";
+  if (!code) {
+    res.status(400).json({ error: "Coupon code is required" });
+    return;
+  }
+
+  try {
+    const result = await previewCheckoutCoupon(req.customer!.userId, code);
+    if ("error" in result && result.error) {
+      couponErrorResponse(res, result);
+      return;
+    }
+
+    res.json({
+      subtotalPaise: result.subtotalPaise,
+      shippingPaise: result.shippingPaise,
+      discountPaise: result.discountPaise,
+      totalPaise: result.totalPaise,
+      coupon: result.coupon,
+    });
+  } catch (error) {
+    console.error("POST /api/checkout/apply-coupon failed:", error);
+    res.status(500).json({ error: "Failed to apply coupon" });
+  }
+});
 
 checkoutRouter.get("/addresses", requireCustomer, async (req: CustomerRequest, res) => {
   try {
@@ -28,7 +95,13 @@ checkoutRouter.post("/razorpay/create-order", requireCustomer, async (req: Custo
   }
 
   try {
-    const result = await createRazorpayCheckout(req.customer!.userId, payload);
+    const couponCode =
+      typeof req.body?.couponCode === "string" ? req.body.couponCode.trim() : undefined;
+    const result = await createRazorpayCheckout(
+      req.customer!.userId,
+      payload,
+      couponCode || undefined,
+    );
 
     if ("error" in result) {
       if (result.error === "CART_EMPTY") {
@@ -47,6 +120,10 @@ checkoutRouter.post("/razorpay/create-order", requireCustomer, async (req: Custo
         res.status(400).json({
           error: "message" in result ? result.message : "Invalid address",
         });
+        return;
+      }
+      if ("message" in result && result.message) {
+        res.status(400).json({ error: result.message });
         return;
       }
     }

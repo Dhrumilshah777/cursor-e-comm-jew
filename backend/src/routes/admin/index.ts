@@ -7,6 +7,7 @@ import { adminProductsRouter } from "./products.js";
 import { adminCustomersRouter } from "./customers.js";
 import { adminDashboardRouter } from "./dashboard.js";
 import { adminHomepageRouter } from "./homepage.js";
+import { adminCouponsRouter } from "./coupons.js";
 
 export const adminRouter = Router();
 
@@ -17,5 +18,6 @@ adminRouter.use("/returns", adminReturnsRouter);
 adminRouter.use("/orders", adminOrdersRouter);
 adminRouter.use("/products", adminProductsRouter);
 adminRouter.use("/homepage", adminHomepageRouter);
+adminRouter.use("/coupons", adminCouponsRouter);
 adminRouter.use("/customers", adminCustomersRouter);
 adminRouter.use("/dashboard", adminDashboardRouter);

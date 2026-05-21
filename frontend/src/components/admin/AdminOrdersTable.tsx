@@ -32,14 +32,15 @@ export default function AdminOrdersTable() {
 
   return (
     <div className="overflow-x-auto border border-zinc-200 bg-white">
-      <table className="w-full min-w-[640px] text-left text-sm font-light">
+      <table className="w-full min-w-[760px] text-left text-sm font-light">
         <thead className="border-b border-zinc-100 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
           <tr>
             <th className="px-5 py-3 font-normal">Order</th>
             <th className="px-5 py-3 font-normal">Customer</th>
             <th className="px-5 py-3 font-normal">Status</th>
             <th className="px-5 py-3 font-normal">Placed</th>
-            <th className="px-5 py-3 font-normal">Total</th>
+            <th className="px-5 py-3 font-normal">Amount paid</th>
+            <th className="px-5 py-3 font-normal">Coupon</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-zinc-100">
@@ -72,7 +73,25 @@ export default function AdminOrdersTable() {
                 </Link>
               </td>
               <td className="px-5 py-4 text-zinc-700">{order.placedOn}</td>
-              <td className="px-5 py-4 text-zinc-900">{order.total}</td>
+              <td className="px-5 py-4 text-zinc-900">
+                <span>{order.total}</span>
+                {order.priceBreakdown.discount &&
+                order.priceBreakdown.discount !== "₹0" &&
+                order.priceBreakdown.discount !== "₹0.00" ? (
+                  <span className="mt-0.5 block text-[11px] font-light text-emerald-700">
+                    incl. -{order.priceBreakdown.discount} discount
+                  </span>
+                ) : null}
+              </td>
+              <td className="px-5 py-4 text-zinc-700">
+                {order.priceBreakdown.couponCode ? (
+                  <span className="text-xs font-normal uppercase tracking-[0.1em] text-zinc-900">
+                    {order.priceBreakdown.couponCode}
+                  </span>
+                ) : (
+                  "—"
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

@@ -22,33 +22,45 @@ const CHECKOUT_TTL_MS = 30 * 60 * 1000;
 
 async function placeOrderForCheckoutSession(
   userId: string,
-  addressJson: string,
+  session: {
+    addressJson: string;
+    couponId: string | null;
+    couponCode: string | null;
+    discountPaise: number;
+  },
   paymentMethod: string,
   transactionId: string,
 ) {
-  const payload = deserializeCheckoutAddressPayload(addressJson);
+  const payload = deserializeCheckoutAddressPayload(session.addressJson);
   if (!payload) {
     return { error: "INVALID_ADDRESS" as const, message: "Invalid checkout address" };
   }
 
+  const orderInput = {
+    paymentMethod,
+    transactionId,
+    couponId: session.couponId,
+    couponCode: session.couponCode,
+    discountPaise: session.discountPaise,
+  };
+
   if ("addressId" in payload) {
     return placeOrderFromCart(userId, {
       addressId: payload.addressId,
-      paymentMethod,
-      transactionId,
+      ...orderInput,
     });
   }
 
   return placeOrderFromCart(userId, {
     address: payload.address,
-    paymentMethod,
-    transactionId,
+    ...orderInput,
   });
 }
 
 export async function createRazorpayCheckout(
   userId: string,
   payload: CheckoutAddressPayload,
+  couponCode?: string | null,
 ) {
   if ("addressId" in payload) {
     const saved = await prisma.address.findFirst({
@@ -64,7 +76,7 @@ export async function createRazorpayCheckout(
     }
   }
 
-  const totals = await getCartCheckoutTotals(userId);
+  const totals = await getCartCheckoutTotals(userId, couponCode);
   if ("error" in totals) {
     return totals;
   }
@@ -81,6 +93,10 @@ export async function createRazorpayCheckout(
       userId,
       razorpayOrderId: razorpayOrder.id,
       addressJson: serializeCheckoutAddressPayload(payload),
+      subtotalPaise: totals.subtotalPaise,
+      discountPaise: totals.discountPaise,
+      couponId: totals.coupon?.couponId ?? null,
+      couponCode: totals.coupon?.code ?? null,
       amountPaise: totals.totalPaise,
       expiresAt: new Date(Date.now() + CHECKOUT_TTL_MS),
     },
@@ -93,7 +109,9 @@ export async function createRazorpayCheckout(
     currency: razorpayOrder.currency,
     subtotalPaise: totals.subtotalPaise,
     shippingPaise: totals.shippingPaise,
+    discountPaise: totals.discountPaise,
     totalPaise: totals.totalPaise,
+    coupon: totals.coupon,
   };
 }
 
@@ -149,7 +167,12 @@ export async function verifyRazorpayCheckoutAndPlaceOrder(
 
   const result = await placeOrderForCheckoutSession(
     userId,
-    session.addressJson,
+    {
+      addressJson: session.addressJson,
+      couponId: session.couponId,
+      couponCode: session.couponCode,
+      discountPaise: session.discountPaise,
+    },
     "Razorpay",
     input.razorpayPaymentId,
   );
@@ -226,7 +249,12 @@ export async function handleRazorpayWebhook(rawBody: string, signature: string) 
 
   const result = await placeOrderForCheckoutSession(
     session.userId,
-    session.addressJson,
+    {
+      addressJson: session.addressJson,
+      couponId: session.couponId,
+      couponCode: session.couponCode,
+      discountPaise: session.discountPaise,
+    },
     "Razorpay",
     payment.id,
   );

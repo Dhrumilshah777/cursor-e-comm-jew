@@ -75,6 +75,9 @@ export type AccountOrderDto = {
     makingCharges: string;
     gst: string;
     shipping: string;
+    subtotalBeforeDiscount: string;
+    discount: string;
+    couponCode?: string;
     total: string;
   };
   shipping: {
@@ -190,6 +193,9 @@ export function mapOrderToDto(order: OrderWithRelations): AccountOrderDto {
       makingCharges: formatPaise(order.makingChargePaise),
       gst: formatPaise(order.gstPaise),
       shipping: formatPaise(order.shippingPaise),
+      subtotalBeforeDiscount: formatPaise(order.totalPaise + order.discountPaise),
+      discount: formatPaise(order.discountPaise),
+      couponCode: order.couponCode ?? undefined,
       total: formatPaise(order.totalPaise),
     },
     shipping: {

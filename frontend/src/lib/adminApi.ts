@@ -227,6 +227,12 @@ export type AdminOrderListItem = {
   statusCode: string;
   placedOn: string;
   total: string;
+  priceBreakdown: {
+    subtotalBeforeDiscount: string;
+    discount: string;
+    couponCode?: string;
+    total: string;
+  };
   customer: { name: string | null; phone: string };
 };
 
@@ -277,6 +283,9 @@ export type AdminOrderDetail = {
     makingCharges: string;
     gst: string;
     shipping: string;
+    subtotalBeforeDiscount: string;
+    discount: string;
+    couponCode?: string;
     total: string;
   };
   shipping: {
@@ -532,6 +541,72 @@ export async function reorderAdminHomepageFeatures(
     { method: "POST", body: JSON.stringify({ section, orderedIds }) },
   );
   return data.features;
+}
+
+export type AdminCoupon = {
+  id: string;
+  code: string;
+  type: "PERCENTAGE" | "FIXED_AMOUNT";
+  value: number;
+  valueLabel: string;
+  minOrderPaise: number | null;
+  minOrder: string | null;
+  maxDiscountPaise: number | null;
+  maxDiscount: string | null;
+  usageLimit: number | null;
+  usageLimitPerUser: number | null;
+  usedCount: number;
+  startsAt: string | null;
+  endsAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminCouponPayload = {
+  code: string;
+  type: "PERCENTAGE" | "FIXED_AMOUNT";
+  value: number;
+  minOrderRupees?: number | null;
+  maxDiscountRupees?: number | null;
+  usageLimit?: number | null;
+  usageLimitPerUser?: number | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  isActive?: boolean;
+};
+
+export async function fetchAdminCoupons() {
+  const data = await adminFetch<{ coupons: AdminCoupon[] }>("/api/admin/coupons");
+  return data.coupons;
+}
+
+export async function fetchAdminCouponById(id: string) {
+  const data = await adminFetch<{ coupon: AdminCoupon }>(`/api/admin/coupons/${id}`);
+  return data.coupon;
+}
+
+export async function createAdminCoupon(payload: AdminCouponPayload) {
+  const data = await adminFetch<{ coupon: AdminCoupon }>("/api/admin/coupons", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return data.coupon;
+}
+
+export async function updateAdminCoupon(id: string, payload: Partial<AdminCouponPayload>) {
+  const data = await adminFetch<{ coupon: AdminCoupon }>(`/api/admin/coupons/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  return data.coupon;
+}
+
+export async function deactivateAdminCoupon(id: string) {
+  const data = await adminFetch<{ coupon: AdminCoupon }>(`/api/admin/coupons/${id}`, {
+    method: "DELETE",
+  });
+  return data.coupon;
 }
 
 export async function fetchAdminCustomers() {

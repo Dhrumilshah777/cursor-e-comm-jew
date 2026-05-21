@@ -48,6 +48,9 @@ export type OrderPriceBreakdown = {
   makingCharges: string;
   gst: string;
   shipping: string;
+  subtotalBeforeDiscount: string;
+  discount: string;
+  couponCode?: string;
   total: string;
 };
 

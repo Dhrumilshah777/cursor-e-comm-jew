@@ -227,6 +227,18 @@ export default function OrderDetailContent({
           <PriceRow label="Making charges" value={order.priceBreakdown.makingCharges} />
           <PriceRow label="GST" value={order.priceBreakdown.gst} />
           <PriceRow label="Shipping" value={order.priceBreakdown.shipping} />
+          {order.priceBreakdown.discount &&
+          order.priceBreakdown.discount !== "₹0" &&
+          order.priceBreakdown.discount !== "₹0.00" ? (
+            <PriceRow
+              label={
+                order.priceBreakdown.couponCode
+                  ? `Discount (${order.priceBreakdown.couponCode})`
+                  : "Discount"
+              }
+              value={`-${order.priceBreakdown.discount}`}
+            />
+          ) : null}
           <div className="border-t border-zinc-200 pt-2">
             <PriceRow label="Total" value={order.priceBreakdown.total} bold />
           </div>

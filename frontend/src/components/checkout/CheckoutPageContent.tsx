@@ -10,6 +10,9 @@ import {
   createRazorpayCheckoutOrder,
   fetchCheckoutAddresses,
   verifyRazorpayPayment,
+  applyCheckoutCoupon,
+  fetchAvailableCheckoutCoupons,
+  type AvailableCheckoutCoupon,
   type CheckoutAddress,
   type SavedCheckoutAddress,
 } from "@/lib/checkoutApi";
@@ -53,6 +56,20 @@ export default function CheckoutPageContent() {
   const [pincode, setPincode] = useState("");
   const [phone, setPhone] = useState("");
   const [saveAddress, setSaveAddress] = useState(true);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountPaise: number;
+    discount: string;
+    valueLabel: string;
+    totalPaise: number;
+  } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [showAvailableCoupons, setShowAvailableCoupons] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState<AvailableCheckoutCoupon[]>([]);
+  const [loadingCoupons, setLoadingCoupons] = useState(false);
+  const [couponsError, setCouponsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!getCustomerToken()) {
@@ -101,6 +118,64 @@ export default function CheckoutPageContent() {
     saveAddress,
   });
 
+  const handleApplyCoupon = async (codeOverride?: string) => {
+    const code = (codeOverride ?? couponInput).trim();
+    if (!code) return;
+
+    setApplyingCoupon(true);
+    setCouponError(null);
+    try {
+      const preview = await applyCheckoutCoupon(code);
+      if (!preview.coupon) {
+        setCouponError("Invalid coupon code");
+        setAppliedCoupon(null);
+        return;
+      }
+      setCouponInput(code);
+      setAppliedCoupon({
+        code: preview.coupon.code,
+        discountPaise: preview.discountPaise,
+        discount: preview.coupon.discount,
+        valueLabel: preview.coupon.valueLabel,
+        totalPaise: preview.totalPaise,
+      });
+      setShowAvailableCoupons(false);
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponError(err instanceof Error ? err.message : "Could not apply coupon");
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
+  const loadAvailableCoupons = async () => {
+    setLoadingCoupons(true);
+    setCouponsError(null);
+    try {
+      const coupons = await fetchAvailableCheckoutCoupons();
+      setAvailableCoupons(coupons);
+    } catch (err) {
+      setCouponsError(err instanceof Error ? err.message : "Could not load coupons");
+      setAvailableCoupons([]);
+    } finally {
+      setLoadingCoupons(false);
+    }
+  };
+
+  const handleToggleAvailableCoupons = async () => {
+    const next = !showAvailableCoupons;
+    setShowAvailableCoupons(next);
+    if (next) {
+      await loadAvailableCoupons();
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponError(null);
+  };
+
   const handlePay = async (event: FormEvent) => {
     event.preventDefault();
     if (!cart || cart.items.length === 0 || !razorpayReady || !window.Razorpay) {
@@ -132,11 +207,12 @@ export default function CheckoutPageContent() {
 
     try {
       const selected = savedAddresses.find((a) => a.id === selectedAddressId);
-      const paymentOrder = await createRazorpayCheckoutOrder(
-        useSaved && selectedAddressId
+      const paymentOrder = await createRazorpayCheckoutOrder({
+        ...(useSaved && selectedAddressId
           ? { addressId: selectedAddressId }
-          : { address: getNewAddress() },
-      );
+          : { address: getNewAddress() }),
+        couponCode: appliedCoupon?.code,
+      });
 
       const prefillName = useSaved && selected ? selected.name : name;
       const prefillPhone =
@@ -209,7 +285,8 @@ export default function CheckoutPageContent() {
     );
   }
 
-  const totalPaise = cart.subtotalPaise;
+  const totalPaise = appliedCoupon?.totalPaise ?? cart.subtotalPaise;
+  const discountPaise = appliedCoupon?.discountPaise ?? 0;
   const hasSaved = savedAddresses.length > 0;
 
   return (
@@ -434,11 +511,136 @@ export default function CheckoutPageContent() {
             ))}
           </ul>
 
+          <div className="mt-6 space-y-3 border-t border-zinc-200 pt-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[10px] font-normal uppercase tracking-[0.16em] text-zinc-500">
+                Coupon code
+              </p>
+              {!appliedCoupon ? (
+                <button
+                  type="button"
+                  onClick={handleToggleAvailableCoupons}
+                  className="cursor-pointer text-[10px] font-light uppercase tracking-[0.14em] text-zinc-600 hover:text-zinc-900"
+                >
+                  {showAvailableCoupons ? "Hide offers" : "View available coupons"}
+                </button>
+              ) : null}
+            </div>
+            {appliedCoupon ? (
+              <div className="flex items-center justify-between gap-3 border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm">
+                <div>
+                  <p className="font-normal text-emerald-900">{appliedCoupon.code}</p>
+                  <p className="text-[11px] font-light text-emerald-800">
+                    {appliedCoupon.valueLabel} applied
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveCoupon}
+                  className="text-[10px] uppercase tracking-[0.14em] text-emerald-900 hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder="Enter code"
+                  className="min-w-0 flex-1 border border-zinc-300 bg-white px-3 py-2.5 text-sm font-light uppercase focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleApplyCoupon()}
+                  disabled={applyingCoupon || !couponInput.trim()}
+                  className="shrink-0 border border-zinc-900 px-4 py-2.5 text-[10px] font-normal uppercase tracking-[0.16em] text-zinc-900 transition hover:bg-zinc-900 hover:text-white disabled:opacity-50"
+                >
+                  {applyingCoupon ? "…" : "Apply"}
+                </button>
+              </div>
+            )}
+            {showAvailableCoupons && !appliedCoupon ? (
+              <div className="space-y-2 border border-zinc-200 bg-white p-3">
+                {loadingCoupons ? (
+                  <p className="text-[11px] font-light text-zinc-500">Loading offers…</p>
+                ) : couponsError ? (
+                  <p className="text-[11px] font-light text-red-600">{couponsError}</p>
+                ) : availableCoupons.length === 0 ? (
+                  <p className="text-[11px] font-light text-zinc-500">
+                    No coupons available right now.
+                  </p>
+                ) : (
+                  <ul className="space-y-2">
+                    {availableCoupons.map((coupon) => (
+                      <li
+                        key={coupon.code}
+                        className={`border px-3 py-2.5 ${
+                          coupon.canApply
+                            ? "border-zinc-200 bg-zinc-50"
+                            : "border-zinc-100 bg-white opacity-80"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-xs font-normal uppercase tracking-[0.12em] text-zinc-900">
+                              {coupon.code}
+                            </p>
+                            <p className="mt-0.5 text-[11px] font-light text-zinc-700">
+                              {coupon.valueLabel}
+                              {coupon.estimatedDiscount && coupon.canApply
+                                ? ` · Save ${coupon.estimatedDiscount}`
+                                : ""}
+                            </p>
+                            {coupon.minOrder ? (
+                              <p className="mt-0.5 text-[10px] font-light text-zinc-500">
+                                Min order {coupon.minOrder}
+                              </p>
+                            ) : null}
+                            {coupon.validUntil ? (
+                              <p className="mt-0.5 text-[10px] font-light text-zinc-500">
+                                Valid till {coupon.validUntil}
+                              </p>
+                            ) : null}
+                            {!coupon.canApply && coupon.reason ? (
+                              <p className="mt-1 text-[10px] font-light text-amber-700">
+                                {coupon.reason}
+                              </p>
+                            ) : null}
+                          </div>
+                          {coupon.canApply ? (
+                            <button
+                              type="button"
+                              onClick={() => handleApplyCoupon(coupon.code)}
+                              disabled={applyingCoupon}
+                              className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-zinc-900 hover:underline disabled:opacity-50"
+                            >
+                              Apply
+                            </button>
+                          ) : null}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : null}
+            {couponError ? (
+              <p className="text-[11px] font-light text-red-600">{couponError}</p>
+            ) : null}
+          </div>
+
           <div className="mt-6 space-y-2 border-t border-zinc-200 pt-4 text-sm">
             <div className="flex justify-between font-light text-zinc-600">
               <span>Subtotal</span>
               <span>{cart.subtotal}</span>
             </div>
+            {discountPaise > 0 ? (
+              <div className="flex justify-between font-light text-emerald-700">
+                <span>Discount{appliedCoupon ? ` (${appliedCoupon.code})` : ""}</span>
+                <span>-{appliedCoupon?.discount ?? formatPaise(discountPaise)}</span>
+              </div>
+            ) : null}
             <div className="flex justify-between font-normal text-zinc-900">
               <span>Total</span>
               <span>{formatPaise(totalPaise)}</span>

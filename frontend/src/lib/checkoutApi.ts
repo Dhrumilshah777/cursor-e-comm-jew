@@ -40,13 +40,58 @@ type RazorpayCreateOrderResponse = {
   currency: string;
   subtotalPaise: number;
   shippingPaise: number;
+  discountPaise: number;
   totalPaise: number;
+  coupon?: {
+    couponId: string;
+    code: string;
+    type: string;
+    discountPaise: number;
+    discount: string;
+    valueLabel: string;
+  } | null;
 };
+
+export type AppliedCheckoutCoupon = NonNullable<RazorpayCreateOrderResponse["coupon"]>;
+
+export type CheckoutCouponPreview = {
+  subtotalPaise: number;
+  shippingPaise: number;
+  discountPaise: number;
+  totalPaise: number;
+  coupon: AppliedCheckoutCoupon | null;
+};
+
+export type AvailableCheckoutCoupon = {
+  code: string;
+  valueLabel: string;
+  minOrder: string | null;
+  validUntil: string | null;
+  canApply: boolean;
+  reason: string | null;
+  estimatedDiscount: string | null;
+};
+
+export async function fetchAvailableCheckoutCoupons() {
+  const data = await customerFetch<{ coupons: AvailableCheckoutCoupon[] }>(
+    "/api/checkout/coupons",
+  );
+  return data.coupons;
+}
+
+export async function applyCheckoutCoupon(code: string) {
+  return customerFetch<CheckoutCouponPreview>("/api/checkout/apply-coupon", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+}
 
 type VerifyResponse = { order: AccountOrder };
 
 export async function createRazorpayCheckoutOrder(
-  payload: { address: CheckoutAddress } | { addressId: string },
+  payload: ({ address: CheckoutAddress } | { addressId: string }) & {
+    couponCode?: string;
+  },
 ) {
   return customerFetch<RazorpayCreateOrderResponse>("/api/checkout/razorpay/create-order", {
     method: "POST",

@@ -3,6 +3,11 @@ import { mapOrderToDto } from "../lib/orderMapper.js";
 import { notifyOrderConfirmed } from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
 import {
+  applyCouponToCheckoutTotals,
+  incrementCouponUsage,
+  listAvailableCouponsForCheckout,
+} from "./coupons.js";
+import {
   calculatePriceBreakup,
   calculateProductPricePaise,
   purityFromDb,
@@ -112,7 +117,7 @@ async function resolveDeliveryAddress(
   return { addressId: created.id };
 }
 
-export async function getCartCheckoutTotals(userId: string) {
+export async function getCartCheckoutTotals(userId: string, couponCode?: string | null) {
   const cart = await prisma.cart.findUnique({
     where: { userId },
     include: {
@@ -136,9 +141,46 @@ export async function getCartCheckoutTotals(userId: string) {
   }
 
   const shippingPaise = 0;
-  const totalPaise = subtotalPaise;
+  const totals = await applyCouponToCheckoutTotals(
+    userId,
+    subtotalPaise,
+    shippingPaise,
+    couponCode,
+  );
 
-  return { subtotalPaise, shippingPaise, totalPaise, cart };
+  if ("error" in totals) {
+    return totals;
+  }
+
+  return { ...totals, cart };
+}
+
+export async function previewCheckoutCoupon(userId: string, couponCode: string) {
+  const base = await getCartCheckoutTotals(userId);
+  if ("error" in base) {
+    return base;
+  }
+
+  return getCartCheckoutTotals(userId, couponCode);
+}
+
+export async function listAvailableCheckoutCoupons(userId: string): Promise<
+  | { error: "CART_EMPTY" }
+  | { error: "PRODUCT_UNAVAILABLE" }
+  | { subtotalPaise: number; coupons: Awaited<ReturnType<typeof listAvailableCouponsForCheckout>> }
+> {
+  const totals = await getCartCheckoutTotals(userId);
+  if ("error" in totals && totals.error) {
+    if (totals.error === "CART_EMPTY" || totals.error === "PRODUCT_UNAVAILABLE") {
+      return { error: totals.error };
+    }
+  }
+  if (!("cart" in totals)) {
+    return { error: "CART_EMPTY" };
+  }
+
+  const coupons = await listAvailableCouponsForCheckout(userId, totals.subtotalPaise);
+  return { subtotalPaise: totals.subtotalPaise, coupons };
 }
 
 export async function placeOrderFromCart(
@@ -148,6 +190,9 @@ export async function placeOrderFromCart(
     address?: CheckoutAddressInput;
     paymentMethod: string;
     transactionId: string;
+    couponId?: string | null;
+    couponCode?: string | null;
+    discountPaise?: number;
   },
 ) {
   const cart = await prisma.cart.findUnique({
@@ -218,7 +263,34 @@ export async function placeOrderFromCart(
   });
 
   const shippingPaise = 0;
-  const totalPaise = subtotalPaise;
+  const discountPaise = input.discountPaise ?? 0;
+
+  let couponId: string | null = input.couponId ?? null;
+  let couponCode: string | null = input.couponCode ?? null;
+
+  if (couponCode) {
+    const couponTotals = await applyCouponToCheckoutTotals(
+      userId,
+      subtotalPaise,
+      shippingPaise,
+      couponCode,
+    );
+    if ("error" in couponTotals) {
+      return couponTotals;
+    }
+    if (!couponTotals.coupon) {
+      return { error: "COUPON_NOT_FOUND" as const, message: "Invalid coupon code" };
+    }
+    couponId = couponTotals.coupon.couponId;
+    couponCode = couponTotals.coupon.code;
+    if (couponTotals.discountPaise !== discountPaise) {
+      return { error: "PAYMENT_AMOUNT_MISMATCH" as const };
+    }
+  } else if (discountPaise > 0) {
+    return { error: "PAYMENT_AMOUNT_MISMATCH" as const };
+  }
+
+  const totalPaise = subtotalPaise + shippingPaise - discountPaise;
 
   const orderNumber = await generateOrderNumber();
 
@@ -234,6 +306,9 @@ export async function placeOrderFromCart(
         makingChargePaise,
         gstPaise,
         shippingPaise,
+        discountPaise,
+        couponId,
+        couponCode,
         paymentMethod: input.paymentMethod,
         paymentStatus: "Paid Successfully",
         transactionId: input.transactionId,
@@ -260,6 +335,10 @@ export async function placeOrderFromCart(
       where: { id: cart.id },
       data: { updatedAt: new Date() },
     });
+
+    if (couponId) {
+      await incrementCouponUsage(tx, couponId);
+    }
 
     return created;
   });

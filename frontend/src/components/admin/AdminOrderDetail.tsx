@@ -16,6 +16,13 @@ import {
   type ShiprocketLogEntry,
 } from "@/lib/adminApi";
 
+function hasOrderDiscount(order: AdminOrderDetail): boolean {
+  const { discount, couponCode } = order.priceBreakdown;
+  return Boolean(
+    couponCode || (discount && discount !== "₹0" && discount !== "₹0.00"),
+  );
+}
+
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-wrap justify-between gap-2 border-b border-zinc-100 py-3 last:border-0">
@@ -170,7 +177,22 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
             <InfoRow label="Order date" value={order.placedOn} />
             <InfoRow label="Payment status" value={order.payment.status} />
             <InfoRow label="Order status" value={order.status} />
-            <InfoRow label="Total amount" value={order.total} />
+            {hasOrderDiscount(order) ? (
+              <>
+                <InfoRow
+                  label="Order subtotal"
+                  value={order.priceBreakdown.subtotalBeforeDiscount}
+                />
+                <InfoRow
+                  label="Coupon code"
+                  value={order.priceBreakdown.couponCode ?? "—"}
+                />
+                <InfoRow label="Discount" value={`-${order.priceBreakdown.discount}`} />
+                <InfoRow label="Amount paid" value={order.total} />
+              </>
+            ) : (
+              <InfoRow label="Amount paid" value={order.total} />
+            )}
           </dl>
         </Section>
 
@@ -325,6 +347,22 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
           <InfoRow label="Razorpay payment ID" value={order.payment.razorpayPaymentId} />
           <InfoRow label="Paid / unpaid" value={order.payment.paid ? "Paid" : "Unpaid"} />
           <InfoRow label="Transaction status" value={order.payment.status} />
+          {hasOrderDiscount(order) ? (
+            <>
+              <InfoRow
+                label="Subtotal before discount"
+                value={order.priceBreakdown.subtotalBeforeDiscount}
+              />
+              <InfoRow
+                label="Coupon applied"
+                value={order.priceBreakdown.couponCode ?? "—"}
+              />
+              <InfoRow label="Discount given" value={`-${order.priceBreakdown.discount}`} />
+              <InfoRow label="Net amount received" value={order.total} />
+            </>
+          ) : (
+            <InfoRow label="Net amount received" value={order.total} />
+          )}
         </dl>
       </Section>
 

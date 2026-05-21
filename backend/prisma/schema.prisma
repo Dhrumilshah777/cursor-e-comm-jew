@@ -63,6 +63,11 @@ enum RefundStatus {
   FAILED
 }
 
+enum CouponType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
 model Admin {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -95,16 +100,43 @@ model CheckoutPayment {
   userId          String
   razorpayOrderId String   @unique
   addressJson     String   @db.Text
+  subtotalPaise   Int      @default(0)
+  discountPaise   Int      @default(0)
+  couponId        String?
+  couponCode      String?
   amountPaise     Int
   status          String   @default("pending")
   shopOrderId     String?
   createdAt       DateTime @default(now())
   expiresAt       DateTime
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@map("checkout_payments")
+}
+
+model Coupon {
+  id                String     @id @default(cuid())
+  code              String     @unique
+  type              CouponType
+  value             Int
+  minOrderPaise     Int?
+  maxDiscountPaise  Int?
+  usageLimit        Int?
+  usageLimitPerUser Int?
+  usedCount         Int        @default(0)
+  startsAt          DateTime?
+  endsAt            DateTime?
+  isActive          Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  orders            Order[]
+  checkoutPayments  CheckoutPayment[]
+
+  @@map("coupons")
 }
 
 model Cart {
@@ -231,6 +263,9 @@ model Order {
   makingChargePaise Int
   gstPaise        Int
   shippingPaise   Int
+  discountPaise   Int         @default(0)
+  couponId        String?
+  couponCode      String?
   paymentMethod   String
   paymentStatus   String
   transactionId   String?
@@ -248,6 +283,7 @@ model Order {
 
   user            User            @relation(fields: [userId], references: [id])
   deliveryAddress Address         @relation(fields: [deliveryAddressId], references: [id])
+  coupon          Coupon?         @relation(fields: [couponId], references: [id], onDelete: SetNull)
   items           OrderItem[]
   returnRequests  ReturnRequest[]
   statusEvents    OrderStatusEvent[]
