@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { collectionSlugs, collections } from "@/data/collections";
 import {
   calculatePriceBreakup,
@@ -53,7 +54,6 @@ function emptyForm(): AdminProductPayload {
     metal: "YELLOW_GOLD",
     purity: "KT_18",
     weightGrams: 0.5,
-    sku: "",
     ringSize: "",
     description: "",
     gallery: [],
@@ -116,7 +116,14 @@ export default function AdminProductForm({
   mode: "create" | "edit";
 }) {
   const router = useRouter();
-  const [form, setForm] = useState<AdminProductPayload>(emptyForm);
+  const searchParams = useSearchParams();
+  const presetCategory = searchParams.get("category");
+  const [form, setForm] = useState<AdminProductPayload>(() => ({
+    ...emptyForm(),
+    ...(presetCategory && collectionSlugs.includes(presetCategory as (typeof collectionSlugs)[number])
+      ? { category: presetCategory }
+      : {}),
+  }));
   const [galleryText, setGalleryText] = useState("");
   const [loading, setLoading] = useState(mode === "edit");
   const [saving, setSaving] = useState(false);
@@ -247,14 +254,15 @@ export default function AdminProductForm({
               required
             />
           </Field>
-          <Field label="SKU">
-            <input
-              className={inputClass}
-              value={form.sku}
-              onChange={(e) => update("sku", e.target.value)}
-              required
-            />
-          </Field>
+          {mode === "edit" ? (
+            <Field label="SKU">
+              <input className={inputClass} value={form.sku ?? ""} readOnly />
+            </Field>
+          ) : (
+            <p className="text-sm font-light text-zinc-600 sm:col-span-2">
+              SKU will be generated automatically when you save (e.g. JL-RI0073).
+            </p>
+          )}
           <Field label="Category">
             <select
               className={inputClass}

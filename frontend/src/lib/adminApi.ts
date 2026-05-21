@@ -410,7 +410,7 @@ export type AdminProductPayload = {
   metal: string;
   purity: string;
   weightGrams: number;
-  sku: string;
+  sku?: string;
   ringSize?: string | null;
   description: string;
   gallery?: string[];
@@ -420,8 +420,11 @@ export type AdminProductPayload = {
   isActive: boolean;
 };
 
-export async function fetchAdminProducts() {
-  const data = await adminFetch<{ products: AdminProduct[] }>("/api/admin/products");
+export async function fetchAdminProducts(category?: string) {
+  const query = category ? `?category=${encodeURIComponent(category)}` : "";
+  const data = await adminFetch<{ products: AdminProduct[] }>(
+    `/api/admin/products${query}`,
+  );
   return data.products;
 }
 
@@ -451,6 +454,84 @@ export async function deleteAdminProduct(id: string) {
     method: "DELETE",
   });
   return data.product;
+}
+
+export type HomepageSectionCode = "NEW_ARRIVALS" | "TOP_STYLES" | "ELEGANCE_IN_MOTION";
+
+export type AdminHomepageFeature = {
+  id: string;
+  section: HomepageSectionCode;
+  sortOrder: number;
+  isActive: boolean;
+  productId: string | null;
+  videoUrl: string | null;
+  posterUrl: string | null;
+  caption: string | null;
+  linkUrl: string | null;
+  product: {
+    id: string;
+    name: string;
+    slug: string;
+    category: string;
+    image: string;
+    price: string;
+    isActive: boolean;
+  } | null;
+};
+
+export async function fetchAdminHomepageFeatures(section?: HomepageSectionCode) {
+  const query = section ? `?section=${section}` : "";
+  const data = await adminFetch<{ features: AdminHomepageFeature[] }>(
+    `/api/admin/homepage${query}`,
+  );
+  return data.features;
+}
+
+export async function createAdminHomepageFeature(payload: {
+  section: HomepageSectionCode;
+  productId?: string;
+  videoUrl?: string;
+  posterUrl?: string;
+  caption?: string;
+  linkUrl?: string;
+}) {
+  const data = await adminFetch<{ feature: AdminHomepageFeature }>("/api/admin/homepage", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return data.feature;
+}
+
+export async function updateAdminHomepageFeature(
+  id: string,
+  payload: Partial<{
+    videoUrl: string | null;
+    posterUrl: string | null;
+    caption: string | null;
+    linkUrl: string | null;
+    isActive: boolean;
+  }>,
+) {
+  const data = await adminFetch<{ feature: AdminHomepageFeature }>(
+    `/api/admin/homepage/${id}`,
+    { method: "PATCH", body: JSON.stringify(payload) },
+  );
+  return data.feature;
+}
+
+export async function deleteAdminHomepageFeature(id: string) {
+  await adminFetch(`/api/admin/homepage/${id}`, { method: "DELETE" });
+}
+
+export async function reorderAdminHomepageFeatures(
+  section: HomepageSectionCode,
+  orderedIds: string[],
+) {
+  const data = await adminFetch<{ features: AdminHomepageFeature[] }>(
+    "/api/admin/homepage/reorder",
+    { method: "POST", body: JSON.stringify({ section, orderedIds }) },
+  );
+  return data.features;
 }
 
 export async function fetchAdminCustomers() {

@@ -36,6 +36,12 @@ enum MakingChargeKind {
   FIXED
 }
 
+enum HomepageSection {
+  NEW_ARRIVALS
+  TOP_STYLES
+  ELEGANCE_IN_MOTION
+}
+
 enum ReturnStatus {
   UNDER_REVIEW
   APPROVED
@@ -188,9 +194,29 @@ model Product {
 
   orderItems OrderItem[]
   cartItems  CartItem[]
+  homepageFeatures HomepageFeature[]
 
   @@index([category])
   @@map("products")
+}
+
+model HomepageFeature {
+  id        String          @id @default(cuid())
+  section   HomepageSection
+  sortOrder Int             @default(0)
+  productId String?
+  videoUrl  String?
+  posterUrl String?
+  caption   String?
+  linkUrl   String?
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([section, sortOrder])
+  @@map("homepage_features")
 }
 
 model Order {

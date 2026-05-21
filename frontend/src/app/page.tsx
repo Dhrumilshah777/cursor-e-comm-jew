@@ -1,27 +1,90 @@
 import AudienceCollections from "@/components/AudienceCollections";
-import Reels from "@/components/Reels";
+import Reels, { type ReelItem } from "@/components/Reels";
 import HeroBanner from "@/components/HeroBanner";
-import NewArrivals from "@/components/NewArrivals";
+import NewArrivals, { type ProductItem } from "@/components/NewArrivals";
 import PromoBanner from "@/components/PromoBanner";
 import PromoVideo from "@/components/PromoVideo";
 import ShopByCategory from "@/components/ShopByCategory";
-import TopStyles from "@/components/TopStyles";
+import TopStyles, { type TopStyleProduct } from "@/components/TopStyles";
 import ShopByCollection from "@/components/ShopByCollection";
 import ShopByRecipient from "@/components/ShopByRecipient";
+import { fetchHomepage } from "@/lib/homepageApi";
+import { softenPublicText } from "@/lib/storeCopy";
 
-export default function Home() {
+function mapProductCards(
+  items: Awaited<ReturnType<typeof fetchHomepage>>["newArrivals"],
+): ProductItem[] {
+  return items.map((item) => ({
+    id: item.id,
+    name: softenPublicText(item.name),
+    href: item.href,
+    image: item.image,
+    alt: item.alt,
+    price: item.price,
+    metal: item.metal,
+  }));
+}
+
+function mapTopStyles(
+  items: Awaited<ReturnType<typeof fetchHomepage>>["topStyles"],
+): TopStyleProduct[] {
+  return items.map((item) => ({
+    id: item.id,
+    name: softenPublicText(item.name),
+    href: item.href,
+    image: item.image,
+    alt: item.alt,
+    price: item.price,
+    metal: item.metal,
+  }));
+}
+
+function mapVideos(
+  items: Awaited<ReturnType<typeof fetchHomepage>>["eleganceInMotion"],
+): ReelItem[] {
+  return items.map((item) => ({
+    id: item.id,
+    href: item.href,
+    image: item.image,
+    alt: item.alt,
+    caption: item.caption ?? undefined,
+    videoUrl: item.videoUrl,
+  }));
+}
+
+export default async function Home() {
+  let homepage: Awaited<ReturnType<typeof fetchHomepage>> | null = null;
+  try {
+    homepage = await fetchHomepage();
+  } catch {
+    homepage = null;
+  }
+
+  const newArrivalItems =
+    homepage && homepage.newArrivals.length > 0
+      ? mapProductCards(homepage.newArrivals)
+      : undefined;
+  const topStyleItems =
+    homepage && homepage.topStyles.length > 0
+      ? mapTopStyles(homepage.topStyles)
+      : undefined;
+  const reelItems =
+    homepage && homepage.eleganceInMotion.length > 0
+      ? mapVideos(homepage.eleganceInMotion)
+      : undefined;
+
   return (
     <div className="flex flex-1 flex-col overflow-x-hidden">
       <HeroBanner />
       <ShopByCategory />
-      <TopStyles />
+      <TopStyles items={topStyleItems} />
       <PromoBanner />
       <ShopByRecipient />
       <ShopByCollection />
-      <NewArrivals />
+      <NewArrivals items={newArrivalItems} />
       <PromoVideo />
       <AudienceCollections />
-      <Reels />
+      <Reels items={reelItems} />
     </div>
   );
 }

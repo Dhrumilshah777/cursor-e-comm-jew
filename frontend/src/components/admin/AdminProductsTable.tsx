@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { collections, collectionSlugs } from "@/data/collections";
 import {
   deleteAdminProduct,
   fetchAdminProducts,
@@ -10,6 +11,7 @@ import {
 
 export default function AdminProductsTable() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -19,13 +21,13 @@ export default function AdminProductsTable() {
     setLoading(true);
     setError(null);
     try {
-      setProducts(await fetchAdminProducts());
+      setProducts(await fetchAdminProducts(categoryFilter || undefined));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load products");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [categoryFilter]);
 
   useEffect(() => {
     load();
@@ -57,9 +59,27 @@ export default function AdminProductsTable() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-sm font-light text-zinc-600">{products.length} products</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm font-light text-zinc-600">{products.length} products</p>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="border border-zinc-300 bg-white px-3 py-2 text-sm font-light"
+          >
+            <option value="">All categories</option>
+            {collectionSlugs.map((slug) => (
+              <option key={slug} value={slug}>
+                {collections[slug].name}
+              </option>
+            ))}
+          </select>
+        </div>
         <Link
-          href="/admin/products/new"
+          href={
+            categoryFilter
+              ? `/admin/products/new?category=${encodeURIComponent(categoryFilter)}`
+              : "/admin/products/new"
+          }
           className="inline-block border border-zinc-900 bg-zinc-900 px-5 py-2.5 text-[10px] font-light uppercase tracking-[0.18em] text-white transition hover:bg-zinc-800"
         >
           + Add product

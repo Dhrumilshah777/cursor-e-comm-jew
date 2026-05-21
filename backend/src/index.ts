@@ -17,6 +17,7 @@ import { ordersRouter } from "./routes/orders.js";
 import { shiprocketWebhookRouter } from "./routes/shiprocketWebhook.js";
 
 import { productsRouter } from "./routes/products.js";
+import { homepageRouter } from "./routes/homepage.js";
 
 import { returnsRouter } from "./routes/returns.js";
 
@@ -102,6 +103,7 @@ app.use("/api/checkout", checkoutRouter);
 app.use("/api/orders", ordersRouter);
 
 app.use("/api/products", productsRouter);
+app.use("/api/homepage", homepageRouter);
 
 app.use("/api/returns", returnsRouter);
 

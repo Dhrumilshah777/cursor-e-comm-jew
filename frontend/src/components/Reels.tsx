@@ -17,6 +17,7 @@ export type ReelItem = {
   image: string;
   alt: string;
   caption?: string;
+  videoUrl?: string;
 };
 
 const reels: ReelItem[] = [
@@ -113,13 +114,26 @@ function ReelCard({ item }: { item: ReelItem }) {
       className="group relative block w-full shrink-0 overflow-hidden bg-zinc-200"
     >
       <div className="relative aspect-[3/4] w-full sm:aspect-[9/16]">
-        <Image
-          src={item.image}
-          alt={item.alt}
-          fill
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
-          sizes="(max-width: 640px) 70vw, (max-width: 768px) 42vw, (max-width: 1024px) 30vw, 22vw"
-        />
+        {item.videoUrl ? (
+          <video
+            src={item.videoUrl}
+            poster={item.image || undefined}
+            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+            muted
+            loop
+            playsInline
+            autoPlay
+            preload="metadata"
+          />
+        ) : (
+          <Image
+            src={item.image}
+            alt={item.alt}
+            fill
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+            sizes="(max-width: 640px) 70vw, (max-width: 768px) 42vw, (max-width: 1024px) 30vw, 22vw"
+          />
+        )}
         {item.caption ? (
           <p className="absolute inset-x-0 bottom-4 px-3 text-center text-xs font-light leading-snug text-white drop-shadow-sm sm:bottom-5 sm:px-4 sm:text-sm">
             {item.caption}

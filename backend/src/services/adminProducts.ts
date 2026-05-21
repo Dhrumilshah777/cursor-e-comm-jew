@@ -13,6 +13,7 @@ import {
   purityFromDb,
   purityToDb,
 } from "../lib/pricing.js";
+import { generateNextProductSku } from "../lib/sku.js";
 
 export type AdminProductInput = {
   slug: string;
@@ -23,7 +24,7 @@ export type AdminProductInput = {
   metal: MetalType | string;
   purity: GoldPurity | string;
   weightGrams: string | number;
-  sku: string;
+  sku?: string;
   ringSize?: string | null;
   description: string;
   gallery?: string[];
@@ -37,7 +38,7 @@ function parseMakingChargeKind(kind?: string): MakingChargeKind {
   return kind === "FIXED" || kind === "fixed" ? "FIXED" : "PERCENTAGE";
 }
 
-function buildProductData(input: AdminProductInput) {
+function buildProductData(input: AdminProductInput, sku: string) {
   const metal = typeof input.metal === "string" && !input.metal.includes("_")
     ? metalToDb(input.metal)
     : (input.metal as MetalType);
@@ -71,7 +72,7 @@ function buildProductData(input: AdminProductInput) {
     metal,
     purity,
     weightGrams,
-    sku: input.sku.trim(),
+    sku,
     ringSize: input.ringSize?.trim() || null,
     description: input.description.trim(),
     gallery,
@@ -123,7 +124,9 @@ export async function getAdminProductById(id: string) {
 }
 
 export async function createAdminProduct(data: AdminProductInput & { id?: string }) {
-  const payload = buildProductData(data);
+  const sku =
+    data.sku?.trim() || (await generateNextProductSku(data.category));
+  const payload = buildProductData(data, sku);
   const product = await prisma.product.create({
     data: {
       id: data.id,
@@ -157,7 +160,7 @@ export async function updateAdminProduct(id: string, data: Partial<AdminProductI
     isActive: data.isActive ?? existing.isActive,
   };
 
-  const payload = buildProductData(merged);
+  const payload = buildProductData(merged, existing.sku);
   const product = await prisma.product.update({
     where: { id },
     data: payload,

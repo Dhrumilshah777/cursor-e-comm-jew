@@ -38,8 +38,8 @@ adminProductsRouter.get("/:id", async (req, res) => {
 });
 
 adminProductsRouter.post("/", async (req, res) => {
-  const { slug, name, category, image, alt, sku, description } = req.body ?? {};
-  if (!slug || !name || !category || !image || !alt || !sku || !description) {
+  const { slug, name, category, image, alt, description } = req.body ?? {};
+  if (!slug || !name || !category || !image || !alt || !description) {
     res.status(400).json({ error: "Missing required product fields" });
     return;
   }
