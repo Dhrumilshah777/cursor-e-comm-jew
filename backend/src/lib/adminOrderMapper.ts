@@ -16,6 +16,11 @@ import {
   purityToDisplay,
 } from "./format.js";
 import { mapOrderToDto } from "./orderMapper.js";
+import {
+  formatCancellationCountdown,
+  getCancellationQuote,
+  type CancellationQuote,
+} from "./orderCancellation.js";
 import type { ShiprocketLogEntry } from "../services/shiprocketFulfillment.js";
 
 export type AdminOrderLineItemDto = {
@@ -65,6 +70,9 @@ export type AdminOrderDetailDto = ReturnType<typeof mapOrderToDto> & {
     scheduledAt: string | null;
   };
   shiprocketFulfillmentLog: ShiprocketLogEntry[] | null;
+  placedAt: string;
+  cancellation: CancellationQuote;
+  cancellationCountdown: string;
 };
 
 type OrderWithRelations = Order & {
@@ -116,10 +124,20 @@ function parseShiprocketFulfillmentLog(value: unknown): ShiprocketLogEntry[] | n
 
 export function mapAdminOrderToDto(order: OrderWithRelations): AdminOrderDetailDto {
   const base = mapOrderToDto(order);
+  const cancellation = getCancellationQuote({
+    status: order.status,
+    placedAt: order.placedAt,
+    totalPaise: order.totalPaise,
+  });
 
   return {
     ...base,
     statusCode: order.status,
+    placedAt: order.placedAt.toISOString(),
+    cancellation,
+    cancellationCountdown: cancellation.cancellable
+      ? formatCancellationCountdown(cancellation.windowRemainingMs)
+      : "—",
     shiprocketOrderId: order.shiprocketOrderId,
     shiprocketShipmentId: order.shiprocketShipmentId,
     customer: order.user,

@@ -278,6 +278,11 @@ model Order {
   pickupDateLabel      String?
   pickupTimeLabel      String?
   shiprocketFulfillmentLog Json?
+  cancelledAt              DateTime?
+  cancelRefundPaise        Int?
+  cancelDeductionPaise     Int?
+  cancelRazorpayRefundId   String?
+  cancelRefundStatus       String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 

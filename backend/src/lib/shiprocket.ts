@@ -206,6 +206,34 @@ export function getShiprocketPickupLocation(): string {
   return getConfig().pickupLocation;
 }
 
+export function getShiprocketPickupPincode(): string {
+  const pincode =
+    process.env.SHIPROCKET_WAREHOUSE_PINCODE?.trim() ||
+    process.env.SHIPROCKET_PICKUP_PINCODE?.trim();
+  if (!pincode || !/^\d{6}$/.test(pincode)) {
+    throw new Error(
+      "SHIPROCKET_WAREHOUSE_PINCODE is required for delivery pincode checks",
+    );
+  }
+  return pincode;
+}
+
+export async function checkShiprocketServiceability(input: {
+  pickupPostcode: string;
+  deliveryPostcode: string;
+  weightKg: number;
+  cod?: boolean;
+}) {
+  const params = new URLSearchParams({
+    pickup_postcode: input.pickupPostcode,
+    delivery_postcode: input.deliveryPostcode,
+    weight: String(Math.max(0.1, input.weightKg)),
+    cod: input.cod ? "1" : "0",
+  });
+
+  return shiprocketFetch<unknown>(`/v1/external/courier/serviceability/?${params.toString()}`);
+}
+
 export type ShiprocketWarehouseAddress = {
   name: string;
   address: string;

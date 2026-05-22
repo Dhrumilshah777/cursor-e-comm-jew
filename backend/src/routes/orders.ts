@@ -3,6 +3,11 @@ import {
   getCustomerTokenFromRequest,
   verifyCustomerToken,
 } from "../lib/customerAuth.js";
+import { requireCustomer, type CustomerRequest } from "../middleware/requireCustomer.js";
+import {
+  cancelOrderForUser,
+  OrderCancellationError,
+} from "../services/orderCancellation.js";
 import {
   getOrderByIdForPhone,
   getOrderByIdForUserId,
@@ -52,6 +57,32 @@ ordersRouter.get("/", async (req, res) => {
   } catch (error) {
     console.error("GET /api/orders failed:", error);
     res.status(500).json({ error: "Failed to load orders" });
+  }
+});
+
+ordersRouter.post("/:orderId/cancel", requireCustomer, async (req: CustomerRequest, res) => {
+  const orderId = req.params.orderId;
+  if (!orderId || Array.isArray(orderId)) {
+    res.status(400).json({ error: "orderId is required" });
+    return;
+  }
+
+  try {
+    const result = await cancelOrderForUser(orderId, req.customer!.userId);
+    res.json(result);
+  } catch (error) {
+    if (error instanceof OrderCancellationError) {
+      const status =
+        error.code === "ORDER_NOT_FOUND"
+          ? 404
+          : error.code === "REFUND_FAILED" || error.code === "REFUND_TOO_LOW"
+            ? 422
+            : 400;
+      res.status(status).json({ error: error.message, code: error.code });
+      return;
+    }
+    console.error(`POST /api/orders/${orderId}/cancel failed:`, error);
+    res.status(500).json({ error: "Failed to cancel order" });
   }
 });
 

@@ -11,6 +11,8 @@ import {
   type CustomerReturnSummaryDto,
   type ReturnWithRelations,
 } from "./returnMapper.js";
+import { customerDeliveryDateFromShiprocketEdd } from "./deliveryDates.js";
+import { getCancellationQuote, type CancellationQuote } from "./orderCancellation.js";
 import {
   formatDisplayDate,
   formatPaise,
@@ -87,6 +89,9 @@ export type AccountOrderDto = {
   };
   returnEligible: boolean;
   returnRequest: CustomerReturnSummaryDto | null;
+  placedAt: string;
+  cancellation: CancellationQuote;
+  cancelRefundAmount: string | null;
 };
 
 type OrderWithRelations = Order & {
@@ -165,11 +170,17 @@ function mapReturnOnOrder(
 
 export function mapOrderToDto(order: OrderWithRelations): AccountOrderDto {
   const status = orderStatusToDisplay(order.status);
+  const cancellation = getCancellationQuote({
+    status: order.status,
+    placedAt: order.placedAt,
+    totalPaise: order.totalPaise,
+  });
 
   return {
     id: order.id,
     orderNumber: order.orderNumber,
     placedOn: formatDisplayDate(order.placedAt),
+    placedAt: order.placedAt.toISOString(),
     status,
     items: order.items.map(mapLineItem),
     total: formatPaise(order.totalPaise),
@@ -201,9 +212,12 @@ export function mapOrderToDto(order: OrderWithRelations): AccountOrderDto {
     shipping: {
       courier: order.courier ?? "—",
       trackingNumber: order.trackingNumber ?? "Pending dispatch",
-      expectedDelivery: order.expectedDelivery ?? "To be confirmed",
+      expectedDelivery: customerDeliveryDateFromShiprocketEdd(order.expectedDelivery),
     },
     returnEligible: isReturnEligible(order.status, order.statusEvents),
     returnRequest: mapReturnOnOrder(order),
+    cancellation,
+    cancelRefundAmount:
+      order.cancelRefundPaise != null ? formatPaise(order.cancelRefundPaise) : null,
   };
 }

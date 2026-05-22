@@ -20,6 +20,7 @@ import { productsRouter } from "./routes/products.js";
 import { homepageRouter } from "./routes/homepage.js";
 
 import { returnsRouter } from "./routes/returns.js";
+import { deliveryRouter } from "./routes/delivery.js";
 
 
 
@@ -106,6 +107,7 @@ app.use("/api/products", productsRouter);
 app.use("/api/homepage", homepageRouter);
 
 app.use("/api/returns", returnsRouter);
+app.use("/api/delivery", deliveryRouter);
 
 app.use("/api/admin", adminRouter);
 

@@ -39,6 +39,26 @@ export async function notifyAdminOrderPlaced(input: {
   await sendTransactionalMessage(admin, body);
 }
 
+export async function notifyOrderCancelled(input: {
+  customerPhone: string;
+  orderNumber: string;
+  refundAmount: string;
+}) {
+  const body = `${STORE_NAME}: Order ${input.orderNumber} has been cancelled. Refund of ${input.refundAmount} will be credited to your original payment method in 5-7 business days.`;
+  await sendTransactionalMessage(input.customerPhone, body);
+}
+
+export async function notifyAdminOrderCancelled(input: {
+  orderNumber: string;
+  customerPhone: string;
+  refundAmount: string;
+}) {
+  const admin = adminPhone();
+  if (!admin) return;
+  const body = `${STORE_NAME} Admin: Order ${input.orderNumber} cancelled by customer ${input.customerPhone}. Refund ${input.refundAmount}. Check Admin Orders.`;
+  await sendTransactionalMessage(admin, body);
+}
+
 export async function notifyOrderDelivered(input: {
   customerPhone: string;
   orderNumber: string;
