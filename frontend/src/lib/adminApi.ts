@@ -307,6 +307,9 @@ export type AdminOrderDetail = {
   cancelRefundAmount?: string | null;
   cancelReason?: string | null;
   cancelNote?: string | null;
+  cancelRefundStatus?: string | null;
+  cancelRefundStatusLabel?: string | null;
+  refundTimeline?: import("@/data/accountOrders").TimelineStep[];
 };
 
 export async function fetchAdminOrders() {

@@ -12,6 +12,12 @@ import {
   type ReturnWithRelations,
 } from "./returnMapper.js";
 import { customerDeliveryDateFromShiprocketEdd } from "./deliveryDates.js";
+import {
+  buildCancelRefundTimeline,
+  cancelRefundPaymentStatusLabel,
+  normalizeCancelRefundStatus,
+  resolveOrderPaymentStatus,
+} from "./cancelRefundStatus.js";
 import { getCancellationQuote, type CancellationQuote } from "./orderCancellation.js";
 import {
   formatDisplayDate,
@@ -94,6 +100,9 @@ export type AccountOrderDto = {
   cancelRefundAmount: string | null;
   cancelReason: string | null;
   cancelNote: string | null;
+  cancelRefundStatus: string | null;
+  cancelRefundStatusLabel: string | null;
+  refundTimeline: TimelineStepDto[];
 };
 
 type OrderWithRelations = Order & {
@@ -177,6 +186,16 @@ export function mapOrderToDto(order: OrderWithRelations): AccountOrderDto {
     placedAt: order.placedAt,
     totalPaise: order.totalPaise,
   });
+  const cancelRefundStatus = normalizeCancelRefundStatus(order.cancelRefundStatus);
+  const refundTimeline =
+    order.status === "CANCELLED"
+      ? buildCancelRefundTimeline({
+          cancelRefundStatus,
+          cancelledAt: order.cancelledAt,
+          cancelRefundProcessingAt: order.cancelRefundProcessingAt,
+          cancelRefundCreditedAt: order.cancelRefundCreditedAt,
+        })
+      : [];
 
   return {
     id: order.id,
@@ -198,7 +217,11 @@ export function mapOrderToDto(order: OrderWithRelations): AccountOrderDto {
     },
     payment: {
       method: order.paymentMethod,
-      status: order.paymentStatus,
+      status: resolveOrderPaymentStatus({
+        paymentStatus: order.paymentStatus,
+        cancelledAt: order.cancelledAt,
+        cancelRefundStatus: order.cancelRefundStatus,
+      }),
       transactionId: order.transactionId ?? "—",
     },
     priceBreakdown: {
@@ -223,5 +246,10 @@ export function mapOrderToDto(order: OrderWithRelations): AccountOrderDto {
       order.cancelRefundPaise != null ? formatPaise(order.cancelRefundPaise) : null,
     cancelReason: order.cancelReason ?? null,
     cancelNote: order.cancelNote ?? null,
+    cancelRefundStatus: cancelRefundStatus,
+    cancelRefundStatusLabel: cancelRefundStatus
+      ? cancelRefundPaymentStatusLabel(cancelRefundStatus)
+      : null,
+    refundTimeline,
   };
 }

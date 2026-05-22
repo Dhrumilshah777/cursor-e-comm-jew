@@ -3,10 +3,10 @@ import Link from "next/link";
 import {
   getOrderStatusClass,
   type AccountOrder,
-  type TimelineStep,
 } from "@/data/accountOrders";
 import { getReturnRequestPath } from "@/data/returnRequest";
 import CancelOrderSection from "@/components/account/CancelOrderSection";
+import StatusTimeline from "@/components/StatusTimeline";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -16,50 +16,11 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
-  return (
-    <ol className="relative mt-6 space-y-0">
-      {steps.map((step, index) => {
-        const isLast = index === steps.length - 1;
-        return (
-          <li key={step.id} className="relative flex gap-4 pb-8 last:pb-0">
-            {!isLast ? (
-              <span
-                className={`absolute left-[7px] top-4 h-[calc(100%-4px)] w-px ${
-                  step.completed ? "bg-emerald-400" : "bg-zinc-200"
-                }`}
-                aria-hidden="true"
-              />
-            ) : null}
-            <span
-              className={`relative z-10 mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
-                step.completed
-                  ? "border-emerald-600 bg-emerald-600"
-                  : step.current
-                    ? "border-emerald-600 bg-white"
-                    : "border-zinc-200 bg-white"
-              }`}
-              aria-hidden="true"
-            >
-              {step.completed ? (
-                <span className="block h-1.5 w-1.5 rounded-full bg-white" />
-              ) : step.current ? (
-                <span className="block h-1.5 w-1.5 rounded-full bg-emerald-600" />
-              ) : null}
-            </span>
-            <div className="min-w-0 flex-1 pt-0">
-              <p className="text-xs font-light uppercase tracking-[0.12em] text-zinc-900">
-                {step.label}
-              </p>
-              {step.date ? (
-                <p className="mt-1 text-[11px] font-light text-zinc-900">{step.date}</p>
-              ) : null}
-            </div>
-          </li>
-        );
-      })}
-    </ol>
-  );
+function paymentStatusClass(status: string): string {
+  const normalized = status.toLowerCase();
+  if (normalized.includes("refund failed")) return "text-red-800";
+  if (normalized.includes("refund")) return "text-amber-800";
+  return "text-emerald-800";
 }
 
 function PriceRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
@@ -178,8 +139,28 @@ export default function OrderDetailContent({
 
       <section className="border border-zinc-100 px-5 py-6 sm:px-8 sm:py-8">
         <SectionTitle>Order status</SectionTitle>
-        <OrderTimeline steps={order.timeline} />
+        <StatusTimeline steps={order.timeline} />
       </section>
+
+      {order.refundTimeline && order.refundTimeline.length > 0 ? (
+        <section className="border border-zinc-100 px-5 py-6 sm:px-8 sm:py-8">
+          <SectionTitle>Refund status</SectionTitle>
+          {order.cancelRefundAmount ? (
+            <p className="mt-3 text-sm font-light text-zinc-700">
+              Refund amount:{" "}
+              <strong className="font-normal text-zinc-900">{order.cancelRefundAmount}</strong>
+            </p>
+          ) : null}
+          <StatusTimeline steps={order.refundTimeline} />
+          {order.cancelRefundStatus === "PROCESSING" ||
+          order.cancelRefundStatus === "INITIATED" ? (
+            <p className="mt-4 text-sm font-light text-zinc-600">
+              Refunds typically appear in your original payment method within 5–7 business
+              days after processing begins.
+            </p>
+          ) : null}
+        </section>
+      ) : null}
 
       <div className="grid gap-8 lg:grid-cols-2">
         <section className="border border-zinc-100 px-5 py-6 sm:px-8 sm:py-8">
@@ -209,7 +190,9 @@ export default function OrderDetailContent({
               <dt className="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
                 Status
               </dt>
-              <dd className="mt-1 text-emerald-800">{order.payment.status}</dd>
+              <dd className={`mt-1 ${paymentStatusClass(order.payment.status)}`}>
+                {order.payment.status}
+              </dd>
             </div>
             <div>
               <dt className="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
@@ -290,11 +273,6 @@ export default function OrderDetailContent({
       ) : order.cancelRefundAmount ? (
         <section className="border border-zinc-100 px-5 py-6 sm:px-8 sm:py-8">
           <SectionTitle>Cancellation</SectionTitle>
-          <p className="mt-3 text-sm font-light text-zinc-700">
-            This order was cancelled. Refund of{" "}
-            <strong className="font-normal text-zinc-900">{order.cancelRefundAmount}</strong>{" "}
-            will be credited to your original payment method in 5–7 business days.
-          </p>
           {order.cancelReason ? (
             <p className="mt-3 text-sm font-light text-zinc-700">
               Reason: <span className="text-zinc-900">{order.cancelReason}</span>

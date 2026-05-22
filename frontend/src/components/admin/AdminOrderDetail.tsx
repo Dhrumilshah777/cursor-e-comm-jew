@@ -17,6 +17,7 @@ import {
   type ShiprocketLogEntry,
 } from "@/lib/adminApi";
 import CancellationCountdown from "@/components/admin/CancellationCountdown";
+import StatusTimeline from "@/components/StatusTimeline";
 
 function hasOrderDiscount(order: AdminOrderDetail): boolean {
   const { discount, couponCode } = order.priceBreakdown;
@@ -237,8 +238,23 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
             {order.cancelRefundAmount ? (
               <InfoRow label="Refund amount" value={order.cancelRefundAmount} />
             ) : null}
+            {order.cancelRefundStatusLabel ? (
+              <InfoRow label="Refund status" value={order.cancelRefundStatusLabel} />
+            ) : null}
           </dl>
         </Section>
+
+        {order.refundTimeline && order.refundTimeline.length > 0 ? (
+          <Section title="Refund progress">
+            <StatusTimeline steps={order.refundTimeline} />
+            {order.cancelRefundStatus === "PROCESSING" ||
+            order.cancelRefundStatus === "INITIATED" ? (
+              <p className="mt-4 text-sm font-light text-zinc-600">
+                Bank credit usually takes 5–7 business days after Razorpay processing.
+              </p>
+            ) : null}
+          </Section>
+        ) : null}
 
         <Section title="Customer information">
           <dl>

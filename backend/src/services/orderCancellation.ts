@@ -1,5 +1,9 @@
 import { orderStatusEventLabel } from "../lib/format.js";
 import {
+  cancelRefundPaymentStatusLabel,
+  type CancelRefundStatus,
+} from "../lib/cancelRefundStatus.js";
+import {
   cancellationBlockReason,
   getCancellationQuote,
   isOrderCancellableStatus,
@@ -83,7 +87,8 @@ export async function cancelOrderForUser(
   }
 
   let cancelRazorpayRefundId: string | null = null;
-  let cancelRefundStatus: string | null = null;
+  let cancelRefundStatus: CancelRefundStatus = "INITIATED";
+  let cancelRefundProcessingAt: Date | null = null;
 
   if (order.transactionId) {
     try {
@@ -96,7 +101,10 @@ export async function cancelOrderForUser(
         },
       });
       cancelRazorpayRefundId = refund.id;
-      cancelRefundStatus = refund.status === "processed" ? "PROCESSED" : "INITIATED";
+      if (refund.status === "processed") {
+        cancelRefundStatus = "PROCESSING";
+        cancelRefundProcessingAt = new Date();
+      }
     } catch (error) {
       console.error(`Razorpay refund failed for order ${order.orderNumber}:`, error);
       throw new OrderCancellationError(
@@ -105,8 +113,10 @@ export async function cancelOrderForUser(
       );
     }
   } else {
-    cancelRefundStatus = "MANUAL";
+    cancelRefundStatus = "INITIATED";
   }
+
+  const paymentStatus = cancelRefundPaymentStatusLabel(cancelRefundStatus);
 
   const noteParts = [
     quote.withinFullRefundWindow
@@ -138,8 +148,8 @@ export async function cancelOrderForUser(
         cancelDeductionPaise: quote.deductionPaise,
         cancelRazorpayRefundId,
         cancelRefundStatus,
-        paymentStatus:
-          cancelRefundStatus === "PROCESSED" ? "Refunded" : "Refund initiated",
+        cancelRefundProcessingAt,
+        paymentStatus,
       },
       include: {
         items: { include: { product: true } },
@@ -160,15 +170,17 @@ export async function cancelOrderForUser(
     });
   });
 
-  void notifyOrderCancelled({
+    void notifyOrderCancelled({
     customerPhone: order.user.phone,
     orderNumber: order.orderNumber,
     refundAmount: quote.refundAmount,
+    refundStatus: paymentStatus,
   });
   void notifyAdminOrderCancelled({
     orderNumber: order.orderNumber,
     customerPhone: order.user.phone,
     refundAmount: quote.refundAmount,
+    refundStatus: paymentStatus,
   });
 
   return {

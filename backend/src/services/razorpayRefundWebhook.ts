@@ -1,5 +1,9 @@
 import { returnStatusLabel } from "../lib/returnStatus.js";
 import {
+  cancelRefundPaymentStatusLabel,
+  type CancelRefundStatus,
+} from "../lib/cancelRefundStatus.js";
+import {
   notifyAdminRefundFailed,
   notifyRefundProcessed,
 } from "../lib/notifications.js";
@@ -32,13 +36,97 @@ async function findReturnForRefund(refund: RefundEntity) {
   return null;
 }
 
-export async function handleRazorpayRefundWebhook(event: string, refund: RefundEntity) {
-  const returnRequest = await findReturnForRefund(refund);
-  if (!returnRequest) {
-    console.warn(`[Razorpay Webhook] No return for refund event ${event}`);
-    return { ok: true as const, ignored: true as const };
+async function findCancelledOrderForRefund(refund: RefundEntity) {
+  if (refund.id) {
+    const byRefundId = await prisma.order.findFirst({
+      where: { cancelRazorpayRefundId: refund.id, status: "CANCELLED" },
+      include: { user: true },
+    });
+    if (byRefundId) return byRefundId;
   }
 
+  if (refund.payment_id) {
+    return prisma.order.findFirst({
+      where: {
+        transactionId: refund.payment_id,
+        status: "CANCELLED",
+        cancelledAt: { not: null },
+      },
+      include: { user: true },
+      orderBy: { cancelledAt: "desc" },
+    });
+  }
+
+  return null;
+}
+
+async function updateCancelledOrderRefundStatus(
+  orderId: string,
+  status: CancelRefundStatus,
+  processingAt?: Date,
+) {
+  await prisma.order.update({
+    where: { id: orderId },
+    data: {
+      cancelRefundStatus: status,
+      paymentStatus: cancelRefundPaymentStatusLabel(status),
+      ...(processingAt ? { cancelRefundProcessingAt: processingAt } : {}),
+    },
+  });
+}
+
+export async function handleRazorpayRefundWebhook(event: string, refund: RefundEntity) {
+  const returnRequest = await findReturnForRefund(refund);
+  if (returnRequest) {
+    return handleReturnRefundWebhook(event, refund, returnRequest);
+  }
+
+  const cancelledOrder = await findCancelledOrderForRefund(refund);
+  if (cancelledOrder) {
+    return handleCancelledOrderRefundWebhook(event, refund, cancelledOrder.id);
+  }
+
+  console.warn(`[Razorpay Webhook] No return or cancelled order for refund event ${event}`);
+  return { ok: true as const, ignored: true as const };
+}
+
+async function handleCancelledOrderRefundWebhook(
+  event: string,
+  refund: RefundEntity,
+  orderId: string,
+) {
+  const refundId = refund.id;
+
+  if (event === "refund.created") {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        cancelRazorpayRefundId: refundId ?? undefined,
+        cancelRefundStatus: "INITIATED",
+        paymentStatus: cancelRefundPaymentStatusLabel("INITIATED"),
+      },
+    });
+    return { ok: true as const, event, orderId };
+  }
+
+  if (event === "refund.processed") {
+    await updateCancelledOrderRefundStatus(orderId, "PROCESSING", new Date());
+    return { ok: true as const, event, orderId };
+  }
+
+  if (event === "refund.failed") {
+    await updateCancelledOrderRefundStatus(orderId, "FAILED");
+    return { ok: true as const, event, orderId };
+  }
+
+  return { ok: true as const, ignored: true as const };
+}
+
+async function handleReturnRefundWebhook(
+  event: string,
+  refund: RefundEntity,
+  returnRequest: NonNullable<Awaited<ReturnType<typeof findReturnForRefund>>>,
+) {
   const refundId = refund.id ?? returnRequest.razorpayRefundId;
   const amountPaise = refund.amount ?? returnRequest.refundAmountPaise ?? 0;
 

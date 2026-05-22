@@ -96,6 +96,9 @@ export type AccountOrder = {
   cancelRefundAmount?: string | null;
   cancelReason?: string | null;
   cancelNote?: string | null;
+  cancelRefundStatus?: string | null;
+  cancelRefundStatusLabel?: string | null;
+  refundTimeline?: TimelineStep[];
 };
 
 const statusStyles: Record<OrderStatus, string> = {

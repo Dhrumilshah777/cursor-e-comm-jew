@@ -43,8 +43,10 @@ export async function notifyOrderCancelled(input: {
   customerPhone: string;
   orderNumber: string;
   refundAmount: string;
+  refundStatus?: string;
 }) {
-  const body = `${STORE_NAME}: Order ${input.orderNumber} has been cancelled. Refund of ${input.refundAmount} will be credited to your original payment method in 5-7 business days.`;
+  const status = input.refundStatus ?? "Refund initiated";
+  const body = `${STORE_NAME}: Order ${input.orderNumber} has been cancelled. ${status} for ${input.refundAmount}. Credited to your original payment method in 5-7 business days.`;
   await sendTransactionalMessage(input.customerPhone, body);
 }
 
@@ -52,10 +54,12 @@ export async function notifyAdminOrderCancelled(input: {
   orderNumber: string;
   customerPhone: string;
   refundAmount: string;
+  refundStatus?: string;
 }) {
   const admin = adminPhone();
   if (!admin) return;
-  const body = `${STORE_NAME} Admin: Order ${input.orderNumber} cancelled by customer ${input.customerPhone}. Refund ${input.refundAmount}. Check Admin Orders.`;
+  const status = input.refundStatus ?? "Refund initiated";
+  const body = `${STORE_NAME} Admin: Order ${input.orderNumber} cancelled by customer ${input.customerPhone}. ${status} — ${input.refundAmount}. Check Admin Orders.`;
   await sendTransactionalMessage(admin, body);
 }
 

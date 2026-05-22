@@ -15,6 +15,7 @@ import {
   orderStatusToDisplay,
   purityToDisplay,
 } from "./format.js";
+import { resolveOrderPaymentStatus } from "./cancelRefundStatus.js";
 import { mapOrderToDto } from "./orderMapper.js";
 import {
   formatCancellationCountdown,
@@ -158,7 +159,11 @@ export function mapAdminOrderToDto(order: OrderWithRelations): AdminOrderDetailD
     })),
     payment: {
       method: order.paymentMethod,
-      status: order.paymentStatus,
+      status: resolveOrderPaymentStatus({
+        paymentStatus: order.paymentStatus,
+        cancelledAt: order.cancelledAt,
+        cancelRefundStatus: order.cancelRefundStatus,
+      }),
       transactionId: order.transactionId ?? "—",
       razorpayPaymentId: order.transactionId ?? "—",
       paid: isPaymentPaid(order.paymentStatus),
