@@ -1,6 +1,7 @@
 import type { OrderStatus } from "../generated/prisma/client.js";
 import { orderStatusEventLabel } from "../lib/format.js";
 import { notifyOrderDelivered } from "../lib/notifications.js";
+import { metaToOrderUpdate, parseShiprocketMetaFromSources } from "../lib/shiprocketMeta.js";
 import { prisma } from "../lib/prisma.js";
 
 export type ShiprocketWebhookPayload = Record<string, unknown>;
@@ -130,19 +131,12 @@ export async function handleShiprocketWebhook(payload: ShiprocketWebhookPayload)
 
   const rawStatus = extractShiprocketStatus(payload);
   const mappedStatus = mapShiprocketStatusToOrderStatus(rawStatus);
+  const metaUpdate = metaToOrderUpdate(parseShiprocketMetaFromSources(payload));
 
   console.log("[Shiprocket Webhook] Received:", JSON.stringify(payload, null, 2));
   console.log(
     `[Shiprocket Webhook] status=${rawStatus ?? "—"} mapped=${mappedStatus ?? "—"}`,
   );
-
-  if (!mappedStatus) {
-    return {
-      ok: true as const,
-      ignored: true as const,
-      reason: "Status not mapped",
-    };
-  }
 
   const order = await findOrderFromWebhook(payload);
   if (!order) {
@@ -154,13 +148,63 @@ export async function handleShiprocketWebhook(payload: ShiprocketWebhookPayload)
     };
   }
 
+  const courier = readString(payload, ["courier_name", "courier"]);
+  const awb = readString(payload, ["awb", "awb_code", "tracking_number"]);
+  const trackingUpdate = {
+    ...(courier ? { courier } : {}),
+    ...(awb ? { trackingNumber: awb } : {}),
+  };
+
+  if (!mappedStatus) {
+    if (Object.keys({ ...metaUpdate, ...trackingUpdate }).length === 0) {
+      return {
+        ok: true as const,
+        ignored: true as const,
+        reason: "Status not mapped",
+      };
+    }
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        ...trackingUpdate,
+        ...metaUpdate,
+      },
+    });
+
+    return {
+      ok: true as const,
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      metaUpdated: true as const,
+    };
+  }
+
   if (order.status === mappedStatus) {
+    if (Object.keys({ ...metaUpdate, ...trackingUpdate }).length === 0) {
+      return {
+        ok: true as const,
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        status: mappedStatus,
+        unchanged: true as const,
+      };
+    }
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        ...trackingUpdate,
+        ...metaUpdate,
+      },
+    });
+
     return {
       ok: true as const,
       orderId: order.id,
       orderNumber: order.orderNumber,
       status: mappedStatus,
-      unchanged: true as const,
+      metaUpdated: true as const,
     };
   }
 
@@ -178,10 +222,6 @@ export async function handleShiprocketWebhook(payload: ShiprocketWebhookPayload)
     };
   }
 
-  const courier = readString(payload, ["courier_name", "courier"]);
-  const awb = readString(payload, ["awb", "awb_code", "tracking_number"]);
-  const etd = readString(payload, ["etd", "expected_delivery_date"]);
-
   await prisma.$transaction(async (tx) => {
     await tx.orderStatusEvent.create({
       data: {
@@ -198,9 +238,8 @@ export async function handleShiprocketWebhook(payload: ShiprocketWebhookPayload)
       where: { id: order.id },
       data: {
         status: mappedStatus,
-        ...(courier ? { courier } : {}),
-        ...(awb ? { trackingNumber: awb } : {}),
-        ...(etd ? { expectedDelivery: etd } : {}),
+        ...trackingUpdate,
+        ...metaUpdate,
       },
     });
   });

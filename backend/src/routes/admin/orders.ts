@@ -5,6 +5,7 @@ import {
   addOrderStatusEvent,
   getAdminOrderById,
   listAdminOrders,
+  syncAdminOrderShiprocket,
   updateAdminOrder,
 } from "../../services/adminOrders.js";
 
@@ -74,6 +75,27 @@ adminOrdersRouter.patch("/:id", async (req, res) => {
   } catch (error) {
     console.error(`PATCH /api/admin/orders/${req.params.id} failed:`, error);
     res.status(500).json({ error: "Failed to update order" });
+  }
+});
+
+adminOrdersRouter.post("/:id/sync-shiprocket", async (req, res) => {
+  try {
+    const result = await syncAdminOrderShiprocket(req.params.id);
+    if (!result) {
+      res.status(404).json({ error: "Order not found" });
+      return;
+    }
+    if (!result.synced) {
+      res.status(400).json({
+        error: "Order is not linked to Shiprocket yet. Mark it as Shipped first.",
+        order: result.order,
+      });
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    console.error(`POST /api/admin/orders/${req.params.id}/sync-shiprocket failed:`, error);
+    res.status(500).json({ error: "Failed to sync Shiprocket details" });
   }
 });
 

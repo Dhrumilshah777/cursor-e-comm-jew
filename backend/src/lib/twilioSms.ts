@@ -142,5 +142,10 @@ export async function sendWhatsApp(to: string, body: string): Promise<boolean> {
 
 /** Sends SMS and WhatsApp when each channel is configured. */
 export async function sendTransactionalMessage(to: string, body: string): Promise<void> {
-  await Promise.all([sendSms(to, body), sendWhatsApp(to, body)]);
+  const [smsOk, whatsAppOk] = await Promise.all([sendSms(to, body), sendWhatsApp(to, body)]);
+  if (!smsOk && !whatsAppOk) {
+    console.warn(
+      `[Notify] Message not delivered to ${formatPhoneForSms(to)} — configure TWILIO_SMS_FROM or TWILIO_MESSAGING_SERVICE_SID for SMS, and TWILIO_WHATSAPP_FROM for WhatsApp`,
+    );
+  }
 }

@@ -8,6 +8,12 @@ import {
   getShiprocketPickupLocation,
   isShiprocketConfigured,
 } from "../lib/shiprocket.js";
+import {
+  mergeShiprocketMeta,
+  metaToOrderUpdate,
+  parseShiprocketMetaFromSources,
+} from "../lib/shiprocketMeta.js";
+import { syncShiprocketMetaToOrder } from "./shiprocketSync.js";
 import type { Prisma } from "../generated/prisma/client.js";
 
 const DEFAULT_DIM_CM = 12;
@@ -177,7 +183,9 @@ export async function fulfillOrderOnShiprocket(
       summary: `Already synced (shipment_id=${order.shiprocketShipmentId}, AWB=${order.trackingNumber ?? "n/a"})`,
     };
     pushLog(orderNumber, log, entry);
-    return { order, log };
+    await syncShiprocketMetaToOrder(orderId, { force: true });
+    const refreshed = await prisma.order.findUnique({ where: { id: orderId } });
+    return { order: refreshed ?? order, log };
   }
 
   const payload = buildAdhocPayload(order);
@@ -262,15 +270,16 @@ export async function fulfillOrderOnShiprocket(
     timeLabel: null as string | null,
     scheduledAt: null as Date | null,
   };
+  let pickupResponse: unknown = null;
 
   try {
-    const pickupResponse = await generateShiprocketPickup(shipmentId);
+    pickupResponse = await generateShiprocketPickup(shipmentId);
     pickupSchedule = parseShiprocketPickupSchedule(pickupResponse);
     const { dateLabel, timeLabel } = pickupSchedule;
     pushLog(orderNumber, log, {
       step: "schedule_pickup",
-      ok: pickupResponse.pickup_status === 1,
-      summary: `pickup_status=${pickupResponse.pickup_status ?? "—"}, date=${dateLabel ?? "—"}, time=${timeLabel ?? "—"}`,
+      ok: (pickupResponse as { pickup_status?: number }).pickup_status === 1,
+      summary: `pickup_status=${(pickupResponse as { pickup_status?: number }).pickup_status ?? "—"}, date=${dateLabel ?? "—"}, time=${timeLabel ?? "—"}`,
       response: pickupResponse,
     });
   } catch (pickupError) {
@@ -284,6 +293,21 @@ export async function fulfillOrderOnShiprocket(
     });
   }
 
+  const parsedMeta = parseShiprocketMetaFromSources(
+    awbResponse,
+    pickupResponse,
+  );
+  const mergedMeta = mergeShiprocketMeta(
+    {
+      expectedDelivery,
+      pickupDateLabel: pickupSchedule.dateLabel,
+      pickupTimeLabel: pickupSchedule.timeLabel,
+      pickupScheduledAt: pickupSchedule.scheduledAt,
+    },
+    parsedMeta,
+  );
+  const metaUpdate = metaToOrderUpdate(mergedMeta);
+
   const fulfillmentLog = log as unknown as Prisma.InputJsonValue;
 
   const updated = await prisma.order.update({
@@ -293,13 +317,14 @@ export async function fulfillOrderOnShiprocket(
       shiprocketShipmentId: shipmentId,
       trackingNumber: awbCode,
       courier: courierName ?? "Shiprocket",
-      expectedDelivery: expectedDelivery ?? undefined,
-      pickupScheduledAt: pickupSchedule.scheduledAt ?? undefined,
-      pickupDateLabel: pickupSchedule.dateLabel ?? undefined,
-      pickupTimeLabel: pickupSchedule.timeLabel ?? undefined,
+      ...metaUpdate,
       shiprocketFulfillmentLog: fulfillmentLog,
     },
   });
+
+  await syncShiprocketMetaToOrder(orderId, { force: true });
+  const syncedOrder =
+    (await prisma.order.findUnique({ where: { id: orderId } })) ?? updated;
 
   pushLog(orderNumber, log, {
     step: "saved_to_db",
@@ -310,11 +335,13 @@ export async function fulfillOrderOnShiprocket(
       shiprocketShipmentId: shipmentId,
       trackingNumber: awbCode,
       courier: courierName,
-      expectedDelivery,
+      expectedDelivery: syncedOrder.expectedDelivery,
+      pickupDateLabel: syncedOrder.pickupDateLabel,
+      pickupTimeLabel: syncedOrder.pickupTimeLabel,
     },
   });
 
   console.log(`[Shiprocket][${orderNumber}] Fulfillment complete`);
 
-  return { order: updated, log };
+  return { order: syncedOrder, log };
 }

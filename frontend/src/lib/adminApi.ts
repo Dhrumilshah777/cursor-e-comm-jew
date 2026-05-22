@@ -310,6 +310,14 @@ export async function fetchAdminOrderById(orderId: string) {
   return data.order;
 }
 
+export async function syncAdminOrderShiprocket(orderId: string) {
+  const data = await adminFetch<{ order: AdminOrderDetail; synced: boolean }>(
+    `/api/admin/orders/${orderId}/sync-shiprocket`,
+    { method: "POST" },
+  );
+  return data.order;
+}
+
 export type ShiprocketLogEntry = {
   step: string;
   ok: boolean;

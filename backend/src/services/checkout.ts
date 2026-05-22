@@ -1,6 +1,6 @@
 import type { MetalType, Product } from "../generated/prisma/client.js";
 import { mapOrderToDto } from "../lib/orderMapper.js";
-import { notifyOrderConfirmed } from "../lib/notifications.js";
+import { notifyAdminOrderPlaced, notifyOrderConfirmed } from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
 import {
   applyCouponToCheckoutTotals,
@@ -345,7 +345,7 @@ export async function placeOrderFromCart(
 
   const orderWithUser = await prisma.order.findUnique({
     where: { id: order.id },
-    include: { user: { select: { phone: true } } },
+    include: { user: { select: { phone: true, name: true } } },
   });
 
   if (orderWithUser?.user.phone) {
@@ -353,6 +353,12 @@ export async function placeOrderFromCart(
       customerPhone: orderWithUser.user.phone,
       orderNumber: order.orderNumber,
       totalPaise: order.totalPaise,
+    });
+    void notifyAdminOrderPlaced({
+      orderNumber: order.orderNumber,
+      totalPaise: order.totalPaise,
+      customerPhone: orderWithUser.user.phone,
+      customerName: orderWithUser.user.name,
     });
   }
 

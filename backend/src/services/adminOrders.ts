@@ -5,6 +5,7 @@ import {
   getShiprocketLogFromError,
   type ShiprocketLogEntry,
 } from "./shiprocketFulfillment.js";
+import { syncShiprocketMetaToOrder } from "./shiprocketSync.js";
 import type { OrderStatus } from "../generated/prisma/client.js";
 
 const orderInclude = {
@@ -59,12 +60,46 @@ export async function listAdminOrders(filters: {
 }
 
 export async function getAdminOrderById(id: string) {
+  let order = await prisma.order.findUnique({
+    where: { id },
+    include: orderInclude,
+  });
+  if (!order) return null;
+
+  if (order.shiprocketShipmentId) {
+    try {
+      await syncShiprocketMetaToOrder(id);
+      order =
+        (await prisma.order.findUnique({
+          where: { id },
+          include: orderInclude,
+        })) ?? order;
+    } catch (error) {
+      console.warn(`Shiprocket meta sync for order ${id}:`, error);
+    }
+  }
+
+  return mapAdminOrderToDto(order);
+}
+
+export async function syncAdminOrderShiprocket(id: string) {
+  const existing = await prisma.order.findUnique({
+    where: { id },
+    include: orderInclude,
+  });
+  if (!existing) return null;
+  if (!existing.shiprocketShipmentId) {
+    return { order: mapAdminOrderToDto(existing), synced: false as const };
+  }
+
+  await syncShiprocketMetaToOrder(id, { force: true });
   const order = await prisma.order.findUnique({
     where: { id },
     include: orderInclude,
   });
   if (!order) return null;
-  return mapAdminOrderToDto(order);
+
+  return { order: mapAdminOrderToDto(order), synced: true as const };
 }
 
 export async function updateAdminOrder(

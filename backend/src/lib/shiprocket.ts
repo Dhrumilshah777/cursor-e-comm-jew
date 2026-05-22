@@ -182,6 +182,26 @@ export async function generateShiprocketPickup(shipmentId: number) {
   });
 }
 
+export async function trackShiprocketByAwb(awbCode: string) {
+  return shiprocketFetch<unknown>(
+    `/v1/external/courier/track/awb/${encodeURIComponent(awbCode)}`,
+  );
+}
+
+export async function trackShiprocketByShipmentId(shipmentId: number) {
+  return shiprocketFetch<unknown>(
+    `/v1/external/courier/track/shipment/${shipmentId}`,
+  );
+}
+
+export async function getShiprocketShipmentDetails(shipmentId: number) {
+  return shiprocketFetch<{ data?: unknown }>(`/v1/external/shipments/${shipmentId}`);
+}
+
+export async function getShiprocketOrderDetails(orderId: number) {
+  return shiprocketFetch<{ data?: unknown }>(`/v1/external/orders/show/${orderId}`);
+}
+
 export function getShiprocketPickupLocation(): string {
   return getConfig().pickupLocation;
 }

@@ -11,6 +11,7 @@ import {
 import {
   fetchAdminOrderById,
   AdminOrderStatusError,
+  syncAdminOrderShiprocket,
   updateAdminOrderStatus,
   type AdminOrderDetail,
   type ShiprocketLogEntry,
@@ -59,6 +60,7 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [shiprocketLog, setShiprocketLog] = useState<ShiprocketLogEntry[] | null>(null);
+  const [syncingShiprocket, setSyncingShiprocket] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -80,6 +82,25 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  const handleShiprocketSync = async () => {
+    setSyncingShiprocket(true);
+    setSaveMessage(null);
+    try {
+      const updated = await syncAdminOrderShiprocket(orderId);
+      setOrder(updated);
+      if (updated.shiprocketFulfillmentLog?.length) {
+        setShiprocketLog(updated.shiprocketFulfillmentLog);
+      }
+      setSaveMessage("Shiprocket delivery and pickup details refreshed.");
+    } catch (err) {
+      setSaveMessage(
+        err instanceof Error ? err.message : "Failed to refresh Shiprocket details",
+      );
+    } finally {
+      setSyncingShiprocket(false);
+    }
+  };
 
   const handleStatusSave = async () => {
     if (!order || statusDraft === order.statusCode) return;
@@ -367,16 +388,31 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
       </Section>
 
       <Section title="Shipment & warehouse pickup">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 py-3">
+          <p className="text-xs font-light text-zinc-500">
+            Delivery ETA and courier pickup date are synced from Shiprocket.
+          </p>
+          {order.shiprocketShipmentId ? (
+            <button
+              type="button"
+              onClick={handleShiprocketSync}
+              disabled={syncingShiprocket}
+              className="border border-zinc-300 px-3 py-1.5 text-[10px] font-normal uppercase tracking-[0.14em] text-zinc-800 transition hover:border-zinc-900 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {syncingShiprocket ? "Refreshing…" : "Refresh from Shiprocket"}
+            </button>
+          ) : null}
+        </div>
         <dl>
           <InfoRow label="Courier" value={order.shipping.courier} />
           <InfoRow label="AWB / tracking" value={order.shipping.trackingNumber} />
-          <InfoRow label="Expected delivery" value={order.shipping.expectedDelivery} />
+          <InfoRow label="Expected delivery (EDD)" value={order.shipping.expectedDelivery} />
           <InfoRow
-            label="Warehouse pickup date"
+            label="Courier pickup date"
             value={order.warehousePickup.date}
           />
           <InfoRow
-            label="Warehouse pickup time"
+            label="Courier pickup time"
             value={order.warehousePickup.time}
           />
           {order.shiprocketOrderId ? (
@@ -430,8 +466,10 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
         ) : null}
         <p className="border-t border-zinc-100 py-3 text-xs font-light text-zinc-500">
           Shiprocket runs when you set status to{" "}
-          <span className="text-zinc-700">Shipped</span>. Pickup date and time come
-          from the schedule pickup API and stay on this order after refresh.
+          <span className="text-zinc-700">Shipped</span>. Expected delivery and courier
+          pickup date are pulled from Shiprocket tracking after AWB assignment. Use{" "}
+          <span className="text-zinc-700">Refresh from Shiprocket</span> if the dashboard
+          already shows an EDD or pickup schedule.
         </p>
       </Section>
     </div>

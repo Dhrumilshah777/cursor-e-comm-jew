@@ -23,6 +23,22 @@ export async function notifyOrderConfirmed(input: {
   await sendTransactionalMessage(input.customerPhone, body);
 }
 
+export async function notifyAdminOrderPlaced(input: {
+  orderNumber: string;
+  totalPaise: number;
+  customerPhone: string;
+  customerName?: string | null;
+}) {
+  const admin = adminPhone();
+  if (!admin) {
+    console.warn("[Notify] ADMIN_ALERT_PHONE not set — skip admin new-order alert");
+    return;
+  }
+  const customerLabel = input.customerName?.trim() || input.customerPhone;
+  const body = `${STORE_NAME} Admin: New order ${input.orderNumber} placed. Total ${formatInrFromPaise(input.totalPaise)}. Customer ${customerLabel} (${input.customerPhone}). Check Admin Orders.`;
+  await sendTransactionalMessage(admin, body);
+}
+
 export async function notifyOrderDelivered(input: {
   customerPhone: string;
   orderNumber: string;
