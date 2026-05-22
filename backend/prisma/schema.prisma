@@ -279,6 +279,8 @@ model Order {
   pickupTimeLabel      String?
   shiprocketFulfillmentLog Json?
   cancelledAt              DateTime?
+  cancelReason             String?
+  cancelNote               String?
   cancelRefundPaise        Int?
   cancelDeductionPaise     Int?
   cancelRazorpayRefundId   String?

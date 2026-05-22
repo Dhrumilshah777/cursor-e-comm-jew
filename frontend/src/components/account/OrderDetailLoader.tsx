@@ -61,5 +61,5 @@ export default function OrderDetailLoader({ orderId }: { orderId: string }) {
     );
   }
 
-  return <OrderDetailContent order={order} whatsappHref={whatsappHref} />;
+  return <OrderDetailContent order={order} whatsappHref={whatsappHref} onOrderUpdated={setOrder} />;
 }

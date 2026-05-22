@@ -223,6 +223,9 @@ export type AdminOrderListItem = {
     total: string;
   };
   customer: { name: string | null; phone: string };
+  placedAt: string;
+  cancellation: import("@/lib/cancellation").CancellationInfo;
+  cancellationCountdown: string;
 };
 
 export type AdminOrderDetail = {
@@ -298,6 +301,12 @@ export type AdminOrderDetail = {
     note: string | null;
     date: string;
   }[];
+  placedAt: string;
+  cancellation: import("@/lib/cancellation").CancellationInfo;
+  cancellationCountdown: string;
+  cancelRefundAmount?: string | null;
+  cancelReason?: string | null;
+  cancelNote?: string | null;
 };
 
 export async function fetchAdminOrders() {

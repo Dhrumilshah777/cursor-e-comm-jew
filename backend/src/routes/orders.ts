@@ -3,6 +3,10 @@ import {
   getCustomerTokenFromRequest,
   verifyCustomerToken,
 } from "../lib/customerAuth.js";
+import {
+  parseCancellationNote,
+  parseCancellationReason,
+} from "../lib/orderCancellation.js";
 import { requireCustomer, type CustomerRequest } from "../middleware/requireCustomer.js";
 import {
   cancelOrderForUser,
@@ -67,8 +71,42 @@ ordersRouter.post("/:orderId/cancel", requireCustomer, async (req: CustomerReque
     return;
   }
 
+  const body = req.body as {
+    reason?: unknown;
+    note?: unknown;
+    policyConfirmed?: unknown;
+  };
+
+  if (body.policyConfirmed !== true) {
+    res.status(400).json({
+      error: "You must confirm the cancellation policy.",
+      code: "POLICY_NOT_CONFIRMED",
+    });
+    return;
+  }
+
+  const reason = parseCancellationReason(body.reason);
+  if (!reason) {
+    res.status(400).json({
+      error: "Please select a reason for cancellation.",
+      code: "INVALID_REASON",
+    });
+    return;
+  }
+
+  let note: string | null = null;
   try {
-    const result = await cancelOrderForUser(orderId, req.customer!.userId);
+    note = parseCancellationNote(body.note);
+  } catch (error) {
+    res.status(400).json({
+      error: error instanceof Error ? error.message : "Invalid additional note.",
+      code: "INVALID_NOTE",
+    });
+    return;
+  }
+
+  try {
+    const result = await cancelOrderForUser(orderId, req.customer!.userId, { reason, note });
     res.json(result);
   } catch (error) {
     if (error instanceof OrderCancellationError) {

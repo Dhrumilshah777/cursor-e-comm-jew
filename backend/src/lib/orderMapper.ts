@@ -92,6 +92,8 @@ export type AccountOrderDto = {
   placedAt: string;
   cancellation: CancellationQuote;
   cancelRefundAmount: string | null;
+  cancelReason: string | null;
+  cancelNote: string | null;
 };
 
 type OrderWithRelations = Order & {
@@ -219,5 +221,7 @@ export function mapOrderToDto(order: OrderWithRelations): AccountOrderDto {
     cancellation,
     cancelRefundAmount:
       order.cancelRefundPaise != null ? formatPaise(order.cancelRefundPaise) : null,
+    cancelReason: order.cancelReason ?? null,
+    cancelNote: order.cancelNote ?? null,
   };
 }

@@ -1,6 +1,7 @@
 import type { MetalType } from "@/data/collections";
+import type { CancellationInfo } from "@/lib/cancellation";
 
-export type OrderStatus = "Delivered" | "Shipped" | "Processing";
+export type OrderStatus = "Delivered" | "Shipped" | "Processing" | "Cancelled";
 
 export type TimelineStep = {
   id: string;
@@ -90,12 +91,18 @@ export type AccountOrder = {
   shipping: ShippingInfo;
   returnEligible: boolean;
   returnRequest?: CustomerReturnOnOrder | null;
+  placedAt: string;
+  cancellation: CancellationInfo;
+  cancelRefundAmount?: string | null;
+  cancelReason?: string | null;
+  cancelNote?: string | null;
 };
 
 const statusStyles: Record<OrderStatus, string> = {
   Delivered: "bg-emerald-50 text-emerald-800 border-emerald-200",
   Shipped: "bg-sky-50 text-sky-800 border-sky-200",
   Processing: "bg-amber-50 text-amber-800 border-amber-200",
+  Cancelled: "bg-red-50 text-red-800 border-red-200",
 };
 
 export function getOrderStatusClass(status: OrderStatus): string {

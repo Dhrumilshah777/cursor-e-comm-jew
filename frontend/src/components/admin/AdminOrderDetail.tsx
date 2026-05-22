@@ -16,6 +16,7 @@ import {
   type AdminOrderDetail,
   type ShiprocketLogEntry,
 } from "@/lib/adminApi";
+import CancellationCountdown from "@/components/admin/CancellationCountdown";
 
 function hasOrderDiscount(order: AdminOrderDetail): boolean {
   const { discount, couponCode } = order.priceBreakdown;
@@ -214,6 +215,28 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
             ) : (
               <InfoRow label="Amount paid" value={order.total} />
             )}
+            {order.cancellation.cancellable ? (
+              <div className="border-b border-zinc-100 py-3 last:border-0">
+                <dt className="text-[10px] font-normal uppercase tracking-[0.16em] text-zinc-500">
+                  24-hour refund window
+                </dt>
+                <dd className="mt-2">
+                  <CancellationCountdown
+                    windowEndsAt={order.cancellation.windowEndsAt}
+                    cancellable={order.cancellation.cancellable}
+                  />
+                </dd>
+              </div>
+            ) : null}
+            {order.cancelReason ? (
+              <InfoRow label="Cancellation reason" value={order.cancelReason} />
+            ) : null}
+            {order.cancelNote ? (
+              <InfoRow label="Cancellation note" value={order.cancelNote} />
+            ) : null}
+            {order.cancelRefundAmount ? (
+              <InfoRow label="Refund amount" value={order.cancelRefundAmount} />
+            ) : null}
           </dl>
         </Section>
 
@@ -252,7 +275,8 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
               })}
             </select>
             <p className="mt-2 text-[10px] font-light leading-relaxed text-zinc-500">
-              Delivered and Cancelled are updated automatically from Shiprocket webhooks.
+              Delivered and Cancelled (via Shiprocket) update automatically. Customers can
+              cancel before shipping from My Orders.
             </p>
           </label>
           <button

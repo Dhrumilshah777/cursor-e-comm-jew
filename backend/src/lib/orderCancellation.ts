@@ -5,6 +5,40 @@ export const CANCELLATION_WINDOW_MS = 24 * 60 * 60 * 1000;
 export const CANCELLATION_GATEWAY_FEE_RATE = 0.01;
 export const LATE_CANCELLATION_PROCESSING_PAISE = 100_000;
 
+export const CANCELLATION_REASONS = [
+  "Ordered by mistake",
+  "Want to change the product",
+  "Found a better price",
+  "Delivery is taking too long",
+  "Placed duplicate order",
+  "Payment issue",
+  "Other",
+] as const;
+
+export type CancellationReason = (typeof CANCELLATION_REASONS)[number];
+
+const CANCELLATION_REASON_SET = new Set<string>(CANCELLATION_REASONS);
+
+export const MAX_CANCELLATION_NOTE_LENGTH = 500;
+
+export function parseCancellationReason(value: unknown): CancellationReason | null {
+  if (typeof value !== "string" || !CANCELLATION_REASON_SET.has(value)) {
+    return null;
+  }
+  return value as CancellationReason;
+}
+
+export function parseCancellationNote(value: unknown): string | null {
+  if (value == null || value === "") return null;
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed.length > MAX_CANCELLATION_NOTE_LENGTH) {
+    throw new Error(`Additional note must be ${MAX_CANCELLATION_NOTE_LENGTH} characters or less.`);
+  }
+  return trimmed;
+}
+
 const NON_CANCELLABLE_STATUSES = new Set<OrderStatus>([
   "SHIPPED",
   "OUT_FOR_DELIVERY",

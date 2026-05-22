@@ -3,6 +3,9 @@ import {
   cancellationBlockReason,
   getCancellationQuote,
   isOrderCancellableStatus,
+  parseCancellationNote,
+  parseCancellationReason,
+  type CancellationReason,
 } from "../lib/orderCancellation.js";
 import { createRazorpayRefund } from "../lib/razorpay.js";
 import { mapOrderToDto } from "../lib/orderMapper.js";
@@ -22,7 +25,16 @@ export class OrderCancellationError extends Error {
   }
 }
 
-export async function cancelOrderForUser(orderId: string, userId: string) {
+export type CancelOrderInput = {
+  reason: CancellationReason;
+  note?: string | null;
+};
+
+export async function cancelOrderForUser(
+  orderId: string,
+  userId: string,
+  input: CancelOrderInput,
+) {
   const order = await prisma.order.findFirst({
     where: { id: orderId, userId },
     include: {
@@ -100,8 +112,10 @@ export async function cancelOrderForUser(orderId: string, userId: string) {
     quote.withinFullRefundWindow
       ? "Cancelled within 24 hours (1% payment gateway fee deducted)."
       : "Cancelled after 24 hours (₹1,000 processing + 1% gateway fee deducted).",
+    `Reason: ${input.reason}.`,
+    input.note ? `Note: ${input.note}` : null,
     `Refund ${quote.refundAmount}.`,
-  ];
+  ].filter(Boolean);
 
   const updated = await prisma.$transaction(async (tx) => {
     await tx.orderStatusEvent.create({
@@ -118,6 +132,8 @@ export async function cancelOrderForUser(orderId: string, userId: string) {
       data: {
         status: "CANCELLED",
         cancelledAt: new Date(),
+        cancelReason: input.reason,
+        cancelNote: input.note ?? null,
         cancelRefundPaise: quote.refundPaise,
         cancelDeductionPaise: quote.deductionPaise,
         cancelRazorpayRefundId,

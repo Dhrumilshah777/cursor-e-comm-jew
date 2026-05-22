@@ -6,6 +6,7 @@ import {
   type TimelineStep,
 } from "@/data/accountOrders";
 import { getReturnRequestPath } from "@/data/returnRequest";
+import CancelOrderSection from "@/components/account/CancelOrderSection";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -77,11 +78,13 @@ function PriceRow({ label, value, bold }: { label: string; value: string; bold?:
 type OrderDetailContentProps = {
   order: AccountOrder;
   whatsappHref: string;
+  onOrderUpdated?: (order: AccountOrder) => void;
 };
 
 export default function OrderDetailContent({
   order,
   whatsappHref,
+  onOrderUpdated,
 }: OrderDetailContentProps) {
   const whatsappMessage = encodeURIComponent(
     `Hi, I need help with my order ${order.orderNumber}.`,
@@ -276,6 +279,34 @@ export default function OrderDetailContent({
           </div>
         </dl>
       </section>
+
+      {order.status !== "Cancelled" ? (
+        <CancelOrderSection
+          orderId={order.id}
+          orderNumber={order.orderNumber}
+          cancellation={order.cancellation}
+          onCancelled={onOrderUpdated}
+        />
+      ) : order.cancelRefundAmount ? (
+        <section className="border border-zinc-100 px-5 py-6 sm:px-8 sm:py-8">
+          <SectionTitle>Cancellation</SectionTitle>
+          <p className="mt-3 text-sm font-light text-zinc-700">
+            This order was cancelled. Refund of{" "}
+            <strong className="font-normal text-zinc-900">{order.cancelRefundAmount}</strong>{" "}
+            will be credited to your original payment method in 5–7 business days.
+          </p>
+          {order.cancelReason ? (
+            <p className="mt-3 text-sm font-light text-zinc-700">
+              Reason: <span className="text-zinc-900">{order.cancelReason}</span>
+            </p>
+          ) : null}
+          {order.cancelNote ? (
+            <p className="mt-2 text-sm font-light text-zinc-700">
+              Note: <span className="text-zinc-900">{order.cancelNote}</span>
+            </p>
+          ) : null}
+        </section>
+      ) : null}
 
       {order.returnRequest ? (
         <section className="border border-emerald-100 bg-emerald-50/30 px-5 py-6 sm:px-8 sm:py-8">

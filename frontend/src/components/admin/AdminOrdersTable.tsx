@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { adminOrderDetailPath } from "@/data/adminOrders";
 import { fetchAdminOrders } from "@/lib/adminApi";
+import CancellationCountdown from "@/components/admin/CancellationCountdown";
 
 export default function AdminOrdersTable() {
   const router = useRouter();
@@ -39,6 +40,7 @@ export default function AdminOrdersTable() {
             <th className="px-5 py-3 font-normal">Customer</th>
             <th className="px-5 py-3 font-normal">Status</th>
             <th className="px-5 py-3 font-normal">Placed</th>
+            <th className="px-5 py-3 font-normal">24h window</th>
             <th className="px-5 py-3 font-normal">Amount paid</th>
             <th className="px-5 py-3 font-normal">Coupon</th>
           </tr>
@@ -73,6 +75,17 @@ export default function AdminOrdersTable() {
                 </Link>
               </td>
               <td className="px-5 py-4 text-zinc-700">{order.placedOn}</td>
+              <td className="px-5 py-4 text-zinc-700">
+                {order.cancellation?.cancellable ? (
+                  <CancellationCountdown
+                    windowEndsAt={order.cancellation.windowEndsAt}
+                    cancellable={order.cancellation.cancellable}
+                    className="text-xs"
+                  />
+                ) : (
+                  "—"
+                )}
+              </td>
               <td className="px-5 py-4 text-zinc-900">
                 <span>{order.total}</span>
                 {order.priceBreakdown.discount &&

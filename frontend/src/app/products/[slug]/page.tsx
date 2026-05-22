@@ -158,7 +158,13 @@ export default async function ProductPage({ params }: PageProps) {
               ringSize={product.ringSize}
             />
 
-            <ProductPincodeCheck />
+            <ProductPincodeCheck
+              weightKg={(() => {
+                const grams = Number.parseFloat(product.weight.replace(/[^\d.]/g, ""));
+                if (!Number.isFinite(grams) || grams <= 0) return 0.1;
+                return Math.max(0.1, grams / 1000);
+              })()}
+            />
           </div>
         </div>
 

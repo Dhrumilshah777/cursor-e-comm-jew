@@ -1,4 +1,5 @@
 import type { AccountOrder } from "@/data/accountOrders";
+import type { CancellationInfo } from "@/lib/cancellation";
 import { customerFetch } from "@/lib/customerFetch";
 
 type OrdersResponse = { orders: AccountOrder[] };
@@ -28,4 +29,21 @@ export async function fetchOrderSummary(
     orderNumber: order.orderNumber,
     returnEligible: order.returnEligible,
   };
+}
+
+export async function cancelOrder(
+  orderId: string,
+  input: {
+    reason: import("@/lib/cancellation").CancellationReason;
+    note?: string;
+    policyConfirmed: boolean;
+  },
+): Promise<{
+  order: AccountOrder;
+  cancellation: CancellationInfo;
+}> {
+  return customerFetch(`/api/orders/${orderId}/cancel`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
