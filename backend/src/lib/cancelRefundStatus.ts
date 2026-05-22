@@ -66,6 +66,15 @@ export function resolveOrderPaymentStatus(input: {
   return input.paymentStatus;
 }
 
+export function cancelRefundCreditedUpdate(processedAt: Date = new Date()) {
+  return {
+    cancelRefundStatus: "CREDITED" as const,
+    cancelRefundProcessingAt: processedAt,
+    cancelRefundCreditedAt: processedAt,
+    paymentStatus: cancelRefundPaymentStatusLabel("CREDITED"),
+  };
+}
+
 export function buildCancelRefundTimeline(input: {
   cancelRefundStatus: CancelRefundStatus | null;
   cancelledAt: Date | null;
@@ -77,7 +86,7 @@ export function buildCancelRefundTimeline(input: {
 
   const dates = [
     cancelledAt,
-    input.cancelRefundProcessingAt,
+    input.cancelRefundProcessingAt ?? input.cancelRefundCreditedAt,
     input.cancelRefundCreditedAt,
   ];
 

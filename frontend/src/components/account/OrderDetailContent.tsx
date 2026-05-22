@@ -139,7 +139,16 @@ export default function OrderDetailContent({
 
       <section className="border border-zinc-100 px-5 py-6 sm:px-8 sm:py-8">
         <SectionTitle>Order status</SectionTitle>
-        <StatusTimeline steps={order.timeline} />
+        {order.status === "Cancelled" ? (
+          <p className="mt-3 text-sm font-light text-zinc-500">
+            This order was cancelled. Fulfillment tracking is no longer active — see refund
+            status below.
+          </p>
+        ) : null}
+        <StatusTimeline
+          steps={order.timeline}
+          disabled={order.status === "Cancelled"}
+        />
       </section>
 
       {order.refundTimeline && order.refundTimeline.length > 0 ? (
@@ -152,11 +161,15 @@ export default function OrderDetailContent({
             </p>
           ) : null}
           <StatusTimeline steps={order.refundTimeline} />
-          {order.cancelRefundStatus === "PROCESSING" ||
-          order.cancelRefundStatus === "INITIATED" ? (
+          {order.cancelRefundStatus === "INITIATED" ? (
             <p className="mt-4 text-sm font-light text-zinc-600">
-              Refunds typically appear in your original payment method within 5–7 business
-              days after processing begins.
+              Your refund is being processed by Razorpay. This page updates when Razorpay
+              confirms the refund.
+            </p>
+          ) : order.cancelRefundStatus === "CREDITED" ? (
+            <p className="mt-4 text-sm font-light text-emerald-800">
+              Razorpay has processed your refund. It may take 5–7 business days to appear in
+              your bank or UPI app.
             </p>
           ) : null}
         </section>

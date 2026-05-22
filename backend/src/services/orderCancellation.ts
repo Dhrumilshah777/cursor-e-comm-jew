@@ -89,6 +89,7 @@ export async function cancelOrderForUser(
   let cancelRazorpayRefundId: string | null = null;
   let cancelRefundStatus: CancelRefundStatus = "INITIATED";
   let cancelRefundProcessingAt: Date | null = null;
+  let cancelRefundCreditedAt: Date | null = null;
 
   if (order.transactionId) {
     try {
@@ -102,8 +103,10 @@ export async function cancelOrderForUser(
       });
       cancelRazorpayRefundId = refund.id;
       if (refund.status === "processed") {
-        cancelRefundStatus = "PROCESSING";
-        cancelRefundProcessingAt = new Date();
+        const processedAt = new Date();
+        cancelRefundStatus = "CREDITED";
+        cancelRefundProcessingAt = processedAt;
+        cancelRefundCreditedAt = processedAt;
       }
     } catch (error) {
       console.error(`Razorpay refund failed for order ${order.orderNumber}:`, error);
@@ -149,6 +152,7 @@ export async function cancelOrderForUser(
         cancelRazorpayRefundId,
         cancelRefundStatus,
         cancelRefundProcessingAt,
+        cancelRefundCreditedAt,
         paymentStatus,
       },
       include: {

@@ -1,5 +1,6 @@
 import { returnStatusLabel } from "../lib/returnStatus.js";
 import {
+  cancelRefundCreditedUpdate,
   cancelRefundPaymentStatusLabel,
   type CancelRefundStatus,
 } from "../lib/cancelRefundStatus.js";
@@ -65,6 +66,14 @@ async function updateCancelledOrderRefundStatus(
   status: CancelRefundStatus,
   processingAt?: Date,
 ) {
+  if (status === "CREDITED") {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: cancelRefundCreditedUpdate(processingAt ?? new Date()),
+    });
+    return;
+  }
+
   await prisma.order.update({
     where: { id: orderId },
     data: {
@@ -110,7 +119,7 @@ async function handleCancelledOrderRefundWebhook(
   }
 
   if (event === "refund.processed") {
-    await updateCancelledOrderRefundStatus(orderId, "PROCESSING", new Date());
+    await updateCancelledOrderRefundStatus(orderId, "CREDITED", new Date());
     return { ok: true as const, event, orderId };
   }
 

@@ -247,10 +247,14 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
         {order.refundTimeline && order.refundTimeline.length > 0 ? (
           <Section title="Refund progress">
             <StatusTimeline steps={order.refundTimeline} />
-            {order.cancelRefundStatus === "PROCESSING" ||
-            order.cancelRefundStatus === "INITIATED" ? (
+            {order.cancelRefundStatus === "INITIATED" ? (
               <p className="mt-4 text-sm font-light text-zinc-600">
-                Bank credit usually takes 5–7 business days after Razorpay processing.
+                Waiting for Razorpay refund.processed confirmation.
+              </p>
+            ) : order.cancelRefundStatus === "CREDITED" ? (
+              <p className="mt-4 text-sm font-light text-emerald-800">
+                Razorpay confirmed refund processed. Bank credit may still take 5–7 business
+                days.
               </p>
             ) : null}
           </Section>
