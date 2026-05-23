@@ -141,7 +141,10 @@ export function mapAdminOrderToDto(order: OrderWithRelations): AdminOrderDetailD
       : "—",
     shiprocketOrderId: order.shiprocketOrderId,
     shiprocketShipmentId: order.shiprocketShipmentId,
-    customer: order.user,
+    customer: {
+      ...order.user,
+      name: order.user.name ?? order.deliveryAddress.name ?? null,
+    },
     items: order.items.map((item) => ({
       id: item.id,
       slug: item.slug,

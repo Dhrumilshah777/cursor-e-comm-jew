@@ -26,6 +26,7 @@ function OrderCard({ order }: { order: AccountOrder }) {
           <p className="mt-1 text-sm font-light uppercase tracking-[0.12em] text-zinc-900">
             {order.orderNumber}
           </p>
+          <p className="mt-1 text-xs font-light text-zinc-600">{order.customerName}</p>
           <p className="mt-1 text-xs font-light text-zinc-500">
             Placed on {order.placedOn}
           </p>

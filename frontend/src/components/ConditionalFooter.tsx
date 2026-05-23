@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Footer from "@/components/Footer";
 
-const HIDE_FOOTER_PREFIXES = ["/cart", "/checkout", "/login"];
+const HIDE_FOOTER_PREFIXES = ["/cart", "/checkout", "/login", "/account"];
 
 export default function ConditionalFooter() {
   const pathname = usePathname();

@@ -80,6 +80,7 @@ export type ShippingInfo = {
 export type AccountOrder = {
   id: string;
   orderNumber: string;
+  customerName: string;
   placedOn: string;
   status: OrderStatus;
   items: OrderLineItem[];

@@ -59,6 +59,7 @@ export type TimelineStepDto = {
 export type AccountOrderDto = {
   id: string;
   orderNumber: string;
+  customerName: string;
   placedOn: string;
   status: string;
   items: OrderLineItemDto[];
@@ -200,6 +201,7 @@ export function mapOrderToDto(order: OrderWithRelations): AccountOrderDto {
   return {
     id: order.id,
     orderNumber: order.orderNumber,
+    customerName: order.deliveryAddress.name,
     placedOn: formatDisplayDate(order.placedAt),
     placedAt: order.placedAt.toISOString(),
     status,

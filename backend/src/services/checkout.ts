@@ -117,6 +117,26 @@ async function resolveDeliveryAddress(
   return { addressId: created.id };
 }
 
+async function resolveCheckoutCustomerName(
+  userId: string,
+  addressId?: string,
+  addressInput?: CheckoutAddressInput,
+): Promise<string | null> {
+  if (addressInput?.name?.trim()) {
+    return addressInput.name.trim();
+  }
+
+  if (addressId) {
+    const saved = await prisma.address.findFirst({
+      where: { id: addressId, userId },
+      select: { name: true },
+    });
+    return saved?.name?.trim() ?? null;
+  }
+
+  return null;
+}
+
 export async function getCartCheckoutTotals(userId: string, couponCode?: string | null) {
   const cart = await prisma.cart.findUnique({
     where: { userId },
@@ -223,6 +243,12 @@ export async function placeOrderFromCart(
   if ("error" in addressResult) {
     return addressResult;
   }
+
+  const checkoutCustomerName = await resolveCheckoutCustomerName(
+    userId,
+    input.addressId,
+    input.address,
+  );
 
   let goldValuePaise = 0;
   let makingChargePaise = 0;
@@ -338,6 +364,13 @@ export async function placeOrderFromCart(
 
     if (couponId) {
       await incrementCouponUsage(tx, couponId);
+    }
+
+    if (checkoutCustomerName) {
+      await tx.user.update({
+        where: { id: userId },
+        data: { name: checkoutCustomerName },
+      });
     }
 
     return created;

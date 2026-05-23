@@ -99,6 +99,9 @@ export default function CheckoutPageContent() {
         if (user?.phone) {
           setPhone(phoneFromSaved(user.phone));
         }
+        if (user?.name) {
+          setName(user.name);
+        }
       })
       .catch(() => {
         if (!cancelled) setShowNewAddressForm(true);

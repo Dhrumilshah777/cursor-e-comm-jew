@@ -123,7 +123,8 @@ export default function OrderDetailContent({
               <p className="mt-1 text-lg font-light uppercase tracking-[0.1em] text-zinc-950 sm:text-xl">
                 #{order.orderNumber}
               </p>
-              <p className="mt-2 text-sm font-light text-zinc-600">
+              <p className="mt-2 text-sm font-light text-zinc-800">{order.customerName}</p>
+              <p className="mt-1 text-sm font-light text-zinc-600">
                 Placed on {order.placedOn}
               </p>
             </div>
