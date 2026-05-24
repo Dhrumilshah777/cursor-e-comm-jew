@@ -8,6 +8,7 @@ import express from "express";
 
 import { prisma } from "./lib/prisma.js";
 import { connectRedis, isRedisConfigured, pingRedis } from "./lib/redis.js";
+import { createRateLimiter, ipKey } from "./middleware/rateLimit.js";
 
 import { adminRouter } from "./routes/admin/index.js";
 import { authRouter } from "./routes/auth.js";
@@ -27,7 +28,33 @@ import { deliveryRouter } from "./routes/delivery.js";
 
 const app = express();
 
+// Render and most PaaS providers run the app behind a reverse proxy.
+// Trusting the first proxy hop lets req.ip reflect the real client IP
+// for rate limiting and logging.
+app.set("trust proxy", 1);
+
 const port = Number(process.env.PORT) || 4000;
+
+const globalApiLimiter = createRateLimiter({
+  name: "global-api",
+  windowSeconds: 60,
+  max: 300,
+  keys: [ipKey("global-api")],
+  message: "You're sending too many requests. Please slow down.",
+  skip: (req) =>
+    // Don't throttle webhooks (they have their own auth/signature checks).
+    req.path.startsWith("/api/checkout/razorpay/webhook") ||
+    req.path.startsWith("/api/shiprocket/webhook") ||
+    req.path === "/api/health",
+});
+
+const publicReadLimiter = createRateLimiter({
+  name: "public-read",
+  windowSeconds: 60,
+  max: 120,
+  keys: [ipKey("public-read")],
+  message: "Too many requests. Please slow down.",
+});
 
 const allowedOrigins = (process.env.FRONTEND_ORIGIN ?? "http://localhost:3000")
   .split(",")
@@ -108,16 +135,18 @@ app.get("/api/health", async (_req, res) => {
 
 
 
+app.use("/api", globalApiLimiter);
+
 app.use("/api/auth", authRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/checkout", checkoutRouter);
 app.use("/api/orders", ordersRouter);
 
-app.use("/api/products", productsRouter);
-app.use("/api/homepage", homepageRouter);
+app.use("/api/products", publicReadLimiter, productsRouter);
+app.use("/api/homepage", publicReadLimiter, homepageRouter);
+app.use("/api/delivery", publicReadLimiter, deliveryRouter);
 
 app.use("/api/returns", returnsRouter);
-app.use("/api/delivery", deliveryRouter);
 
 app.use("/api/admin", adminRouter);
 

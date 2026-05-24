@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireCustomer, type CustomerRequest } from "../middleware/requireCustomer.js";
+import { createRateLimiter, ipKey, userKey } from "../middleware/rateLimit.js";
 import { listSavedAddressesForUser } from "../services/addresses.js";
 import { parseCheckoutAddressPayload } from "../services/checkoutAddresses.js";
 import { previewCheckoutCoupon, listAvailableCheckoutCoupons } from "../services/checkout.js";
@@ -9,6 +10,30 @@ import {
 } from "../services/razorpayCheckout.js";
 
 export const checkoutRouter = Router();
+
+const couponApplyLimiter = createRateLimiter({
+  name: "checkout-coupon",
+  windowSeconds: 10 * 60,
+  max: 20,
+  keys: [userKey("coupon"), ipKey("coupon")],
+  message: "Too many coupon attempts. Please wait a few minutes.",
+});
+
+const createCheckoutLimiter = createRateLimiter({
+  name: "checkout-create-order",
+  windowSeconds: 10 * 60,
+  max: 30,
+  keys: [userKey("checkout-create"), ipKey("checkout-create")],
+  message: "Too many checkout attempts. Please wait before trying again.",
+});
+
+const verifyPaymentLimiter = createRateLimiter({
+  name: "checkout-verify",
+  windowSeconds: 10 * 60,
+  max: 60,
+  keys: [userKey("checkout-verify"), ipKey("checkout-verify")],
+  message: "Too many payment verifications. Please wait before retrying.",
+});
 
 function couponErrorResponse(
   res: import("express").Response,
@@ -49,7 +74,7 @@ checkoutRouter.get("/coupons", requireCustomer, async (req: CustomerRequest, res
   }
 });
 
-checkoutRouter.post("/apply-coupon", requireCustomer, async (req: CustomerRequest, res) => {
+checkoutRouter.post("/apply-coupon", requireCustomer, couponApplyLimiter, async (req: CustomerRequest, res) => {
   const code = typeof req.body?.code === "string" ? req.body.code.trim() : "";
   if (!code) {
     res.status(400).json({ error: "Coupon code is required" });
@@ -86,7 +111,7 @@ checkoutRouter.get("/addresses", requireCustomer, async (req: CustomerRequest, r
   }
 });
 
-checkoutRouter.post("/razorpay/create-order", requireCustomer, async (req: CustomerRequest, res) => {
+checkoutRouter.post("/razorpay/create-order", requireCustomer, createCheckoutLimiter, async (req: CustomerRequest, res) => {
   const payload = parseCheckoutAddressPayload(req.body);
 
   if (!payload) {
@@ -141,7 +166,7 @@ checkoutRouter.post("/razorpay/create-order", requireCustomer, async (req: Custo
   }
 });
 
-checkoutRouter.post("/razorpay/verify", requireCustomer, async (req: CustomerRequest, res) => {
+checkoutRouter.post("/razorpay/verify", requireCustomer, verifyPaymentLimiter, async (req: CustomerRequest, res) => {
   const razorpayOrderId = req.body?.razorpay_order_id;
   const razorpayPaymentId = req.body?.razorpay_payment_id;
   const razorpaySignature = req.body?.razorpay_signature;

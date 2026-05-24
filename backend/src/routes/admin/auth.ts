@@ -2,10 +2,20 @@ import { Router } from "express";
 import { adminCookieName, adminCookieOptions } from "../../lib/auth.js";
 import { getAdminById, loginAdmin } from "../../services/adminAuth.js";
 import { requireAdmin, type AdminRequest } from "../../middleware/requireAdmin.js";
+import { createRateLimiter, ipKey } from "../../middleware/rateLimit.js";
 
 export const adminAuthRouter = Router();
 
-adminAuthRouter.post("/login", async (req, res) => {
+const adminLoginLimiter = createRateLimiter({
+  name: "admin-login",
+  windowSeconds: 15 * 60,
+  max: 10,
+  keys: [ipKey("admin-login")],
+  message:
+    "Too many login attempts. Please wait 15 minutes before trying again.",
+});
+
+adminAuthRouter.post("/login", adminLoginLimiter, async (req, res) => {
   const { email, password } = req.body as { email?: string; password?: string };
 
   if (!email || !password) {

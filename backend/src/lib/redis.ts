@@ -157,3 +157,59 @@ export async function cacheSetJson(
 ): Promise<void> {
   await cacheSet(key, JSON.stringify(value), ttlSeconds);
 }
+
+/**
+ * Atomically increment a counter and ensure it expires after ttlSeconds.
+ * Returns { count, ttlSeconds } where count is the new value after increment
+ * and ttlSeconds is the remaining time-to-live for the key.
+ */
+export async function cacheIncrWithTtl(
+  key: string,
+  ttlSeconds: number,
+): Promise<{ count: number; ttlSeconds: number }> {
+  const redis = getClient();
+
+  if (redis) {
+    const pipeline = redis.multi();
+    pipeline.incr(key);
+    pipeline.ttl(key);
+    const results = await pipeline.exec();
+
+    let count = 0;
+    let ttl = ttlSeconds;
+    if (results) {
+      const incrResult = results[0]?.[1];
+      const ttlResult = results[1]?.[1];
+      if (typeof incrResult === "number") count = incrResult;
+      if (typeof ttlResult === "number") ttl = ttlResult;
+    }
+
+    if (count === 1 || ttl < 0) {
+      await redis.expire(key, ttlSeconds);
+      ttl = ttlSeconds;
+    }
+
+    return { count, ttlSeconds: ttl };
+  }
+
+  pruneMemoryStore();
+  const now = Date.now();
+  const existing = memoryStore.get(key);
+  let count: number;
+  let expiresAt: number;
+
+  if (!existing || existing.expiresAt <= now) {
+    count = 1;
+    expiresAt = now + ttlSeconds * 1000;
+  } else {
+    count = Number.parseInt(existing.value, 10) + 1;
+    if (Number.isNaN(count)) count = 1;
+    expiresAt = existing.expiresAt;
+  }
+
+  memoryStore.set(key, { value: String(count), expiresAt });
+  return {
+    count,
+    ttlSeconds: Math.max(1, Math.ceil((expiresAt - now) / 1000)),
+  };
+}

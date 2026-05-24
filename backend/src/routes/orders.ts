@@ -7,6 +7,7 @@ import {
   parseCancellationNote,
   parseCancellationReason,
 } from "../lib/orderCancellation.js";
+import { createRateLimiter, ipKey, userKey } from "../middleware/rateLimit.js";
 import { requireCustomer, type CustomerRequest } from "../middleware/requireCustomer.js";
 import {
   cancelOrderForUser,
@@ -20,6 +21,14 @@ import {
 } from "../services/orders.js";
 
 export const ordersRouter = Router();
+
+const cancelOrderLimiter = createRateLimiter({
+  name: "order-cancel",
+  windowSeconds: 60 * 60,
+  max: 10,
+  keys: [userKey("order-cancel"), ipKey("order-cancel")],
+  message: "Too many cancellation attempts. Please contact support if this is in error.",
+});
 
 function resolvePhone(queryPhone: unknown): string | null {
   if (typeof queryPhone === "string" && queryPhone.trim()) {
@@ -64,7 +73,7 @@ ordersRouter.get("/", async (req, res) => {
   }
 });
 
-ordersRouter.post("/:orderId/cancel", requireCustomer, async (req: CustomerRequest, res) => {
+ordersRouter.post("/:orderId/cancel", requireCustomer, cancelOrderLimiter, async (req: CustomerRequest, res) => {
   const orderId = req.params.orderId;
   if (!orderId || Array.isArray(orderId)) {
     res.status(400).json({ error: "orderId is required" });

@@ -7,6 +7,11 @@ import {
 import { requireCustomer, type CustomerRequest } from "../middleware/requireCustomer.js";
 import { OtpRateLimitError, TwilioVerifyError } from "../lib/twilioVerify.js";
 import {
+  createRateLimiter,
+  ipKey,
+  phoneFromBodyKey,
+} from "../middleware/rateLimit.js";
+import {
   getCustomerProfile,
   sendLoginOtp,
   verifyLoginOtp,
@@ -14,7 +19,33 @@ import {
 
 export const authRouter = Router();
 
-authRouter.post("/send-otp", async (req, res) => {
+const sendOtpLimiter = createRateLimiter({
+  name: "auth-send-otp",
+  windowSeconds: 15 * 60,
+  max: 5,
+  keys: [phoneFromBodyKey("send-otp"), ipKey("send-otp")],
+  message:
+    "Too many OTP requests. Please wait a few minutes before trying again.",
+});
+
+const sendOtpDailyLimiter = createRateLimiter({
+  name: "auth-send-otp-daily",
+  windowSeconds: 24 * 60 * 60,
+  max: 15,
+  keys: [phoneFromBodyKey("send-otp-daily")],
+  message:
+    "You've requested too many OTPs today. Please try again tomorrow or contact support.",
+});
+
+const verifyOtpLimiter = createRateLimiter({
+  name: "auth-verify-otp",
+  windowSeconds: 15 * 60,
+  max: 10,
+  keys: [phoneFromBodyKey("verify-otp"), ipKey("verify-otp")],
+  message: "Too many incorrect attempts. Please request a new code.",
+});
+
+authRouter.post("/send-otp", sendOtpDailyLimiter, sendOtpLimiter, async (req, res) => {
   const phone = req.body?.phone;
   if (!phone || typeof phone !== "string") {
     res.status(400).json({ error: "phone is required" });
@@ -57,7 +88,7 @@ authRouter.post("/send-otp", async (req, res) => {
   }
 });
 
-authRouter.post("/verify-otp", async (req, res) => {
+authRouter.post("/verify-otp", verifyOtpLimiter, async (req, res) => {
   const phone = req.body?.phone;
   const otp = req.body?.otp;
   const verificationSid =
