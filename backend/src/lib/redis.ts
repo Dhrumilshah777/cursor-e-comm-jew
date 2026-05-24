@@ -13,6 +13,17 @@ export const redisKeys = {
   otpPending: (phone: string) => `wj:otp:pending:${phone}`,
   otpSendLock: (inflightKey: string) => `wj:otp:send-lock:${inflightKey}`,
   shiprocketToken: () => "wj:shiprocket:auth-token",
+  productsList: (category?: string) =>
+    `wj:cache:products:list:${category ?? "all"}`,
+  productBySlug: (slug: string) => `wj:cache:products:slug:${slug}`,
+  productRelated: (slug: string, limit: number) =>
+    `wj:cache:products:related:${slug}:${limit}`,
+  homepagePublic: () => "wj:cache:homepage:public",
+} as const;
+
+export const cachePatterns = {
+  allProducts: "wj:cache:products:*",
+  homepage: "wj:cache:homepage:*",
 } as const;
 
 export function isRedisConfigured(): boolean {
@@ -113,6 +124,41 @@ export async function cacheDel(key: string): Promise<void> {
     return;
   }
   memoryStore.delete(key);
+}
+
+/**
+ * Delete all keys matching a glob pattern (e.g. "wj:cache:products:*").
+ * Uses SCAN under the hood so it never blocks the Redis event loop.
+ */
+export async function cacheDelByPattern(pattern: string): Promise<number> {
+  const redis = getClient();
+  if (redis) {
+    let cursor = "0";
+    let removed = 0;
+    do {
+      const [next, keys] = await redis.scan(cursor, "MATCH", pattern, "COUNT", 200);
+      cursor = next;
+      if (keys.length > 0) {
+        removed += await redis.del(...keys);
+      }
+    } while (cursor !== "0");
+    return removed;
+  }
+
+  const regex = globToRegExp(pattern);
+  let removed = 0;
+  for (const key of [...memoryStore.keys()]) {
+    if (regex.test(key)) {
+      memoryStore.delete(key);
+      removed++;
+    }
+  }
+  return removed;
+}
+
+function globToRegExp(pattern: string): RegExp {
+  const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+  return new RegExp(`^${escaped}$`);
 }
 
 export async function cacheSetNx(

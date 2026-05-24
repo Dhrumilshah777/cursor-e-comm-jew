@@ -27,7 +27,7 @@ export type HomepageData = {
 
 export async function fetchHomepage(): Promise<HomepageData> {
   const response = await fetch(new URL("/api/homepage", getApiBaseUrl()).toString(), {
-    cache: "no-store",
+    next: { revalidate: 60, tags: ["homepage"] },
   });
   if (!response.ok) {
     throw new Error("Failed to load homepage");

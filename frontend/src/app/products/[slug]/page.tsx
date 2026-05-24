@@ -10,7 +10,7 @@ import ProductYouMayAlsoLike from "@/components/ProductYouMayAlsoLike";
 import { getCollection } from "@/data/collections";
 import { fetchProductBySlug, fetchRelatedProducts } from "@/lib/productsApi";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const jost = Jost({
   subsets: ["latin"],

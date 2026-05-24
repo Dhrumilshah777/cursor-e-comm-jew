@@ -1,7 +1,13 @@
 import type { HomepageSection, Product } from "../generated/prisma/client.js";
+import {
+  cachedJson,
+  HOMEPAGE_CACHE_TTL_SECONDS,
+  invalidateCachedHomepage,
+} from "../lib/cache.js";
 import { prisma } from "../lib/prisma.js";
 import { formatPaise, metalToDisplay } from "../lib/format.js";
 import { calculateProductPricePaise } from "../lib/pricing.js";
+import { redisKeys } from "../lib/redis.js";
 
 export const MAX_ELEGANCE_VIDEOS = 4;
 
@@ -119,39 +125,45 @@ async function loadAdminFeatures(section?: HomepageSection) {
 }
 
 export async function getPublicHomepage() {
-  const features = await loadFeatures();
+  return cachedJson(
+    redisKeys.homepagePublic(),
+    HOMEPAGE_CACHE_TTL_SECONDS,
+    async () => {
+      const features = await loadFeatures();
 
-  const newArrivals: HomepageProductCardDto[] = [];
-  const topStyles: HomepageProductCardDto[] = [];
-  const eleganceInMotion: HomepageVideoDto[] = [];
+      const newArrivals: HomepageProductCardDto[] = [];
+      const topStyles: HomepageProductCardDto[] = [];
+      const eleganceInMotion: HomepageVideoDto[] = [];
 
-  for (const feature of features) {
-    if (feature.section === "NEW_ARRIVALS" && feature.product) {
-      newArrivals.push(
-        productCardFromFeature(feature as typeof feature & { product: Product }),
-      );
-    } else if (feature.section === "TOP_STYLES" && feature.product) {
-      topStyles.push(
-        productCardFromFeature(feature as typeof feature & { product: Product }),
-      );
-    } else if (feature.section === "ELEGANCE_IN_MOTION" && feature.videoUrl) {
-      eleganceInMotion.push({
-        id: feature.id,
-        featureId: feature.id,
-        sortOrder: feature.sortOrder,
-        videoUrl: feature.videoUrl,
-        image: feature.posterUrl ?? feature.product?.image ?? "",
-        alt: feature.caption ?? feature.product?.alt ?? "Elegance in motion video",
-        caption: feature.caption,
-        href:
-          feature.linkUrl ??
-          (feature.product ? `/products/${feature.product.slug}` : "#"),
-        linkUrl: feature.linkUrl,
-      });
-    }
-  }
+      for (const feature of features) {
+        if (feature.section === "NEW_ARRIVALS" && feature.product) {
+          newArrivals.push(
+            productCardFromFeature(feature as typeof feature & { product: Product }),
+          );
+        } else if (feature.section === "TOP_STYLES" && feature.product) {
+          topStyles.push(
+            productCardFromFeature(feature as typeof feature & { product: Product }),
+          );
+        } else if (feature.section === "ELEGANCE_IN_MOTION" && feature.videoUrl) {
+          eleganceInMotion.push({
+            id: feature.id,
+            featureId: feature.id,
+            sortOrder: feature.sortOrder,
+            videoUrl: feature.videoUrl,
+            image: feature.posterUrl ?? feature.product?.image ?? "",
+            alt: feature.caption ?? feature.product?.alt ?? "Elegance in motion video",
+            caption: feature.caption,
+            href:
+              feature.linkUrl ??
+              (feature.product ? `/products/${feature.product.slug}` : "#"),
+            linkUrl: feature.linkUrl,
+          });
+        }
+      }
 
-  return { newArrivals, topStyles, eleganceInMotion };
+      return { newArrivals, topStyles, eleganceInMotion };
+    },
+  );
 }
 
 export async function listAdminHomepageFeatures(section?: HomepageSection) {
@@ -219,6 +231,8 @@ export async function createHomepageFeature(input: {
     include: { product: true },
   });
 
+  await invalidateCachedHomepage();
+
   return { feature: mapAdminFeature(feature) };
 }
 
@@ -254,6 +268,8 @@ export async function updateHomepageFeature(
     include: { product: true },
   });
 
+  await invalidateCachedHomepage();
+
   return mapAdminFeature(feature);
 }
 
@@ -261,6 +277,7 @@ export async function deleteHomepageFeature(id: string) {
   const existing = await prisma.homepageFeature.findUnique({ where: { id } });
   if (!existing) return null;
   await prisma.homepageFeature.delete({ where: { id } });
+  await invalidateCachedHomepage();
   return { ok: true as const };
 }
 
@@ -276,5 +293,6 @@ export async function reorderHomepageFeatures(
       }),
     ),
   );
+  await invalidateCachedHomepage();
   return listAdminHomepageFeatures(section);
 }

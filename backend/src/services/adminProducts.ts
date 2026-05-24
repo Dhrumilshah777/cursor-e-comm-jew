@@ -4,6 +4,7 @@ import type {
   MetalType,
   Product,
 } from "../generated/prisma/client.js";
+import { invalidateCachedProducts } from "../lib/cache.js";
 import { prisma } from "../lib/prisma.js";
 import { mapProductToDto } from "../lib/productMapper.js";
 import {
@@ -133,6 +134,7 @@ export async function createAdminProduct(data: AdminProductInput & { id?: string
       ...payload,
     },
   });
+  await invalidateCachedProducts();
   return toAdminProductDto(product);
 }
 
@@ -165,6 +167,7 @@ export async function updateAdminProduct(id: string, data: Partial<AdminProductI
     where: { id },
     data: payload,
   });
+  await invalidateCachedProducts();
   return toAdminProductDto(product);
 }
 
@@ -173,5 +176,6 @@ export async function deleteAdminProduct(id: string) {
     where: { id },
     data: { isActive: false },
   });
+  await invalidateCachedProducts();
   return toAdminProductDto(product);
 }

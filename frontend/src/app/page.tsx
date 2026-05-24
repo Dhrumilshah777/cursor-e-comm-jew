@@ -51,6 +51,8 @@ function mapVideos(
   }));
 }
 
+export const revalidate = 60;
+
 export default async function Home() {
   let homepage: Awaited<ReturnType<typeof fetchHomepage>> | null = null;
   try {
