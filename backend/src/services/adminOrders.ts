@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import { mapAdminOrderToDto, orderStatusEventLabel } from "../lib/adminOrderMapper.js";
+import { enqueueShiprocketRetry } from "../lib/shiprocketQueue.js";
 import {
   fulfillOrderOnShiprocket,
   getShiprocketLogFromError,
@@ -132,6 +133,15 @@ export async function updateAdminOrder(
       shiprocketLog = getShiprocketLogFromError(error);
       console.error(`Shiprocket fulfillment for order ${id}:`, error);
 
+      // Auto-retry in the background so transient Shiprocket errors recover
+      // without admin intervention.
+      void enqueueShiprocketRetry({
+        orderId: id,
+        orderNumber: existing.orderNumber,
+      }).catch((queueError) =>
+        console.error("[Shiprocket-retry] enqueue failed:", queueError),
+      );
+
       const unchanged = await prisma.order.findUnique({
         where: { id },
         include: orderInclude,
@@ -140,7 +150,7 @@ export async function updateAdminOrder(
 
       return {
         order: mapAdminOrderToDto(unchanged),
-        shiprocketWarning: message,
+        shiprocketWarning: `${message} — auto-retry queued`,
         shiprocketFailed: true,
         ...(shiprocketLog?.length ? { shiprocketLog } : {}),
       };
@@ -203,6 +213,13 @@ export async function addOrderStatusEvent(
       shiprocketLog = getShiprocketLogFromError(error);
       console.error(`Shiprocket fulfillment for order ${orderId}:`, error);
 
+      void enqueueShiprocketRetry({
+        orderId,
+        orderNumber: existing.orderNumber,
+      }).catch((queueError) =>
+        console.error("[Shiprocket-retry] enqueue failed:", queueError),
+      );
+
       const unchanged = await prisma.order.findUnique({
         where: { id: orderId },
         include: orderInclude,
@@ -211,7 +228,7 @@ export async function addOrderStatusEvent(
 
       return {
         order: mapAdminOrderToDto(unchanged),
-        shiprocketWarning: message,
+        shiprocketWarning: `${message} — auto-retry queued`,
         shiprocketFailed: true,
         ...(shiprocketLog?.length ? { shiprocketLog } : {}),
       };

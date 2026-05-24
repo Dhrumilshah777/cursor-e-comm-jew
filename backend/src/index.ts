@@ -7,8 +7,12 @@ import cookieParser from "cookie-parser";
 import express from "express";
 
 import { prisma } from "./lib/prisma.js";
+import { isQueueEnabled, shutdownQueues } from "./lib/queue.js";
 import { connectRedis, isRedisConfigured, pingRedis } from "./lib/redis.js";
 import { createRateLimiter, ipKey } from "./middleware/rateLimit.js";
+import { startNotificationsWorker } from "./workers/notificationsWorker.js";
+import { startRefundsWorker } from "./workers/refundsWorker.js";
+import { startShiprocketRetryWorker } from "./workers/shiprocketWorker.js";
 
 import { adminRouter } from "./routes/admin/index.js";
 import { authRouter } from "./routes/auth.js";
@@ -127,6 +131,7 @@ app.get("/api/health", async (_req, res) => {
       ok: true,
       database: "connected",
       redis: redisConfigured ? "connected" : "not_configured",
+      queues: isQueueEnabled() ? "running" : "inline",
     });
   } catch {
     res.status(503).json({ ok: false, database: "disconnected" });
@@ -160,9 +165,28 @@ async function startServer() {
     }
   }
 
-  app.listen(port, () => {
+  // Background workers — they only spin up when REDIS_URL is set; otherwise
+  // jobs run inline as fallback (see queue.ts / refundQueue.ts).
+  startNotificationsWorker();
+  startRefundsWorker();
+  startShiprocketRetryWorker();
+
+  const server = app.listen(port, () => {
     console.log(`API listening on http://localhost:${port}`);
   });
+
+  const gracefulShutdown = async (signal: string) => {
+    console.log(`\n[${signal}] graceful shutdown starting…`);
+    server.close(() => console.log("[Server] HTTP server closed"));
+    await shutdownQueues().catch((error) =>
+      console.error("[Queue] shutdown error:", error),
+    );
+    await prisma.$disconnect().catch(() => {});
+    process.exit(0);
+  };
+
+  process.on("SIGTERM", () => void gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => void gracefulShutdown("SIGINT"));
 }
 
 void startServer();

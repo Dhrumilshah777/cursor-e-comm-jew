@@ -1,6 +1,10 @@
-import { sendTransactionalMessage } from "./twilioSms.js";
+import { enqueueNotification } from "./notificationQueue.js";
 
 const STORE_NAME = process.env.STORE_NAME?.trim() || "Dhrumil Jewellers";
+
+async function send(kind: string, to: string, body: string): Promise<void> {
+  await enqueueNotification({ to, body, kind });
+}
 
 function adminPhone(): string | null {
   const raw =
@@ -20,7 +24,7 @@ export async function notifyOrderConfirmed(input: {
   totalPaise: number;
 }) {
   const body = `${STORE_NAME}: Order ${input.orderNumber} confirmed. Total ${formatInrFromPaise(input.totalPaise)}. Track in My Orders on our website. Thank you!`;
-  await sendTransactionalMessage(input.customerPhone, body);
+  await send("order-confirmed", input.customerPhone, body);
 }
 
 export async function notifyAdminOrderPlaced(input: {
@@ -36,7 +40,7 @@ export async function notifyAdminOrderPlaced(input: {
   }
   const customerLabel = input.customerName?.trim() || input.customerPhone;
   const body = `${STORE_NAME} Admin: New order ${input.orderNumber} placed. Total ${formatInrFromPaise(input.totalPaise)}. Customer ${customerLabel} (${input.customerPhone}). Check Admin Orders.`;
-  await sendTransactionalMessage(admin, body);
+  await send("admin-order-placed", admin, body);
 }
 
 export async function notifyOrderCancelled(input: {
@@ -47,7 +51,7 @@ export async function notifyOrderCancelled(input: {
 }) {
   const status = input.refundStatus ?? "Refund initiated";
   const body = `${STORE_NAME}: Order ${input.orderNumber} has been cancelled. ${status} for ${input.refundAmount}. Credited to your original payment method in 5-7 business days.`;
-  await sendTransactionalMessage(input.customerPhone, body);
+  await send("order-cancelled", input.customerPhone, body);
 }
 
 export async function notifyAdminOrderCancelled(input: {
@@ -60,7 +64,7 @@ export async function notifyAdminOrderCancelled(input: {
   if (!admin) return;
   const status = input.refundStatus ?? "Refund initiated";
   const body = `${STORE_NAME} Admin: Order ${input.orderNumber} cancelled by customer ${input.customerPhone}. ${status} — ${input.refundAmount}. Check Admin Orders.`;
-  await sendTransactionalMessage(admin, body);
+  await send("admin-order-cancelled", admin, body);
 }
 
 export async function notifyOrderDelivered(input: {
@@ -68,7 +72,7 @@ export async function notifyOrderDelivered(input: {
   orderNumber: string;
 }) {
   const body = `${STORE_NAME}: Your order ${input.orderNumber} has been delivered. Thank you for shopping with us!`;
-  await sendTransactionalMessage(input.customerPhone, body);
+  await send("order-delivered", input.customerPhone, body);
 }
 
 export async function notifyAdminReturnRequested(input: {
@@ -83,7 +87,7 @@ export async function notifyAdminReturnRequested(input: {
     return;
   }
   const body = `${STORE_NAME} Admin: New return request for ${input.orderNumber} (${input.productName}). Reason: ${input.reason}. Customer ${input.customerPhone}. Check Admin Returns.`;
-  await sendTransactionalMessage(admin, body);
+  await send("admin-return-requested", admin, body);
 }
 
 export async function notifyReturnRejected(input: {
@@ -91,7 +95,7 @@ export async function notifyReturnRejected(input: {
   orderNumber: string;
 }) {
   const body = `${STORE_NAME}: Your return request for order ${input.orderNumber} could not be approved. Contact Client Care for help.`;
-  await sendTransactionalMessage(input.customerPhone, body);
+  await send("return-rejected", input.customerPhone, body);
 }
 
 export async function notifyReturnApproved(input: {
@@ -103,7 +107,7 @@ export async function notifyReturnApproved(input: {
     ? ` Pickup: ${input.pickupScheduledFor}.`
     : " Courier will contact you before pickup.";
   const body = `${STORE_NAME}: Return approved for order ${input.orderNumber}.${pickupLine} Keep item packed with invoice and certificate.`;
-  await sendTransactionalMessage(input.customerPhone, body);
+  await send("return-approved", input.customerPhone, body);
 }
 
 export async function notifyRefundProcessed(input: {
@@ -112,7 +116,7 @@ export async function notifyRefundProcessed(input: {
   amountPaise: number;
 }) {
   const body = `${STORE_NAME}: Refund ${formatInrFromPaise(input.amountPaise)} for order ${input.orderNumber} has been processed to your original payment method (5-7 business days).`;
-  await sendTransactionalMessage(input.customerPhone, body);
+  await send("refund-processed", input.customerPhone, body);
 }
 
 export async function notifyAdminRefundFailed(input: {
@@ -123,7 +127,7 @@ export async function notifyAdminRefundFailed(input: {
   const admin = adminPhone();
   if (!admin) return;
   const body = `${STORE_NAME} Admin: Refund FAILED for return ${input.returnRequestId} (order ${input.orderNumber}).${input.reason ? ` ${input.reason}` : ""} Check Razorpay dashboard.`;
-  await sendTransactionalMessage(admin, body);
+  await send("admin-refund-failed", admin, body);
 }
 
 export async function notifyRefundInitiated(input: {
@@ -132,5 +136,16 @@ export async function notifyRefundInitiated(input: {
   amountPaise: number;
 }) {
   const body = `${STORE_NAME}: Refund of ${formatInrFromPaise(input.amountPaise)} initiated for order ${input.orderNumber}. You will receive it in 5-7 business days.`;
-  await sendTransactionalMessage(input.customerPhone, body);
+  await send("refund-initiated", input.customerPhone, body);
+}
+
+export async function notifyAdminCancellationRefundFailed(input: {
+  orderNumber: string;
+  refundAmount: string;
+  reason?: string;
+}) {
+  const admin = adminPhone();
+  if (!admin) return;
+  const body = `${STORE_NAME} Admin: Cancellation refund FAILED for order ${input.orderNumber} (${input.refundAmount}).${input.reason ? ` ${input.reason}` : ""} Refund needs manual action in Razorpay.`;
+  await send("admin-cancel-refund-failed", admin, body);
 }

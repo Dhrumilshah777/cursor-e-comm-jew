@@ -11,13 +11,13 @@ import {
   parseCancellationReason,
   type CancellationReason,
 } from "../lib/orderCancellation.js";
-import { createRazorpayRefund } from "../lib/razorpay.js";
 import { mapOrderToDto } from "../lib/orderMapper.js";
 import {
   notifyAdminOrderCancelled,
   notifyOrderCancelled,
 } from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
+import { enqueueRefund } from "../lib/refundQueue.js";
 
 export class OrderCancellationError extends Error {
   code: string;
@@ -86,38 +86,14 @@ export async function cancelOrderForUser(
     );
   }
 
-  let cancelRazorpayRefundId: string | null = null;
-  let cancelRefundStatus: CancelRefundStatus = "INITIATED";
-  let cancelRefundProcessingAt: Date | null = null;
-  let cancelRefundCreditedAt: Date | null = null;
-
-  if (order.transactionId) {
-    try {
-      const refund = await createRazorpayRefund({
-        paymentId: order.transactionId,
-        amountPaise: quote.refundPaise,
-        notes: {
-          order_number: order.orderNumber,
-          reason: "customer_cancellation",
-        },
-      });
-      cancelRazorpayRefundId = refund.id;
-      if (refund.status === "processed") {
-        const processedAt = new Date();
-        cancelRefundStatus = "CREDITED";
-        cancelRefundProcessingAt = processedAt;
-        cancelRefundCreditedAt = processedAt;
-      }
-    } catch (error) {
-      console.error(`Razorpay refund failed for order ${order.orderNumber}:`, error);
-      throw new OrderCancellationError(
-        "Refund could not be processed. Please contact client care.",
-        "REFUND_FAILED",
-      );
-    }
-  } else {
-    cancelRefundStatus = "INITIATED";
-  }
+  // Refund is created asynchronously by the refunds worker so the customer's
+  // cancel request returns instantly even when Razorpay is slow. We commit the
+  // order as cancelled with `cancelRefundStatus = INITIATED`, then push a job.
+  // The worker is idempotent — it re-reads the order before calling Razorpay.
+  const cancelRazorpayRefundId: string | null = null;
+  const cancelRefundStatus: CancelRefundStatus = "INITIATED";
+  const cancelRefundProcessingAt: Date | null = null;
+  const cancelRefundCreditedAt: Date | null = null;
 
   const paymentStatus = cancelRefundPaymentStatusLabel(cancelRefundStatus);
 
@@ -174,7 +150,27 @@ export async function cancelOrderForUser(
     });
   });
 
-    void notifyOrderCancelled({
+  if (order.transactionId) {
+    try {
+      await enqueueRefund({
+        kind: "order-cancellation",
+        orderId: order.id,
+        paymentId: order.transactionId,
+        amountPaise: quote.refundPaise,
+        orderNumber: order.orderNumber,
+        refundAmountLabel: quote.refundAmount,
+      });
+    } catch (error) {
+      // Don't fail the cancel just because the queue is down; the admin can
+      // re-trigger the refund manually if needed. The order is still cancelled.
+      console.error(
+        `Failed to enqueue cancellation refund for ${order.orderNumber}:`,
+        error,
+      );
+    }
+  }
+
+  void notifyOrderCancelled({
     customerPhone: order.user.phone,
     orderNumber: order.orderNumber,
     refundAmount: quote.refundAmount,

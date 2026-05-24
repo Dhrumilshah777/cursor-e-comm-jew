@@ -8,7 +8,7 @@ import type {
 } from "../generated/prisma/client.js";
 import { notifyRefundInitiated } from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
-import { createRazorpayRefund } from "../lib/razorpay.js";
+import { enqueueRefund } from "../lib/refundQueue.js";
 import {
   assignShiprocketAwb,
   createShiprocketReturnOrder,
@@ -333,36 +333,8 @@ export async function initiateReturnRefundOnItemReceived(returnRequestId: string
     returnRequest.refundAmountPaise ??
     returnRequest.orderItem.unitPricePaise * returnRequest.orderItem.quantity;
 
-  let razorpayRefundId: string;
-  let refundStatus: "INITIATED" | "PROCESSED" | "FAILED";
-
-  try {
-    const refund = await createRazorpayRefund({
-      paymentId,
-      amountPaise: lineTotalPaise,
-      notes: {
-        returnRequestId: returnRequest.id,
-        orderNumber: returnRequest.order.orderNumber,
-      },
-    });
-    razorpayRefundId = refund.id;
-    refundStatus = refund.status === "processed" ? "PROCESSED" : "INITIATED";
-    log.push({
-      step: "razorpay_refund",
-      ok: true,
-      summary: `Refund ${refund.id} (${refund.status})`,
-      response: refund,
-    });
-  } catch (error) {
-    log.push({
-      step: "razorpay_refund",
-      ok: false,
-      summary: "Razorpay refund failed",
-      error: error instanceof Error ? error.message : String(error),
-    });
-    throw new ReturnFulfillmentError("Razorpay refund failed", log);
-  }
-
+  // Refund is created asynchronously — admin's "Item received" action returns
+  // immediately and the worker calls Razorpay in the background.
   const updated = await prisma.$transaction(async (tx) => {
     await tx.returnStatusEvent.create({
       data: {
@@ -377,8 +349,7 @@ export async function initiateReturnRefundOnItemReceived(returnRequestId: string
       where: { id: returnRequestId },
       data: {
         status: "ITEM_RECEIVED",
-        razorpayRefundId,
-        refundStatus,
+        refundStatus: "INITIATED",
         refundAmountPaise: lineTotalPaise,
       },
       include: {
@@ -391,6 +362,24 @@ export async function initiateReturnRefundOnItemReceived(returnRequestId: string
     });
   });
 
+  log.push({
+    step: "razorpay_refund",
+    ok: true,
+    summary: "Refund queued for processing",
+  });
+
+  try {
+    await enqueueRefund({
+      kind: "return",
+      returnRequestId: returnRequest.id,
+      paymentId,
+      amountPaise: lineTotalPaise,
+      orderNumber: returnRequest.order.orderNumber,
+    });
+  } catch (error) {
+    console.error(`Failed to enqueue return refund ${returnRequest.id}:`, error);
+  }
+
   if (updated.order.user.phone) {
     void notifyRefundInitiated({
       customerPhone: updated.order.user.phone,
@@ -399,5 +388,10 @@ export async function initiateReturnRefundOnItemReceived(returnRequestId: string
     });
   }
 
-  return { returnRequest: updated, log, refundStatus, alreadyRefunded: false };
+  return {
+    returnRequest: updated,
+    log,
+    refundStatus: "INITIATED" as const,
+    alreadyRefunded: false,
+  };
 }
