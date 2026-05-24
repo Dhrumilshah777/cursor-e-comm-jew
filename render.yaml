@@ -17,6 +17,8 @@ services:
         generateValue: true
       - key: FRONTEND_ORIGIN
         sync: false
+      - key: REDIS_URL
+        sync: false
       - key: RAZORPAY_KEY_ID
         sync: false
       - key: RAZORPAY_KEY_SECRET

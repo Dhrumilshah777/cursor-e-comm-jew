@@ -1,3 +1,22 @@
+import {
+  cacheDel,
+  cacheGetJson,
+  cacheSetJson,
+  cacheSetNx,
+  redisKeys,
+} from "./redis.js";
+
+type PendingVerification = {
+  sid: string;
+  sentAt: number;
+};
+
+type VerificationResource = {
+  sid: string;
+  status: string;
+  to?: string;
+};
+
 type TwilioErrorBody = {
   code?: number;
   message?: string;
@@ -24,15 +43,9 @@ export class OtpRateLimitError extends Error {
   }
 }
 
-type VerificationResource = {
-  sid: string;
-  status: string;
-  to?: string;
-};
-
-const pendingByPhone = new Map<string, { sid: string; sentAt: number }>();
-const sendInFlight = new Map<string, Promise<SendTwilioVerificationResult>>();
 const MIN_RESEND_INTERVAL_MS = 30_000;
+const OTP_PENDING_TTL_SECONDS = 10 * 60;
+const OTP_SEND_LOCK_TTL_SECONDS = 60;
 
 export function isTwilioVerifyConfigured(): boolean {
   return Boolean(
@@ -88,15 +101,26 @@ async function cancelTwilioVerification(sid: string): Promise<void> {
   }
 }
 
-async function cancelPendingForPhone(phone: string): Promise<void> {
-  const pending = pendingByPhone.get(phone);
-  if (!pending) return;
-  await cancelTwilioVerification(pending.sid);
-  pendingByPhone.delete(phone);
+async function getPendingVerification(phone: string): Promise<PendingVerification | null> {
+  return cacheGetJson<PendingVerification>(redisKeys.otpPending(phone));
 }
 
-export function clearTwilioVerificationState(phone: string): void {
-  pendingByPhone.delete(phone);
+async function setPendingVerification(
+  phone: string,
+  pending: PendingVerification,
+): Promise<void> {
+  await cacheSetJson(redisKeys.otpPending(phone), pending, OTP_PENDING_TTL_SECONDS);
+}
+
+async function cancelPendingForPhone(phone: string): Promise<void> {
+  const pending = await getPendingVerification(phone);
+  if (!pending) return;
+  await cancelTwilioVerification(pending.sid);
+  await cacheDel(redisKeys.otpPending(phone));
+}
+
+export async function clearTwilioVerificationState(phone: string): Promise<void> {
+  await cacheDel(redisKeys.otpPending(phone));
 }
 
 export type SendTwilioVerificationResult = {
@@ -110,7 +134,7 @@ async function sendTwilioVerificationInternal(
 ): Promise<SendTwilioVerificationResult> {
   const now = Date.now();
   const forceNew = options?.forceNew === true;
-  const pending = pendingByPhone.get(phone);
+  const pending = await getPendingVerification(phone);
 
   if (forceNew && pending) {
     const elapsed = now - pending.sentAt;
@@ -121,13 +145,12 @@ async function sendTwilioVerificationInternal(
     await cancelPendingForPhone(phone);
   }
 
-  // Twilio returns the existing pending verification if one is already active.
   const result = await twilioVerifyRequest<VerificationResource>("/Verifications", {
     To: phone,
     Channel: "sms",
   });
 
-  pendingByPhone.set(phone, { sid: result.sid, sentAt: now });
+  await setPendingVerification(phone, { sid: result.sid, sentAt: now });
   return { sent: true, verificationSid: result.sid };
 }
 
@@ -136,18 +159,25 @@ export async function sendTwilioVerification(
   options?: { forceNew?: boolean },
 ): Promise<SendTwilioVerificationResult> {
   const inflightKey = `${phone}:${options?.forceNew === true}`;
-  const existing = sendInFlight.get(inflightKey);
-  if (existing) {
-    return existing;
+  const lockKey = redisKeys.otpSendLock(inflightKey);
+  const acquired = await cacheSetNx(lockKey, "1", OTP_SEND_LOCK_TTL_SECONDS);
+
+  if (!acquired) {
+    const pending = await getPendingVerification(phone);
+    if (pending) {
+      return { sent: true, verificationSid: pending.sid };
+    }
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    const pendingAfterWait = await getPendingVerification(phone);
+    if (pendingAfterWait) {
+      return { sent: true, verificationSid: pendingAfterWait.sid };
+    }
   }
 
-  const promise = sendTwilioVerificationInternal(phone, options);
-  sendInFlight.set(inflightKey, promise);
-
   try {
-    return await promise;
+    return await sendTwilioVerificationInternal(phone, options);
   } finally {
-    sendInFlight.delete(inflightKey);
+    await cacheDel(lockKey);
   }
 }
 
@@ -161,7 +191,7 @@ export async function checkTwilioVerification(
   code: string,
   verificationSid?: string,
 ): Promise<"approved" | "invalid" | "expired"> {
-  const pending = pendingByPhone.get(phone);
+  const pending = await getPendingVerification(phone);
   const sid = verificationSid ?? pending?.sid;
   const checkPayload: Record<string, string> = { Code: code.trim() };
 
@@ -178,7 +208,7 @@ export async function checkTwilioVerification(
     );
 
     if (result.status === "approved") {
-      clearTwilioVerificationState(phone);
+      await clearTwilioVerificationState(phone);
       return "approved";
     }
 
@@ -186,7 +216,7 @@ export async function checkTwilioVerification(
   } catch (error) {
     if (error instanceof TwilioVerifyError) {
       if (error.twilioCode === 20404) {
-        clearTwilioVerificationState(phone);
+        await clearTwilioVerificationState(phone);
 
         if (sid) {
           return checkTwilioVerificationWithTo(phone, code);
@@ -213,7 +243,7 @@ async function checkTwilioVerificationWithTo(
     );
 
     if (result.status === "approved") {
-      clearTwilioVerificationState(phone);
+      await clearTwilioVerificationState(phone);
       return "approved";
     }
 

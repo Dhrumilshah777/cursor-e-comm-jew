@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 
 import { prisma } from "./lib/prisma.js";
+import { connectRedis, isRedisConfigured, pingRedis } from "./lib/redis.js";
 
 import { adminRouter } from "./routes/admin/index.js";
 import { authRouter } from "./routes/auth.js";
@@ -81,19 +82,28 @@ app.use("/api/shiprocket/webhook", shiprocketWebhookRouter);
 
 
 app.get("/api/health", async (_req, res) => {
-
   try {
-
     await prisma.$queryRaw`SELECT 1`;
+    const redisConfigured = isRedisConfigured();
+    const redisConnected = redisConfigured ? await pingRedis() : null;
 
-    res.json({ ok: true, database: "connected" });
+    if (redisConfigured && !redisConnected) {
+      res.status(503).json({
+        ok: false,
+        database: "connected",
+        redis: "disconnected",
+      });
+      return;
+    }
 
+    res.json({
+      ok: true,
+      database: "connected",
+      redis: redisConfigured ? "connected" : "not_configured",
+    });
   } catch {
-
     res.status(503).json({ ok: false, database: "disconnected" });
-
   }
-
 });
 
 
@@ -111,12 +121,21 @@ app.use("/api/delivery", deliveryRouter);
 
 app.use("/api/admin", adminRouter);
 
+async function startServer() {
+  try {
+    await connectRedis();
+  } catch (error) {
+    console.error("[Redis] failed to connect on startup:", error);
+    if (process.env.NODE_ENV === "production" && isRedisConfigured()) {
+      process.exit(1);
+    }
+  }
 
+  app.listen(port, () => {
+    console.log(`API listening on http://localhost:${port}`);
+  });
+}
 
-app.listen(port, () => {
-
-  console.log(`API listening on http://localhost:${port}`);
-
-});
+void startServer();
 
 

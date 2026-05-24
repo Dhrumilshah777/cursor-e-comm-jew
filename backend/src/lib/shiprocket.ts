@@ -1,3 +1,9 @@
+import {
+  cacheGetJson,
+  cacheSetJson,
+  redisKeys,
+} from "./redis.js";
+
 const DEFAULT_BASE_URL = "https://apiv2.shiprocket.in";
 
 type TokenCache = {
@@ -5,7 +11,7 @@ type TokenCache = {
   expiresAt: number;
 };
 
-let tokenCache: TokenCache | null = null;
+const SHIPROCKET_TOKEN_TTL_SECONDS = 9 * 24 * 60 * 60;
 
 function getConfig() {
   const email =
@@ -37,7 +43,7 @@ export function isShiprocketConfigured(): boolean {
 }
 
 async function login(): Promise<string> {
-  const cached = tokenCache;
+  const cached = await cacheGetJson<TokenCache>(redisKeys.shiprocketToken());
   if (cached && cached.expiresAt > Date.now()) {
     return cached.token;
   }
@@ -58,10 +64,16 @@ async function login(): Promise<string> {
     throw new Error(body.message ?? "Shiprocket login failed");
   }
 
-  tokenCache = {
+  const tokenPayload: TokenCache = {
     token: body.token,
-    expiresAt: Date.now() + 9 * 24 * 60 * 60 * 1000,
+    expiresAt: Date.now() + SHIPROCKET_TOKEN_TTL_SECONDS * 1000,
   };
+
+  await cacheSetJson(
+    redisKeys.shiprocketToken(),
+    tokenPayload,
+    SHIPROCKET_TOKEN_TTL_SECONDS,
+  );
 
   return body.token;
 }
