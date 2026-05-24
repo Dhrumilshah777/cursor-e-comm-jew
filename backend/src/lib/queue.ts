@@ -111,7 +111,7 @@ export async function shutdownQueues(): Promise<void> {
 }
 
 export const QUEUE_NAMES = {
-  notifications: "wj:notifications",
-  refunds: "wj:refunds",
-  shiprocketRetry: "wj:shiprocket-retry",
+  notifications: "wj-notifications",
+  refunds: "wj-refunds",
+  shiprocketRetry: "wj-shiprocket-retry",
 } as const;
