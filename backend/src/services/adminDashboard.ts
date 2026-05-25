@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import { formatPaise } from "../lib/format.js";
+import { Prisma } from "../generated/prisma/client.js";
 
 export async function getAdminDashboard() {
   const startOfToday = new Date();
@@ -11,16 +12,19 @@ export async function getAdminDashboard() {
     pendingReturns,
     totalProducts,
     activeProducts,
+    outOfStockProducts,
     totalCustomers,
     revenueTodayAgg,
     recentOrders,
     recentReturns,
+    lowStockRows,
   ] = await Promise.all([
     prisma.order.count(),
     prisma.order.count({ where: { placedAt: { gte: startOfToday } } }),
     prisma.returnRequest.count({ where: { status: "UNDER_REVIEW" } }),
     prisma.product.count(),
     prisma.product.count({ where: { isActive: true } }),
+    prisma.product.count({ where: { isActive: true, stockCount: { lte: 0 } } }),
     prisma.user.count(),
     prisma.order.aggregate({
       where: { placedAt: { gte: startOfToday } },
@@ -48,6 +52,19 @@ export async function getAdminDashboard() {
         order: { select: { orderNumber: true } },
       },
     }),
+    // Low stock = active products where stockCount is at or below the
+    // product's own lowStockThreshold (including 0). Can't express that
+    // comparison through Prisma's where clause directly, so we use raw SQL.
+    prisma.$queryRaw<
+      { id: string; name: string; slug: string; stockCount: number; lowStockThreshold: number }[]
+    >(Prisma.sql`
+      SELECT "id", "name", "slug", "stockCount", "lowStockThreshold"
+      FROM "products"
+      WHERE "isActive" = true
+        AND "stockCount" <= "lowStockThreshold"
+      ORDER BY "stockCount" ASC, "name" ASC
+      LIMIT 10
+    `),
   ]);
 
   const revenueTodayPaise = revenueTodayAgg._sum.totalPaise ?? 0;
@@ -59,6 +76,8 @@ export async function getAdminDashboard() {
       pendingReturns,
       totalProducts,
       activeProducts,
+      outOfStockProducts,
+      lowStockProducts: lowStockRows.length,
       totalCustomers,
       revenueToday: formatPaise(revenueTodayPaise),
       revenueTodayPaise,
@@ -75,6 +94,14 @@ export async function getAdminDashboard() {
       orderNumber: item.order.orderNumber,
       status: item.status,
       submittedAt: item.submittedAt.toISOString(),
+    })),
+    lowStockProducts: lowStockRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      stockCount: row.stockCount,
+      lowStockThreshold: row.lowStockThreshold,
+      isOutOfStock: row.stockCount <= 0,
     })),
   };
 }

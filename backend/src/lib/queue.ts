@@ -129,4 +129,5 @@ export const QUEUE_NAMES = {
   notifications: "wj-notifications",
   refunds: "wj-refunds",
   shiprocketRetry: "wj-shiprocket-retry",
+  stockCleanup: "wj-stock-cleanup",
 } as const;

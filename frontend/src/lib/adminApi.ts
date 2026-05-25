@@ -71,6 +71,8 @@ export type AdminDashboard = {
     pendingReturns: number;
     totalProducts: number;
     activeProducts: number;
+    outOfStockProducts: number;
+    lowStockProducts: number;
     totalCustomers: number;
     revenueToday: string;
     revenueTodayPaise: number;
@@ -87,6 +89,14 @@ export type AdminDashboard = {
     orderNumber: string;
     status: string;
     submittedAt: string;
+  }[];
+  lowStockProducts: {
+    id: string;
+    name: string;
+    slug: string;
+    stockCount: number;
+    lowStockThreshold: number;
+    isOutOfStock: boolean;
   }[];
 };
 
@@ -415,6 +425,10 @@ export type AdminProduct = {
   makingChargeValue: number;
   gstPercent: number;
   pricePaise: number;
+  stockCount: number;
+  lowStockThreshold: number;
+  inStock: boolean;
+  lowStock: boolean;
   isActive: boolean;
 };
 
@@ -434,6 +448,8 @@ export type AdminProductPayload = {
   makingChargeKind: string;
   makingChargeValue: number;
   gstPercent: number;
+  stockCount: number;
+  lowStockThreshold: number;
   isActive: boolean;
 };
 

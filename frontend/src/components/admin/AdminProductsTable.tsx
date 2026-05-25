@@ -91,7 +91,7 @@ export default function AdminProductsTable() {
       ) : null}
 
       <div className="overflow-x-auto border border-zinc-200 bg-white">
-        <table className="w-full min-w-[880px] text-left text-sm font-light">
+        <table className="w-full min-w-[940px] text-left text-sm font-light">
           <thead className="border-b border-zinc-100 text-[10px] uppercase tracking-[0.16em] text-zinc-500">
             <tr>
               <th className="px-5 py-3 font-normal">Product</th>
@@ -99,18 +99,33 @@ export default function AdminProductsTable() {
               <th className="px-5 py-3 font-normal">Category</th>
               <th className="px-5 py-3 font-normal">Weight</th>
               <th className="px-5 py-3 font-normal">Price</th>
+              <th className="px-5 py-3 font-normal">Stock</th>
               <th className="px-5 py-3 font-normal">Status</th>
               <th className="px-5 py-3 font-normal">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100">
-            {products.map((product) => (
+            {products.map((product) => {
+              const stockColor =
+                product.stockCount <= 0
+                  ? "text-red-700"
+                  : product.lowStock
+                    ? "text-amber-700"
+                    : "text-zinc-900";
+              const stockLabel =
+                product.stockCount <= 0
+                  ? "Sold out"
+                  : product.lowStock
+                    ? `${product.stockCount} (low)`
+                    : `${product.stockCount}`;
+              return (
               <tr key={product.id}>
                 <td className="px-5 py-4 text-zinc-900">{product.name}</td>
                 <td className="px-5 py-4 text-zinc-600">{product.sku}</td>
                 <td className="px-5 py-4 capitalize text-zinc-700">{product.category}</td>
                 <td className="px-5 py-4 text-zinc-600">{product.weight}</td>
                 <td className="px-5 py-4 text-zinc-900">{product.price}</td>
+                <td className={`px-5 py-4 font-medium ${stockColor}`}>{stockLabel}</td>
                 <td className="px-5 py-4">
                   <span
                     className={`text-[10px] uppercase tracking-[0.14em] ${
@@ -156,7 +171,8 @@ export default function AdminProductsTable() {
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

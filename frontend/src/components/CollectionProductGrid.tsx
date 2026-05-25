@@ -43,6 +43,13 @@ function matchesPriceFilter(amount: number, filter: PriceFilter) {
 
 function ProductCard({ product }: { product: CollectionProduct }) {
   const [wishlisted, setWishlisted] = useState(false);
+  const soldOut = product.inStock === false;
+  const lowStock =
+    !soldOut &&
+    typeof product.stockCount === "number" &&
+    typeof product.lowStockThreshold === "number" &&
+    product.stockCount > 0 &&
+    product.stockCount <= product.lowStockThreshold;
 
   return (
     <Link
@@ -54,9 +61,23 @@ function ProductCard({ product }: { product: CollectionProduct }) {
           src={product.image}
           alt={product.alt}
           fill
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          className={`object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${
+            soldOut ? "opacity-60 grayscale" : ""
+          }`}
           sizes="(max-width: 1024px) 50vw, 22vw"
         />
+        {soldOut ? (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white/30">
+            <span className="bg-zinc-900/85 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.22em] text-white sm:text-[11px]">
+              Sold out
+            </span>
+          </div>
+        ) : null}
+        {lowStock ? (
+          <span className="absolute left-2.5 top-2.5 z-10 bg-amber-500/95 px-2 py-1 text-[9px] font-medium uppercase tracking-[0.16em] text-white sm:left-3 sm:top-3 sm:text-[10px]">
+            {product.stockCount === 1 ? "Last one" : `Only ${product.stockCount} left`}
+          </span>
+        ) : null}
         <button
           type="button"
           onClick={(e) => {
@@ -76,7 +97,7 @@ function ProductCard({ product }: { product: CollectionProduct }) {
           />
         </button>
       </div>
-      <div className="space-y-1 text-left">
+      <div className={`space-y-1 text-left ${soldOut ? "opacity-70" : ""}`}>
         <p className="text-xs font-normal uppercase tracking-[0.14em] text-zinc-900 sm:text-[13px] lg:tracking-[0.18em]">
           {product.name}
         </p>

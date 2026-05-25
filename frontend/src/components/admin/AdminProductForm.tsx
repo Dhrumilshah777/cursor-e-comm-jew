@@ -60,6 +60,8 @@ function emptyForm(): AdminProductPayload {
     makingChargeKind: "PERCENTAGE",
     makingChargeValue: 0.1,
     gstPercent: 3,
+    stockCount: 1,
+    lowStockThreshold: 2,
     isActive: true,
   };
 }
@@ -81,6 +83,8 @@ function productToForm(product: AdminProduct): AdminProductPayload {
     makingChargeKind: product.makingChargeKind,
     makingChargeValue: product.makingChargeValue,
     gstPercent: product.gstPercent,
+    stockCount: product.stockCount,
+    lowStockThreshold: product.lowStockThreshold,
     isActive: product.isActive,
   };
 }
@@ -377,6 +381,47 @@ export default function AdminProductForm({
               />
             </Field>
           ) : null}
+        </div>
+      </section>
+
+      <section className="border border-zinc-200 bg-white p-6 space-y-5">
+        <h2 className="text-[11px] font-normal uppercase tracking-[0.2em] text-zinc-900">
+          Inventory
+        </h2>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field
+            label="Stock on hand"
+            hint="Units currently in stock. 0 will mark the product as Sold out on the storefront."
+          >
+            <input
+              type="number"
+              min="0"
+              step="1"
+              className={inputClass}
+              value={form.stockCount}
+              onChange={(e) =>
+                update("stockCount", Math.max(0, Math.floor(Number(e.target.value) || 0)))
+              }
+            />
+          </Field>
+          <Field
+            label="Low-stock warning at"
+            hint="When stock falls to or below this number, the admin dashboard highlights it as low."
+          >
+            <input
+              type="number"
+              min="0"
+              step="1"
+              className={inputClass}
+              value={form.lowStockThreshold}
+              onChange={(e) =>
+                update(
+                  "lowStockThreshold",
+                  Math.max(0, Math.floor(Number(e.target.value) || 0)),
+                )
+              }
+            />
+          </Field>
         </div>
       </section>
 

@@ -10,6 +10,7 @@ type AddToBagButtonProps = {
   productSlug: string;
   ringSize?: string;
   className?: string;
+  soldOut?: boolean;
 };
 
 export default function AddToBagButton({
@@ -17,6 +18,7 @@ export default function AddToBagButton({
   productSlug,
   ringSize,
   className = "mt-8 w-full cursor-pointer bg-zinc-900 px-8 py-3.5 text-[11px] font-normal uppercase tracking-[0.22em] text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto",
+  soldOut = false,
 }: AddToBagButtonProps) {
   const router = useRouter();
   const { setCart, refreshCart } = useCart();
@@ -24,6 +26,7 @@ export default function AddToBagButton({
   const [message, setMessage] = useState<string | null>(null);
 
   const handleClick = async () => {
+    if (soldOut) return;
     setStatus("loading");
     setMessage(null);
 
@@ -57,6 +60,24 @@ export default function AddToBagButton({
       await refreshCart();
     }
   };
+
+  if (soldOut) {
+    return (
+      <div>
+        <button
+          type="button"
+          disabled
+          aria-disabled
+          className={className}
+        >
+          Sold out
+        </button>
+        <p className="mt-2 text-sm font-light text-zinc-600">
+          This piece is currently out of stock. Check back soon — restocks happen often.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>

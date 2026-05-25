@@ -32,6 +32,9 @@ export type CollectionProductDto = {
   gstPercent: number;
   priceBreakup: PriceBreakup;
   ringSize?: string;
+  stockCount: number;
+  lowStockThreshold: number;
+  inStock: boolean;
 };
 
 function weightDisplay(grams: { toString(): string }): string {
@@ -71,5 +74,8 @@ export function mapProductToDto(product: Product): CollectionProductDto {
     gstPercent: product.gstPercent,
     priceBreakup,
     ringSize: product.ringSize ?? undefined,
+    stockCount: product.stockCount,
+    lowStockThreshold: product.lowStockThreshold,
+    inStock: product.stockCount > 0,
   };
 }

@@ -17,8 +17,20 @@ import {
   validateCheckoutAddress,
 } from "./checkout.js";
 import { handleRazorpayRefundWebhook } from "./razorpayRefundWebhook.js";
+import {
+  checkAvailability,
+  InsufficientStockError,
+  parseCheckoutItems,
+  reserveStock,
+  restoreStock,
+  serializeCheckoutItems,
+  type InventoryItem,
+  type UnavailableItem,
+} from "../lib/inventory.js";
 
-const CHECKOUT_TTL_MS = 30 * 60 * 1000;
+// 15-minute reservation window — matches the customer-visible expiry shown
+// on the checkout page and the cleanup worker that releases stale carts.
+const CHECKOUT_TTL_MS = 15 * 60 * 1000;
 
 async function placeOrderForCheckoutSession(
   userId: string,
@@ -57,6 +69,74 @@ async function placeOrderForCheckoutSession(
   });
 }
 
+/**
+ * Stock was decremented at create-order time using the cart snapshot.
+ * If the cart changed between then and order placement (rare), the
+ * actually-placed order won't match the reservation. We reconcile here:
+ *   - reserved > ordered → restore the difference
+ *   - reserved < ordered → try to decrement extra; warn if we can't
+ *     (means cart grew faster than other buyers; very rare)
+ */
+async function reconcileStockAfterOrder(
+  sessionId: string,
+  shopOrderId: string,
+): Promise<void> {
+  const session = await prisma.checkoutPayment.findUnique({
+    where: { id: sessionId },
+    select: { itemsJson: true },
+  });
+  if (!session) return;
+
+  const orderItems = await prisma.orderItem.findMany({
+    where: { orderId: shopOrderId },
+    select: { productId: true, quantity: true },
+  });
+
+  const reserved = parseCheckoutItems(session.itemsJson);
+
+  const reservedMap = new Map<string, number>();
+  for (const r of reserved) {
+    reservedMap.set(r.productId, (reservedMap.get(r.productId) ?? 0) + r.quantity);
+  }
+  const orderedMap = new Map<string, number>();
+  for (const o of orderItems) {
+    if (!o.productId) continue;
+    orderedMap.set(o.productId, (orderedMap.get(o.productId) ?? 0) + o.quantity);
+  }
+
+  const productIds = new Set([...reservedMap.keys(), ...orderedMap.keys()]);
+  for (const pid of productIds) {
+    const reservedQty = reservedMap.get(pid) ?? 0;
+    const orderedQty = orderedMap.get(pid) ?? 0;
+    const diff = reservedQty - orderedQty;
+
+    if (diff > 0) {
+      try {
+        await prisma.product.update({
+          where: { id: pid },
+          data: { stockCount: { increment: diff } },
+        });
+      } catch (error) {
+        console.error(`[inventory] reconciliation restore failed for ${pid}:`, error);
+      }
+      continue;
+    }
+
+    if (diff < 0) {
+      const need = -diff;
+      const result = await prisma.product.updateMany({
+        where: { id: pid, stockCount: { gte: need } },
+        data: { stockCount: { decrement: need } },
+      });
+      if (result.count === 0) {
+        console.error(
+          `[inventory] overdraft during reconciliation for product ${pid}: ordered ${orderedQty}, reserved ${reservedQty}. Manual adjustment may be required.`,
+        );
+      }
+    }
+  }
+}
+
 export async function createRazorpayCheckout(
   userId: string,
   payload: CheckoutAddressPayload,
@@ -81,6 +161,22 @@ export async function createRazorpayCheckout(
     return totals;
   }
 
+  const itemsSnapshot: InventoryItem[] = totals.cart.items.map((item) => ({
+    productId: item.productId,
+    quantity: item.quantity,
+  }));
+
+  // Pre-flight check so we can surface a clean "X is sold out" message
+  // before hitting Razorpay. The reserve step below is still the source
+  // of truth (covers races between this check and the decrement).
+  const availability = await checkAvailability(itemsSnapshot);
+  if (!availability.ok) {
+    return {
+      error: "OUT_OF_STOCK" as const,
+      unavailable: availability.unavailable,
+    };
+  }
+
   const receipt = `wj_${userId.slice(-8)}_${Date.now()}`;
   const razorpayOrder = await createRazorpayOrder({
     amountPaise: totals.totalPaise,
@@ -88,19 +184,39 @@ export async function createRazorpayCheckout(
     notes: { userId },
   });
 
-  await prisma.checkoutPayment.create({
-    data: {
-      userId,
-      razorpayOrderId: razorpayOrder.id,
-      addressJson: serializeCheckoutAddressPayload(payload),
-      subtotalPaise: totals.subtotalPaise,
-      discountPaise: totals.discountPaise,
-      couponId: totals.coupon?.couponId ?? null,
-      couponCode: totals.coupon?.code ?? null,
-      amountPaise: totals.totalPaise,
-      expiresAt: new Date(Date.now() + CHECKOUT_TTL_MS),
-    },
-  });
+  try {
+    await prisma.$transaction(async (tx) => {
+      await reserveStock(tx, itemsSnapshot);
+      await tx.checkoutPayment.create({
+        data: {
+          userId,
+          razorpayOrderId: razorpayOrder.id,
+          addressJson: serializeCheckoutAddressPayload(payload),
+          itemsJson: serializeCheckoutItems(itemsSnapshot),
+          subtotalPaise: totals.subtotalPaise,
+          discountPaise: totals.discountPaise,
+          couponId: totals.coupon?.couponId ?? null,
+          couponCode: totals.coupon?.code ?? null,
+          amountPaise: totals.totalPaise,
+          expiresAt: new Date(Date.now() + CHECKOUT_TTL_MS),
+        },
+      });
+    });
+  } catch (error) {
+    if (error instanceof InsufficientStockError) {
+      // Stock was sniped by another buyer between availability check and
+      // reservation. Razorpay order will auto-expire on their side.
+      const unavailable: UnavailableItem[] = [
+        {
+          productId: error.productId,
+          available: 0,
+          requested: error.requested,
+        },
+      ];
+      return { error: "OUT_OF_STOCK" as const, unavailable };
+    }
+    throw error;
+  }
 
   return {
     keyId: getRazorpayKeyId(),
@@ -113,6 +229,35 @@ export async function createRazorpayCheckout(
     totalPaise: totals.totalPaise,
     coupon: totals.coupon,
   };
+}
+
+/**
+ * Mark a checkout session as failed/cancelled and restore any reserved
+ * stock. Safe to call multiple times — only `pending` sessions are touched.
+ */
+async function releaseCheckoutSessionStock(
+  sessionId: string,
+  reason: "expired" | "failed",
+): Promise<void> {
+  const session = await prisma.checkoutPayment.findUnique({
+    where: { id: sessionId },
+    select: { id: true, status: true, itemsJson: true },
+  });
+
+  if (!session || session.status !== "pending") return;
+
+  const items = parseCheckoutItems(session.itemsJson);
+
+  await prisma.$transaction(async (tx) => {
+    const updated = await tx.checkoutPayment.updateMany({
+      where: { id: session.id, status: "pending" },
+      data: { status: reason },
+    });
+    if (updated.count === 0) return;
+    if (items.length > 0) {
+      await restoreStock(tx, items);
+    }
+  });
 }
 
 export async function verifyRazorpayCheckoutAndPlaceOrder(
@@ -157,6 +302,15 @@ export async function verifyRazorpayCheckoutAndPlaceOrder(
   }
 
   if (session.expiresAt < new Date()) {
+    // Reservation lapsed before the user finished paying — release the
+    // hold so other shoppers can buy the items. Razorpay will refund
+    // the captured payment via its standard auto-refund flow.
+    await releaseCheckoutSessionStock(session.id, "expired").catch((error) => {
+      console.error(
+        `[inventory] failed to release expired session ${session.id}:`,
+        error,
+      );
+    });
     return { error: "CHECKOUT_SESSION_EXPIRED" as const };
   }
 
@@ -191,6 +345,10 @@ export async function verifyRazorpayCheckoutAndPlaceOrder(
       status: "completed",
       shopOrderId: result.order.id,
     },
+  });
+
+  await reconcileStockAfterOrder(session.id, result.order.id).catch((error) => {
+    console.error("[inventory] reconciliation failed:", error);
   });
 
   return result;
@@ -228,6 +386,26 @@ export async function handleRazorpayWebhook(rawBody: string, signature: string) 
       return { ok: true as const, ignored: true };
     }
     return handleRazorpayRefundWebhook(event, refund);
+  }
+
+  if (event === "payment.failed") {
+    const payment = payload.payload?.payment?.entity;
+    if (!payment?.order_id) {
+      return { ok: true as const, ignored: true };
+    }
+    const session = await prisma.checkoutPayment.findUnique({
+      where: { razorpayOrderId: payment.order_id },
+      select: { id: true, status: true },
+    });
+    if (session && session.status === "pending") {
+      await releaseCheckoutSessionStock(session.id, "failed").catch((error) => {
+        console.error(
+          `[inventory] failed to release session ${session.id} on payment.failed:`,
+          error,
+        );
+      });
+    }
+    return { ok: true as const };
   }
 
   if (event !== "payment.captured") {
@@ -270,6 +448,10 @@ export async function handleRazorpayWebhook(rawBody: string, signature: string) 
   await prisma.checkoutPayment.update({
     where: { id: session.id },
     data: { status: "completed", shopOrderId: result.order.id },
+  });
+
+  await reconcileStockAfterOrder(session.id, result.order.id).catch((error) => {
+    console.error("[inventory] webhook reconciliation failed:", error);
   });
 
   return { ok: true as const };

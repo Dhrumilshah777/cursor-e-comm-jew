@@ -53,53 +53,76 @@ export default function CartPageContent() {
     );
   }
 
+  const hasOutOfStockItem = cart.items.some(
+    (item) => item.product.inStock === false,
+  );
+
   return (
     <div className="space-y-8">
       {error ? <p className="text-sm font-light text-red-600">{error}</p> : null}
+      {hasOutOfStockItem ? (
+        <p className="border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-light text-amber-900">
+          Some items in your bag are sold out. Please remove them to continue
+          to checkout.
+        </p>
+      ) : null}
 
       <ul className="divide-y divide-zinc-100 border-t border-zinc-100">
-        {cart.items.map((item) => (
-          <li key={item.id} className="flex gap-4 py-6 sm:gap-6">
-            <Link
-              href={`/products/${item.product.slug}`}
-              className="relative h-24 w-24 shrink-0 overflow-hidden bg-zinc-100 sm:h-28 sm:w-28"
-            >
-              <Image
-                src={item.product.image}
-                alt={item.product.alt}
-                fill
-                className="object-cover"
-                sizes="112px"
-              />
-            </Link>
-            <div className="min-w-0 flex-1">
+        {cart.items.map((item) => {
+          const soldOut = item.product.inStock === false;
+          return (
+            <li key={item.id} className="flex gap-4 py-6 sm:gap-6">
               <Link
                 href={`/products/${item.product.slug}`}
-                className="text-sm font-normal uppercase tracking-[0.12em] text-zinc-900 hover:text-zinc-600"
+                className="relative h-24 w-24 shrink-0 overflow-hidden bg-zinc-100 sm:h-28 sm:w-28"
               >
-                {item.product.name}
+                <Image
+                  src={item.product.image}
+                  alt={item.product.alt}
+                  fill
+                  className={`object-cover ${soldOut ? "opacity-60 grayscale" : ""}`}
+                  sizes="112px"
+                />
+                {soldOut ? (
+                  <span className="absolute inset-x-0 bottom-0 bg-zinc-900/85 py-1 text-center text-[9px] font-medium uppercase tracking-[0.18em] text-white">
+                    Sold out
+                  </span>
+                ) : null}
               </Link>
-              <p className="mt-1 text-xs font-light text-zinc-500">
-                {item.product.metal}
-                {item.size ? ` · Size ${item.size}` : null}
-                {" · "}
-                <span className="text-zinc-700">Qty {item.quantity}</span>
-              </p>
-              <p className="mt-2 text-sm font-light text-zinc-900">{item.lineTotal}</p>
-
-              <div className="mt-3">
-                <button
-                  type="button"
-                  disabled={updatingId === item.id}
-                  onClick={() => handleRemove(item.id)}
-                  className="text-[10px] font-light uppercase tracking-[0.16em] text-zinc-500 underline-offset-2 hover:text-zinc-900 hover:underline disabled:opacity-50"
+              <div className="min-w-0 flex-1">
+                <Link
+                  href={`/products/${item.product.slug}`}
+                  className="text-sm font-normal uppercase tracking-[0.12em] text-zinc-900 hover:text-zinc-600"
                 >
-                  Remove
-                </button>
+                  {item.product.name}
+                </Link>
+                <p className="mt-1 text-xs font-light text-zinc-500">
+                  {item.product.metal}
+                  {item.size ? ` · Size ${item.size}` : null}
+                  {" · "}
+                  <span className="text-zinc-700">Qty {item.quantity}</span>
+                </p>
+                <p className="mt-2 text-sm font-light text-zinc-900">{item.lineTotal}</p>
+                {soldOut ? (
+                  <p className="mt-1 text-xs font-medium text-red-600">
+                    Currently sold out — please remove to continue.
+                  </p>
+                ) : null}
+
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    disabled={updatingId === item.id}
+                    onClick={() => handleRemove(item.id)}
+                    className="text-[10px] font-light uppercase tracking-[0.16em] text-zinc-500 underline-offset-2 hover:text-zinc-900 hover:underline disabled:opacity-50"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
 
       <div className="border-t border-zinc-100 pt-6">
@@ -112,12 +135,23 @@ export default function CartPageContent() {
         <p className="mt-2 text-xs font-light text-zinc-500">
           Shipping and taxes calculated at checkout.
         </p>
-        <Link
-          href="/checkout"
-          className="mt-6 inline-block w-full bg-zinc-900 px-8 py-3.5 text-center text-[11px] font-normal uppercase tracking-[0.22em] text-white transition hover:bg-zinc-800 sm:w-auto"
-        >
-          Proceed to checkout
-        </Link>
+        {hasOutOfStockItem ? (
+          <button
+            type="button"
+            disabled
+            aria-disabled
+            className="mt-6 inline-block w-full cursor-not-allowed bg-zinc-400 px-8 py-3.5 text-center text-[11px] font-normal uppercase tracking-[0.22em] text-white sm:w-auto"
+          >
+            Remove sold-out items to continue
+          </button>
+        ) : (
+          <Link
+            href="/checkout"
+            className="mt-6 inline-block w-full bg-zinc-900 px-8 py-3.5 text-center text-[11px] font-normal uppercase tracking-[0.22em] text-white transition hover:bg-zinc-800 sm:w-auto"
+          >
+            Proceed to checkout
+          </Link>
+        )}
       </div>
     </div>
   );

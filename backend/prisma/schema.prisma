@@ -100,6 +100,7 @@ model CheckoutPayment {
   userId          String
   razorpayOrderId String   @unique
   addressJson     String   @db.Text
+  itemsJson       String   @default("[]") @db.Text
   subtotalPaise   Int      @default(0)
   discountPaise   Int      @default(0)
   couponId        String?
@@ -222,6 +223,8 @@ model Product {
   makingChargeKind  MakingChargeKind @default(PERCENTAGE)
   makingChargeValue Decimal          @default(0.1) @db.Decimal(8, 2)
   gstPercent        Int              @default(3)
+  stockCount        Int              @default(0)
+  lowStockThreshold Int              @default(2)
   isActive          Boolean          @default(true)
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt

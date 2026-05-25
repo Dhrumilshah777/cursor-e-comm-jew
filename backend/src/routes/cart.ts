@@ -41,6 +41,10 @@ cartRouter.post("/items", async (req: CustomerRequest, res) => {
         res.status(409).json({ error: "This item is already in your bag" });
         return;
       }
+      if (result.error === "OUT_OF_STOCK") {
+        res.status(409).json({ error: "This item is currently sold out." });
+        return;
+      }
       res.status(400).json({ error: "Could not add item to cart" });
       return;
     }

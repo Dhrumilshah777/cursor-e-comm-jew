@@ -147,6 +147,17 @@ checkoutRouter.post("/razorpay/create-order", requireCustomer, createCheckoutLim
         });
         return;
       }
+      if (result.error === "OUT_OF_STOCK") {
+        const unavailable = "unavailable" in result ? result.unavailable : [];
+        const names = unavailable
+          .map((item) => item.name)
+          .filter((name): name is string => Boolean(name));
+        const message = names.length > 0
+          ? `${names.join(", ")} just sold out. Please remove it from your bag and try again.`
+          : "One or more items in your bag are sold out. Please refresh and try again.";
+        res.status(409).json({ error: message, unavailable });
+        return;
+      }
       if ("message" in result && result.message) {
         res.status(400).json({ error: result.message });
         return;

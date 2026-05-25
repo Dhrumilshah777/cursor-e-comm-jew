@@ -32,6 +32,8 @@ export type AdminProductInput = {
   makingChargeKind?: MakingChargeKind | string;
   makingChargeValue?: number | string;
   gstPercent?: number;
+  stockCount?: number;
+  lowStockThreshold?: number;
   isActive?: boolean;
 };
 
@@ -64,6 +66,12 @@ function buildProductData(input: AdminProductInput, sku: string) {
     gstPercent,
   });
 
+  const stockCount = Math.max(0, Math.floor(Number(input.stockCount ?? 0)));
+  const lowStockThreshold = Math.max(
+    0,
+    Math.floor(Number(input.lowStockThreshold ?? 2)),
+  );
+
   return {
     slug: input.slug.trim(),
     name: input.name.trim(),
@@ -80,6 +88,8 @@ function buildProductData(input: AdminProductInput, sku: string) {
     makingChargeKind,
     makingChargeValue,
     gstPercent,
+    stockCount,
+    lowStockThreshold,
     isActive: input.isActive ?? true,
     pricePaise,
   };
@@ -100,6 +110,9 @@ function toAdminProductDto(product: Product) {
       product.makingChargeKind,
       product.makingChargeValue,
     ),
+    stockCount: product.stockCount,
+    lowStockThreshold: product.lowStockThreshold,
+    lowStock: product.stockCount > 0 && product.stockCount <= product.lowStockThreshold,
   };
 }
 
@@ -159,6 +172,8 @@ export async function updateAdminProduct(id: string, data: Partial<AdminProductI
     makingChargeValue:
       data.makingChargeValue ?? existing.makingChargeValue.toString(),
     gstPercent: data.gstPercent ?? existing.gstPercent,
+    stockCount: data.stockCount ?? existing.stockCount,
+    lowStockThreshold: data.lowStockThreshold ?? existing.lowStockThreshold,
     isActive: data.isActive ?? existing.isActive,
   };
 

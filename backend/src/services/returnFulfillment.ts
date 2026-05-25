@@ -9,6 +9,7 @@ import type {
 import { notifyRefundInitiated } from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
 import { enqueueRefund } from "../lib/refundQueue.js";
+import { restoreStock } from "../lib/inventory.js";
 import {
   assignShiprocketAwb,
   createShiprocketReturnOrder,
@@ -335,6 +336,8 @@ export async function initiateReturnRefundOnItemReceived(returnRequestId: string
 
   // Refund is created asynchronously — admin's "Item received" action returns
   // immediately and the worker calls Razorpay in the background.
+  // Stock is also restored here since the physical item is back at the
+  // warehouse and can be resold.
   const updated = await prisma.$transaction(async (tx) => {
     await tx.returnStatusEvent.create({
       data: {
@@ -344,6 +347,15 @@ export async function initiateReturnRefundOnItemReceived(returnRequestId: string
         note: "Item received at warehouse — refund initiated",
       },
     });
+
+    if (returnRequest.orderItem.productId) {
+      await restoreStock(tx, [
+        {
+          productId: returnRequest.orderItem.productId,
+          quantity: returnRequest.orderItem.quantity,
+        },
+      ]);
+    }
 
     return tx.returnRequest.update({
       where: { id: returnRequestId },

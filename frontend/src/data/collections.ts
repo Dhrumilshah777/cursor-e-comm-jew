@@ -53,6 +53,12 @@ export type CollectionProduct = {
   priceBreakup: PriceBreakup;
   /** Set for ring products only */
   ringSize?: string;
+  /** Current saleable stock. 0 = sold out. */
+  stockCount?: number;
+  /** Admin-configured "running low" threshold. */
+  lowStockThreshold?: number;
+  /** Derived from stockCount > 0. */
+  inStock?: boolean;
 };
 
 export const collections: Record<CollectionSlug, CollectionConfig> = {

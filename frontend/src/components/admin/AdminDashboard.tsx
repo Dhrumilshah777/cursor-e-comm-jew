@@ -29,6 +29,13 @@ export default function AdminDashboard() {
     { label: "Orders today", value: String(dashboard.counts.ordersToday) },
     { label: "Pending returns", value: String(dashboard.counts.pendingReturns) },
     { label: "Active products", value: String(dashboard.counts.activeProducts) },
+    {
+      label: "Out of stock",
+      value: String(dashboard.counts.outOfStockProducts ?? 0),
+      accent: (dashboard.counts.outOfStockProducts ?? 0) > 0
+        ? "text-red-700"
+        : undefined,
+    },
     { label: "Customers", value: String(dashboard.counts.totalCustomers) },
     { label: "Revenue today", value: dashboard.counts.revenueToday },
   ];
@@ -41,10 +48,54 @@ export default function AdminDashboard() {
             <p className="text-[10px] font-normal uppercase tracking-[0.2em] text-zinc-500">
               {stat.label}
             </p>
-            <p className="mt-2 text-2xl font-light text-zinc-950">{stat.value}</p>
+            <p className={`mt-2 text-2xl font-light ${stat.accent ?? "text-zinc-950"}`}>
+              {stat.value}
+            </p>
           </div>
         ))}
       </div>
+
+      {dashboard.lowStockProducts && dashboard.lowStockProducts.length > 0 ? (
+        <section>
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-sm font-normal uppercase tracking-[0.2em] text-zinc-900">
+              Low / out of stock
+            </h2>
+            <Link
+              href="/admin/products"
+              className="text-[10px] font-light uppercase tracking-[0.16em] text-zinc-600 hover:text-zinc-900"
+            >
+              Manage stock →
+            </Link>
+          </div>
+          <ul className="mt-4 divide-y divide-zinc-100 border border-zinc-200 bg-white">
+            {dashboard.lowStockProducts.map((product) => (
+              <li
+                key={product.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 text-sm font-light"
+              >
+                <Link
+                  href={`/admin/products/${product.id}/edit`}
+                  className="text-zinc-900 hover:underline"
+                >
+                  {product.name}
+                </Link>
+                <span
+                  className={
+                    product.isOutOfStock
+                      ? "text-red-700"
+                      : "text-amber-700"
+                  }
+                >
+                  {product.isOutOfStock
+                    ? "Sold out"
+                    : `${product.stockCount} left · alert at ${product.lowStockThreshold}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section>
         <div className="flex items-center justify-between gap-4">

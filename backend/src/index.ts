@@ -18,6 +18,7 @@ import { createRateLimiter, ipKey } from "./middleware/rateLimit.js";
 import { startNotificationsWorker } from "./workers/notificationsWorker.js";
 import { startRefundsWorker } from "./workers/refundsWorker.js";
 import { startShiprocketRetryWorker } from "./workers/shiprocketWorker.js";
+import { startStockCleanupWorker } from "./workers/stockCleanupWorker.js";
 
 import { adminRouter } from "./routes/admin/index.js";
 import { authRouter } from "./routes/auth.js";
@@ -194,6 +195,7 @@ async function startServer() {
   startNotificationsWorker();
   startRefundsWorker();
   startShiprocketRetryWorker();
+  startStockCleanupWorker();
 
   const server = app.listen(port, () => {
     console.log(`API listening on http://localhost:${port}`);

@@ -47,6 +47,10 @@ export async function addCartItem(
     return { error: "PRODUCT_NOT_FOUND" as const };
   }
 
+  if (product.stockCount <= 0) {
+    return { error: "OUT_OF_STOCK" as const };
+  }
+
   const effectiveSize =
     sizeKey || (product.category === "rings" && product.ringSize ? product.ringSize : "");
 

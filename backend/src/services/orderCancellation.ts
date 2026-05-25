@@ -18,6 +18,7 @@ import {
 } from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
 import { enqueueRefund } from "../lib/refundQueue.js";
+import { restoreStock, type InventoryItem } from "../lib/inventory.js";
 
 export class OrderCancellationError extends Error {
   code: string;
@@ -106,6 +107,13 @@ export async function cancelOrderForUser(
     `Refund ${quote.refundAmount}.`,
   ].filter(Boolean);
 
+  const restorableStock: InventoryItem[] = order.items
+    .filter((item) => item.productId)
+    .map((item) => ({
+      productId: item.productId as string,
+      quantity: item.quantity,
+    }));
+
   const updated = await prisma.$transaction(async (tx) => {
     await tx.orderStatusEvent.create({
       data: {
@@ -115,6 +123,10 @@ export async function cancelOrderForUser(
         note: noteParts.join(" "),
       },
     });
+
+    if (restorableStock.length > 0) {
+      await restoreStock(tx, restorableStock);
+    }
 
     return tx.order.update({
       where: { id: order.id },
