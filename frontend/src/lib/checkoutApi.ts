@@ -13,6 +13,10 @@ export type CheckoutAddress = {
   saveAddress?: boolean;
 };
 
+export type CheckoutContact = {
+  email: string;
+};
+
 export type SavedCheckoutAddress = {
   id: string;
   label: string;
@@ -90,6 +94,7 @@ type VerifyResponse = { order: AccountOrder };
 
 export async function createRazorpayCheckoutOrder(
   payload: ({ address: CheckoutAddress } | { addressId: string }) & {
+    email: string;
     couponCode?: string;
   },
 ) {

@@ -108,6 +108,7 @@ model CheckoutPayment {
   amountPaise     Int
   status          String   @default("pending")
   shopOrderId     String?
+  customerEmail   String?
   createdAt       DateTime @default(now())
   expiresAt       DateTime
 

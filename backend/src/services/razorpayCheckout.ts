@@ -15,6 +15,8 @@ import {
   getCartCheckoutTotals,
   placeOrderFromCart,
   validateCheckoutAddress,
+  validateCheckoutEmail,
+  normalizeCheckoutEmail,
 } from "./checkout.js";
 import { handleRazorpayRefundWebhook } from "./razorpayRefundWebhook.js";
 import {
@@ -36,6 +38,7 @@ async function placeOrderForCheckoutSession(
   userId: string,
   session: {
     addressJson: string;
+    customerEmail: string | null;
     couponId: string | null;
     couponCode: string | null;
     discountPaise: number;
@@ -48,9 +51,14 @@ async function placeOrderForCheckoutSession(
     return { error: "INVALID_ADDRESS" as const, message: "Invalid checkout address" };
   }
 
+  if (!session.customerEmail) {
+    return { error: "INVALID_EMAIL" as const, message: "Email is required" };
+  }
+
   const orderInput = {
     paymentMethod,
     transactionId,
+    customerEmail: session.customerEmail,
     couponId: session.couponId,
     couponCode: session.couponCode,
     discountPaise: session.discountPaise,
@@ -140,8 +148,15 @@ async function reconcileStockAfterOrder(
 export async function createRazorpayCheckout(
   userId: string,
   payload: CheckoutAddressPayload,
+  customerEmail: string,
   couponCode?: string | null,
 ) {
+  const emailError = validateCheckoutEmail(customerEmail);
+  if (emailError) {
+    return { error: "INVALID_EMAIL" as const, message: emailError };
+  }
+  const normalizedEmail = normalizeCheckoutEmail(customerEmail);
+
   if ("addressId" in payload) {
     const saved = await prisma.address.findFirst({
       where: { id: payload.addressId, userId },
@@ -198,6 +213,7 @@ export async function createRazorpayCheckout(
           couponId: totals.coupon?.couponId ?? null,
           couponCode: totals.coupon?.code ?? null,
           amountPaise: totals.totalPaise,
+          customerEmail: normalizedEmail,
           expiresAt: new Date(Date.now() + CHECKOUT_TTL_MS),
         },
       });
@@ -323,6 +339,7 @@ export async function verifyRazorpayCheckoutAndPlaceOrder(
     userId,
     {
       addressJson: session.addressJson,
+      customerEmail: session.customerEmail,
       couponId: session.couponId,
       couponCode: session.couponCode,
       discountPaise: session.discountPaise,
@@ -429,6 +446,7 @@ export async function handleRazorpayWebhook(rawBody: string, signature: string) 
     session.userId,
     {
       addressJson: session.addressJson,
+      customerEmail: session.customerEmail,
       couponId: session.couponId,
       couponCode: session.couponCode,
       discountPaise: session.discountPaise,

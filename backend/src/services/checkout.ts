@@ -1,6 +1,6 @@
 import type { MetalType, Product } from "../generated/prisma/client.js";
 import { mapOrderToDto } from "../lib/orderMapper.js";
-import { notifyAdminOrderPlaced, notifyOrderConfirmed } from "../lib/notifications.js";
+import { notifyOrderPlaced } from "../lib/notifications.js";
 import { prisma } from "../lib/prisma.js";
 import {
   applyCouponToCheckoutTotals,
@@ -59,6 +59,21 @@ async function generateOrderNumber(): Promise<string> {
 
   const count = await prisma.order.count();
   return `DJ-${24000 + count + 1}`;
+}
+
+export function validateCheckoutEmail(email: unknown): string | null {
+  if (typeof email !== "string" || !email.trim()) {
+    return "Email is required";
+  }
+  const normalized = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+    return "Valid email address is required";
+  }
+  return null;
+}
+
+export function normalizeCheckoutEmail(email: string): string {
+  return email.trim().toLowerCase();
 }
 
 export function validateCheckoutAddress(input: CheckoutAddressInput): string | null {
@@ -208,6 +223,7 @@ export async function placeOrderFromCart(
   input: {
     addressId?: string;
     address?: CheckoutAddressInput;
+    customerEmail: string;
     paymentMethod: string;
     transactionId: string;
     couponId?: string | null;
@@ -215,6 +231,12 @@ export async function placeOrderFromCart(
     discountPaise?: number;
   },
 ) {
+  const emailError = validateCheckoutEmail(input.customerEmail);
+  if (emailError) {
+    return { error: "INVALID_EMAIL" as const, message: emailError };
+  }
+  const customerEmail = normalizeCheckoutEmail(input.customerEmail);
+
   const cart = await prisma.cart.findUnique({
     where: { userId },
     include: {
@@ -366,31 +388,31 @@ export async function placeOrderFromCart(
       await incrementCouponUsage(tx, couponId);
     }
 
-    if (checkoutCustomerName) {
-      await tx.user.update({
-        where: { id: userId },
-        data: { name: checkoutCustomerName },
-      });
-    }
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        email: customerEmail,
+        ...(checkoutCustomerName ? { name: checkoutCustomerName } : {}),
+      },
+    });
 
     return created;
   });
 
   const orderWithUser = await prisma.order.findUnique({
     where: { id: order.id },
-    include: { user: { select: { phone: true, name: true } } },
+    include: {
+      user: { select: { phone: true, name: true } },
+      items: true,
+      deliveryAddress: true,
+    },
   });
 
-  if (orderWithUser?.user.phone) {
-    void notifyOrderConfirmed({
-      customerPhone: orderWithUser.user.phone,
-      orderNumber: order.orderNumber,
-      totalPaise: order.totalPaise,
-    });
-    void notifyAdminOrderPlaced({
-      orderNumber: order.orderNumber,
-      totalPaise: order.totalPaise,
-      customerPhone: orderWithUser.user.phone,
+  if (orderWithUser) {
+    void notifyOrderPlaced({
+      order: orderWithUser,
+      customerEmail,
+      customerPhone: orderWithUser.user.phone ?? "",
       customerName: orderWithUser.user.name,
     });
   }

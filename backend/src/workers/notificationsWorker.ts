@@ -1,3 +1,4 @@
+import { sendTransactionalEmail } from "../lib/resendEmail.js";
 import { sendTransactionalMessage } from "../lib/twilioSms.js";
 import { startWorker, QUEUE_NAMES } from "../lib/queue.js";
 import type { NotificationJobPayload } from "../lib/notificationQueue.js";
@@ -6,9 +7,24 @@ export function startNotificationsWorker() {
   const worker = startWorker<NotificationJobPayload>(
     QUEUE_NAMES.notifications,
     async (job) => {
-      const { to, body, kind } = job.data;
-      console.log(`[Notify:${kind}] sending to ${to.replace(/\d(?=\d{4})/g, "*")}`);
-      await sendTransactionalMessage(to, body);
+      const payload = job.data;
+
+      if (payload.channel === "email") {
+        const masked = payload.to.replace(/(.{2}).+(@.+)/, "$1***$2");
+        console.log(`[Notify:${payload.kind}] emailing ${masked}`);
+        await sendTransactionalEmail({
+          to: payload.to,
+          subject: payload.subject,
+          html: payload.html,
+          text: payload.text,
+        });
+        return;
+      }
+
+      console.log(
+        `[Notify:${payload.kind}] sending SMS to ${payload.to.replace(/\d(?=\d{4})/g, "*")}`,
+      );
+      await sendTransactionalMessage(payload.to, payload.body);
     },
     { concurrency: 5 },
   );

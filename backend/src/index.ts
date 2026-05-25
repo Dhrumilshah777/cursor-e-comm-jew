@@ -14,6 +14,7 @@ import express from "express";
 import { prisma } from "./lib/prisma.js";
 import { isQueueEnabled, shutdownQueues } from "./lib/queue.js";
 import { connectRedis, isRedisConfigured, pingRedis } from "./lib/redis.js";
+import { isResendConfigured } from "./lib/resendEmail.js";
 import { createRateLimiter, ipKey } from "./middleware/rateLimit.js";
 import { startNotificationsWorker } from "./workers/notificationsWorker.js";
 import { startRefundsWorker } from "./workers/refundsWorker.js";
@@ -139,6 +140,7 @@ app.get("/api/health", async (_req, res) => {
       redis: redisConfigured ? "connected" : "not_configured",
       queues: isQueueEnabled() ? "running" : "inline",
       sentry: isSentryEnabled() ? "enabled" : "disabled",
+      email: isResendConfigured() ? "enabled" : "disabled",
     });
   } catch {
     res.status(503).json({ ok: false, database: "disconnected" });

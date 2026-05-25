@@ -113,9 +113,15 @@ checkoutRouter.get("/addresses", requireCustomer, async (req: CustomerRequest, r
 
 checkoutRouter.post("/razorpay/create-order", requireCustomer, createCheckoutLimiter, async (req: CustomerRequest, res) => {
   const payload = parseCheckoutAddressPayload(req.body);
+  const email = typeof req.body?.email === "string" ? req.body.email : "";
 
   if (!payload) {
     res.status(400).json({ error: "Delivery address or addressId is required" });
+    return;
+  }
+
+  if (!email.trim()) {
+    res.status(400).json({ error: "Email is required" });
     return;
   }
 
@@ -125,6 +131,7 @@ checkoutRouter.post("/razorpay/create-order", requireCustomer, createCheckoutLim
     const result = await createRazorpayCheckout(
       req.customer!.userId,
       payload,
+      email,
       couponCode || undefined,
     );
 
@@ -144,6 +151,12 @@ checkoutRouter.post("/razorpay/create-order", requireCustomer, createCheckoutLim
       if (result.error === "INVALID_ADDRESS") {
         res.status(400).json({
           error: "message" in result ? result.message : "Invalid address",
+        });
+        return;
+      }
+      if (result.error === "INVALID_EMAIL") {
+        res.status(400).json({
+          error: "message" in result ? result.message : "Valid email is required",
         });
         return;
       }

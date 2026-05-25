@@ -55,6 +55,7 @@ export default function CheckoutPageContent() {
   const [state, setState] = useState("");
   const [pincode, setPincode] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [saveAddress, setSaveAddress] = useState(true);
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{
@@ -101,6 +102,9 @@ export default function CheckoutPageContent() {
         }
         if (user?.name) {
           setName(user.name);
+        }
+        if (user?.email) {
+          setEmail(user.email);
         }
       })
       .catch(() => {
@@ -210,6 +214,11 @@ export default function CheckoutPageContent() {
       }
     }
 
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("Please enter a valid email address for order confirmation.");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
@@ -219,6 +228,7 @@ export default function CheckoutPageContent() {
         ...(useSaved && selectedAddressId
           ? { addressId: selectedAddressId }
           : { address: getNewAddress() }),
+        email: email.trim(),
         couponCode: appliedCoupon?.code,
       });
 
@@ -235,6 +245,7 @@ export default function CheckoutPageContent() {
         order_id: paymentOrder.razorpayOrderId,
         prefill: {
           name: prefillName,
+          email: email.trim(),
           contact: prefillPhone.length === 10 ? `+91${prefillPhone}` : prefillPhone,
         },
         theme: { color: "#18181b" },
@@ -307,6 +318,29 @@ export default function CheckoutPageContent() {
 
       <form onSubmit={handlePay} className="grid gap-10 lg:grid-cols-[1fr_360px] lg:gap-14">
         <div className="space-y-8">
+          <section>
+            <h2 className="text-sm font-normal uppercase tracking-[0.2em] text-zinc-900">
+              Contact
+            </h2>
+            <p className="mt-2 text-sm font-light text-zinc-600">
+              Order confirmation and updates will be sent to this email.
+            </p>
+            <label className="mt-4 block">
+              <span className="text-[10px] font-normal uppercase tracking-[0.16em] text-zinc-500">
+                Email address
+              </span>
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 w-full border border-zinc-300 bg-white px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                placeholder="you@example.com"
+              />
+            </label>
+          </section>
+
           <section>
             <h2 className="text-sm font-normal uppercase tracking-[0.2em] text-zinc-900">
               Delivery address
