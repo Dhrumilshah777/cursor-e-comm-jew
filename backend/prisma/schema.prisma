@@ -114,6 +114,7 @@ model CheckoutPayment {
   coupon Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([status, expiresAt])
   @@map("checkout_payments")
 }
 
@@ -176,6 +177,7 @@ model OtpCode {
   createdAt DateTime @default(now())
 
   @@index([phone])
+  @@index([expiresAt])
   @@map("otp_codes")
 }
 
@@ -297,8 +299,11 @@ model Order {
   returnRequests  ReturnRequest[]
   statusEvents    OrderStatusEvent[]
 
-  @@index([userId])
-  @@index([status])
+  @@index([placedAt])
+  @@index([userId, placedAt])
+  @@index([status, placedAt])
+  @@index([transactionId])
+  @@index([cancelRazorpayRefundId])
   @@map("orders")
 }
 
@@ -367,6 +372,8 @@ model ReturnRequest {
 
   @@index([orderId])
   @@index([status])
+  @@index([submittedAt])
+  @@index([razorpayRefundId])
   @@map("return_requests")
 }
 

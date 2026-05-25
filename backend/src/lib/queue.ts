@@ -1,5 +1,6 @@
 import { Redis } from "ioredis";
 import { Queue, Worker, type ConnectionOptions, type Processor, type WorkerOptions } from "bullmq";
+import { captureError } from "./sentry.js";
 
 /**
  * BullMQ requires a *separate* Redis connection from the one used for caching,
@@ -86,14 +87,28 @@ export function startWorker<T = unknown, R = unknown>(
   });
 
   worker.on("failed", (job, error) => {
+    const attempts = job?.attemptsMade ?? 0;
+    const maxAttempts = job?.opts.attempts ?? 1;
+    const isFinal = attempts >= maxAttempts;
+
     console.error(
-      `[Queue:${name}] Job ${job?.id ?? "?"} failed (attempt ${job?.attemptsMade}/${job?.opts.attempts}):`,
+      `[Queue:${name}] Job ${job?.id ?? "?"} failed (attempt ${attempts}/${maxAttempts}):`,
       error.message,
     );
+
+    // Only report to Sentry on final failure to avoid alert noise from
+    // routine transient failures that BullMQ retries successfully.
+    if (isFinal) {
+      captureError(error, {
+        tags: { queue: name, jobId: job?.id ?? "unknown" },
+        extra: { jobName: job?.name, jobData: job?.data, attempts },
+      });
+    }
   });
 
   worker.on("error", (error) => {
     console.error(`[Queue:${name}] Worker error:`, error.message);
+    captureError(error, { tags: { queue: name, scope: "worker-error" } });
   });
 
   workers.push(worker);

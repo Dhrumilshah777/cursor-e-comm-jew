@@ -1,5 +1,10 @@
 import "dotenv/config";
 
+// Sentry must be initialized before any other module that we want
+// instrumented (Express, Postgres, etc.).
+import { initSentry, isSentryEnabled, Sentry } from "./lib/sentry.js";
+initSentry();
+
 import cors from "cors";
 
 import cookieParser from "cookie-parser";
@@ -132,6 +137,7 @@ app.get("/api/health", async (_req, res) => {
       database: "connected",
       redis: redisConfigured ? "connected" : "not_configured",
       queues: isQueueEnabled() ? "running" : "inline",
+      sentry: isSentryEnabled() ? "enabled" : "disabled",
     });
   } catch {
     res.status(503).json({ ok: false, database: "disconnected" });
@@ -154,6 +160,24 @@ app.use("/api/delivery", publicReadLimiter, deliveryRouter);
 app.use("/api/returns", returnsRouter);
 
 app.use("/api/admin", adminRouter);
+
+// Sentry's Express error handler — must be registered AFTER all routes.
+// Sets up captureException for any unhandled error thrown inside a handler.
+Sentry.setupExpressErrorHandler(app);
+
+// Final safety net so we always return JSON instead of leaking stack traces.
+app.use(
+  (
+    error: unknown,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    console.error("[Express] Unhandled error:", error);
+    if (res.headersSent) return;
+    res.status(500).json({ error: "Internal server error" });
+  },
+);
 
 async function startServer() {
   try {

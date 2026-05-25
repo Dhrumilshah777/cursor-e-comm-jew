@@ -21,6 +21,14 @@ services:
         sync: false
       - key: REVALIDATE_SECRET
         sync: false
+      - key: DATABASE_POOL_MAX
+        value: "10"
+      - key: DATABASE_STATEMENT_TIMEOUT_MS
+        value: "15000"
+      - key: SENTRY_DSN
+        sync: false
+      - key: SENTRY_TRACES_SAMPLE_RATE
+        value: "0.1"
       - key: RAZORPAY_KEY_ID
         sync: false
       - key: RAZORPAY_KEY_SECRET
