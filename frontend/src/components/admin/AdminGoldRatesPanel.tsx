@@ -15,7 +15,14 @@ const inputClass =
   "w-full max-w-xs border border-zinc-300 bg-white px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-400";
 
 function formatInr(value: number): string {
-  return `₹${Math.round(value).toLocaleString("en-IN")}`;
+  return `₹${value.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function formatRatePerGram(value: number): string {
+  return `${formatInr(value)}/g`;
 }
 
 function RateRow({ label, value, note }: { label: string; value: string; note?: string }) {
@@ -56,14 +63,14 @@ export default function AdminGoldRatesPanel() {
     const factor22 = rates.purityFactors["22kt"];
     const factor18 = rates.purityFactors["18kt"];
     const factor14 = rates.purityFactors["14kt"];
-    const rate24 = Math.round(parsed);
+    const rate24 = parsed;
     return {
       ...rates,
       rate24ktPerGram: rate24,
       derivedRates: {
-        "22kt": Math.round(rate24 * factor22),
-        "18kt": Math.round(rate24 * factor18),
-        "14kt": Math.round(rate24 * factor14),
+        "22kt": rate24 * factor22,
+        "18kt": rate24 * factor18,
+        "14kt": rate24 * factor14,
       },
     };
   }, [input24kt, rates]);
@@ -137,8 +144,8 @@ export default function AdminGoldRatesPanel() {
               <span className="text-sm text-zinc-500">₹</span>
               <input
                 type="number"
-                min={1}
-                step={1}
+                min={0.01}
+                step={0.01}
                 required
                 value={input24kt}
                 onChange={(e) => setInput24kt(e.target.value)}
@@ -167,17 +174,17 @@ export default function AdminGoldRatesPanel() {
         <div className="mt-4 max-w-xl">
           <RateRow
             label="22KT"
-            value={`${formatInr(previewRates.derivedRates["22kt"])}/g`}
+            value={formatRatePerGram(previewRates.derivedRates["22kt"])}
             note={`24KT × ${previewRates.purityFactors["22kt"]}`}
           />
           <RateRow
             label="18KT"
-            value={`${formatInr(previewRates.derivedRates["18kt"])}/g`}
+            value={formatRatePerGram(previewRates.derivedRates["18kt"])}
             note={`24KT × ${previewRates.purityFactors["18kt"]}`}
           />
           <RateRow
             label="14KT"
-            value={`${formatInr(previewRates.derivedRates["14kt"])}/g`}
+            value={formatRatePerGram(previewRates.derivedRates["14kt"])}
             note={`24KT × ${(previewRates.purityFactors["14kt"]).toFixed(4)} (14÷24)`}
           />
         </div>
@@ -191,7 +198,7 @@ export default function AdminGoldRatesPanel() {
           <dl className="mt-4 max-w-xl space-y-2 text-sm font-light text-zinc-700">
             <div className="flex justify-between gap-4">
               <dt>22KT rate</dt>
-              <dd>{formatInr(exampleBreakup.pricePerGram)}/g</dd>
+              <dd>{formatRatePerGram(exampleBreakup.pricePerGram)}</dd>
             </div>
             <div className="flex justify-between gap-4">
               <dt>Gold value</dt>

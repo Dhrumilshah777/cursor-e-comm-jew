@@ -8,18 +8,13 @@ export const PURITY_FACTOR_FROM_24KT: Record<GoldPurity, number> = {
 
 export const DEFAULT_RATE_24KT_RUPEES_PER_GRAM = 8952;
 
-function roundRatePerGram(value: number): number {
-  return Math.round(value);
-}
-
 export function deriveGoldRatesFrom24kt(
   rate24ktRupeesPerGram: number,
 ): Record<GoldPurity, number> {
-  const rate24 = roundRatePerGram(rate24ktRupeesPerGram);
   return {
-    "22kt": roundRatePerGram(rate24 * PURITY_FACTOR_FROM_24KT["22kt"]),
-    "18kt": roundRatePerGram(rate24 * PURITY_FACTOR_FROM_24KT["18kt"]),
-    "14kt": roundRatePerGram(rate24 * PURITY_FACTOR_FROM_24KT["14kt"]),
+    "22kt": rate24ktRupeesPerGram * PURITY_FACTOR_FROM_24KT["22kt"],
+    "18kt": rate24ktRupeesPerGram * PURITY_FACTOR_FROM_24KT["18kt"],
+    "14kt": rate24ktRupeesPerGram * PURITY_FACTOR_FROM_24KT["14kt"],
   };
 }
 
@@ -31,7 +26,7 @@ export type GoldRates = {
 
 export function buildGoldRates(rate24ktPerGram: number): GoldRates {
   return {
-    rate24ktPerGram: roundRatePerGram(rate24ktPerGram),
+    rate24ktPerGram,
     derivedRates: deriveGoldRatesFrom24kt(rate24ktPerGram),
     purityFactors: { ...PURITY_FACTOR_FROM_24KT },
   };

@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { collectionSlugs, collections } from "@/data/collections";
 import {
   calculatePriceBreakup,
+  formatINR,
   type GoldPurity,
   type ProductMakingCharge,
 } from "@/lib/pricing";
@@ -177,7 +178,7 @@ export default function AdminProductForm({
         gstPercent: form.gstPercent,
         ...(pricePerGram ? { pricePerGram } : {}),
       });
-      return `₹${Math.round(breakup.total).toLocaleString("en-IN")}`;
+      return formatINR(breakup.total);
     } catch {
       return "—";
     }

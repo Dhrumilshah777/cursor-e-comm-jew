@@ -85,7 +85,10 @@ export function calculatePriceBreakup(input: {
 }
 
 export function formatINR(amount: number): string {
-  return `₹${Math.round(amount).toLocaleString("en-IN")}`;
+  return `₹${amount.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 export function formatPurityLabel(purity: GoldPurity): string {

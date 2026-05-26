@@ -65,24 +65,22 @@ export async function updateGoldRate24kt(
     throw new Error("INVALID_RATE");
   }
 
-  const rounded = Math.round(rate24ktPerGram);
-
   await prisma.goldRateSettings.upsert({
     where: { id: SETTINGS_ID },
     create: {
       id: SETTINGS_ID,
-      rate24ktRupeesPerGram: rounded,
+      rate24ktRupeesPerGram: rate24ktPerGram,
     },
     update: {
-      rate24ktRupeesPerGram: rounded,
+      rate24ktRupeesPerGram: rate24ktPerGram,
     },
   });
 
-  setCachedGoldRate24kt(rounded);
+  setCachedGoldRate24kt(rate24ktPerGram);
   const productsUpdated = await recalculateAllProductPrices();
 
   return {
-    rates: buildGoldRatesDto(rounded),
+    rates: buildGoldRatesDto(rate24ktPerGram),
     productsUpdated,
   };
 }
