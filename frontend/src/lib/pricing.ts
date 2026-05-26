@@ -2,7 +2,7 @@ import {
   deriveGoldRatesFrom24kt,
   DEFAULT_RATE_24KT_RUPEES_PER_GRAM,
   type GoldPurity,
-} from "./goldRates.js";
+} from "./goldRates";
 
 export type { GoldPurity };
 
