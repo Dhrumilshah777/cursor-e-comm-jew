@@ -702,3 +702,32 @@ export async function fetchAdminCustomers() {
   }>("/api/admin/customers");
   return data.customers;
 }
+
+export type AdminGoldRates = {
+  rate24ktPerGram: number;
+  derivedRates: {
+    "14kt": number;
+    "18kt": number;
+    "22kt": number;
+  };
+  purityFactors: {
+    "14kt": number;
+    "18kt": number;
+    "22kt": number;
+  };
+};
+
+export async function fetchAdminGoldRates(): Promise<AdminGoldRates> {
+  const data = await adminFetch<{ rates: AdminGoldRates }>("/api/admin/gold-rates");
+  return data.rates;
+}
+
+export async function updateAdminGoldRates(rate24ktPerGram: number) {
+  return adminFetch<{
+    rates: AdminGoldRates;
+    productsUpdated: number;
+  }>("/api/admin/gold-rates", {
+    method: "PUT",
+    body: JSON.stringify({ rate24ktPerGram }),
+  });
+}

@@ -79,6 +79,14 @@ model Admin {
   @@map("admins")
 }
 
+model GoldRateSettings {
+  id                    String   @id @default("default")
+  rate24ktRupeesPerGram Decimal  @db.Decimal(10, 2)
+  updatedAt             DateTime @updatedAt
+
+  @@map("gold_rate_settings")
+}
+
 model User {
   id        String   @id @default(cuid())
   phone     String   @unique

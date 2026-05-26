@@ -22,6 +22,7 @@ const navItems = [
   { href: "/admin/abandoned-checkouts", label: "Abandoned checkout" },
   { href: "/admin/returns", label: "Returns" },
   { href: "/admin/products", label: "Products" },
+  { href: "/admin/gold-rates", label: "Gold rates" },
   { href: "/admin/coupons", label: "Coupons" },
   { href: "/admin/homepage", label: "Homepage" },
   { href: "/admin/customers", label: "Customers" },

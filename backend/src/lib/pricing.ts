@@ -1,3 +1,7 @@
+import {
+  getGoldRatePerGramForPurity,
+} from "./goldRates.js";
+
 export type GoldPurity = "14kt" | "18kt" | "22kt";
 
 export type MakingChargeType = "percentage" | "fixed";
@@ -21,9 +25,15 @@ export type PriceBreakup = {
 };
 
 export const goldRatePerGram: Record<GoldPurity, number> = {
-  "14kt": 5_450,
-  "18kt": 2,
-  "22kt": 20,
+  get "14kt"() {
+    return getGoldRatePerGramForPurity("14kt");
+  },
+  get "18kt"() {
+    return getGoldRatePerGramForPurity("18kt");
+  },
+  get "22kt"() {
+    return getGoldRatePerGramForPurity("22kt");
+  },
 };
 
 export const DEFAULT_GST_PERCENT = 3;

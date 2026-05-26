@@ -12,8 +12,10 @@ import {
 } from "@/lib/pricing";
 import {
   createAdminProduct,
+  fetchAdminGoldRates,
   fetchAdminProductById,
   updateAdminProduct,
+  type AdminGoldRates,
   type AdminProduct,
   type AdminProductPayload,
 } from "@/lib/adminApi";
@@ -132,6 +134,13 @@ export default function AdminProductForm({
   const [loading, setLoading] = useState(mode === "edit");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [goldRates, setGoldRates] = useState<AdminGoldRates | null>(null);
+
+  useEffect(() => {
+    fetchAdminGoldRates()
+      .then(setGoldRates)
+      .catch(() => setGoldRates(null));
+  }, []);
 
   useEffect(() => {
     if (mode !== "edit" || !productId) return;
@@ -159,17 +168,20 @@ export default function AdminProductForm({
 
   const pricePreview = useMemo(() => {
     try {
+      const purity = purityLabelToGold(form.purity);
+      const pricePerGram = goldRates?.derivedRates[purity];
       const breakup = calculatePriceBreakup({
         netWeightGrams: form.weightGrams,
-        purity: purityLabelToGold(form.purity),
+        purity,
         makingCharge,
         gstPercent: form.gstPercent,
+        ...(pricePerGram ? { pricePerGram } : {}),
       });
       return `₹${Math.round(breakup.total).toLocaleString("en-IN")}`;
     } catch {
       return "—";
     }
-  }, [form.weightGrams, form.purity, form.gstPercent, makingCharge]);
+  }, [form.weightGrams, form.purity, form.gstPercent, makingCharge, goldRates]);
 
   const update = <K extends keyof AdminProductPayload>(
     key: K,

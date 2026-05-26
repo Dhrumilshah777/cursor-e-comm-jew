@@ -1,4 +1,10 @@
-export type GoldPurity = "14kt" | "18kt" | "22kt";
+import {
+  deriveGoldRatesFrom24kt,
+  DEFAULT_RATE_24KT_RUPEES_PER_GRAM,
+  type GoldPurity,
+} from "./goldRates.js";
+
+export type { GoldPurity };
 
 export type MakingChargeType = "percentage" | "fixed";
 
@@ -20,12 +26,13 @@ export type PriceBreakup = {
   total: number;
 };
 
-/** Gold rate per gram (₹) by purity */
-export const goldRatePerGram: Record<GoldPurity, number> = {
-  "14kt": 5_450,
-  "18kt": 2,
-  "22kt": 20,
-};
+/** Live rates — use deriveGoldRatesFrom24kt() with admin-configured 24KT rate when available. */
+export function getGoldRatesFor24kt(rate24ktPerGram: number): Record<GoldPurity, number> {
+  return deriveGoldRatesFrom24kt(rate24ktPerGram);
+}
+
+export const goldRatePerGram: Record<GoldPurity, number> =
+  deriveGoldRatesFrom24kt(DEFAULT_RATE_24KT_RUPEES_PER_GRAM);
 
 export const DEFAULT_GST_PERCENT = 3;
 

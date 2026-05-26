@@ -12,6 +12,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 
 import { prisma } from "./lib/prisma.js";
+import { loadGoldRatesFromDb } from "./services/goldRates.js";
 import { isQueueEnabled, shutdownQueues } from "./lib/queue.js";
 import { connectRedis, isRedisConfigured, pingRedis } from "./lib/redis.js";
 import { isResendConfigured } from "./lib/resendEmail.js";
@@ -194,8 +195,16 @@ async function startServer() {
     }
   }
 
-  // Background workers — they only spin up when REDIS_URL is set; otherwise
-  // jobs run inline as fallback (see queue.ts / refundQueue.ts).
+  try {
+    const rates = await loadGoldRatesFromDb();
+    console.log(
+      `[GoldRates] 24KT ₹${rates.rate24ktPerGram}/g → 22KT ₹${rates.derivedRates["22kt"]}/g`,
+    );
+  } catch (error) {
+    console.error("[GoldRates] failed to load settings:", error);
+  }
+
+  // Background workers
   startNotificationsWorker();
   startRefundsWorker();
   startShiprocketRetryWorker();
