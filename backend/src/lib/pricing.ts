@@ -85,10 +85,7 @@ function formatPercent(value: number): string {
 }
 
 export function formatINR(amount: number): string {
-  return `₹${amount.toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  return `₹${Math.round(amount).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 }
 
 export function purityFromDb(purity: string): GoldPurity {

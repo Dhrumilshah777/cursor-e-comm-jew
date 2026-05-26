@@ -33,7 +33,8 @@ export function adminAlertEmail(): string | null {
 }
 
 export function formatInrFromPaise(paise: number): string {
-  return `₹${(paise / 100).toLocaleString("en-IN")}`;
+  const rupees = Math.round(paise / 100);
+  return `₹${rupees.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 }
 
 export async function sendTransactionalEmail(input: {

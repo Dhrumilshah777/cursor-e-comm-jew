@@ -14,10 +14,7 @@ export type InvoiceOrder = Order & {
 };
 
 function formatInrPlain(paise: number): string {
-  return (paise / 100).toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  return Math.round(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
 function drawRow(

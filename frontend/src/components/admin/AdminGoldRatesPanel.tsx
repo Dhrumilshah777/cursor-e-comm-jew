@@ -8,22 +8,13 @@ import {
 } from "@/lib/adminApi";
 import {
   calculatePriceBreakup,
+  formatINR,
+  formatRatePerGram,
   type GoldPurity,
 } from "@/lib/pricing";
 
 const inputClass =
   "w-full max-w-xs border border-zinc-300 bg-white px-3 py-2.5 text-sm font-light text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-400";
-
-function formatInr(value: number): string {
-  return `₹${value.toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
-
-function formatRatePerGram(value: number): string {
-  return `${formatInr(value)}/g`;
-}
 
 function RateRow({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
@@ -202,23 +193,23 @@ export default function AdminGoldRatesPanel() {
             </div>
             <div className="flex justify-between gap-4">
               <dt>Gold value</dt>
-              <dd>{formatInr(exampleBreakup.goldValue)}</dd>
+              <dd>{formatINR(exampleBreakup.goldValue)}</dd>
             </div>
             <div className="flex justify-between gap-4">
               <dt>Making charges (7%)</dt>
-              <dd>{formatInr(exampleBreakup.makingCharge)}</dd>
+              <dd>{formatINR(exampleBreakup.makingCharge)}</dd>
             </div>
             <div className="flex justify-between gap-4">
               <dt>Subtotal</dt>
-              <dd>{formatInr(exampleBreakup.subtotal)}</dd>
+              <dd>{formatINR(exampleBreakup.subtotal)}</dd>
             </div>
             <div className="flex justify-between gap-4">
               <dt>GST (3%)</dt>
-              <dd>{formatInr(exampleBreakup.gst)}</dd>
+              <dd>{formatINR(exampleBreakup.gst)}</dd>
             </div>
             <div className="flex justify-between gap-4 border-t border-zinc-200 pt-3 text-zinc-900">
               <dt className="font-normal">Final price</dt>
-              <dd className="font-normal">{formatInr(exampleBreakup.total)}</dd>
+              <dd className="font-normal">{formatINR(exampleBreakup.total)}</dd>
             </div>
           </dl>
         </section>

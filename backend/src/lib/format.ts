@@ -1,10 +1,8 @@
 import type { GoldPurity, MetalType, OrderStatus } from "../generated/prisma/client.js";
 
 export function formatPaise(paise: number): string {
-  return `₹${(paise / 100).toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  const rupees = Math.round(paise / 100);
+  return `₹${rupees.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 }
 
 export function formatDisplayDate(date: Date): string {
