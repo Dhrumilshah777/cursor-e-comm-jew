@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import CategoryBanner from "@/components/CategoryBanner";
 import CollectionProductGrid from "@/components/CollectionProductGrid";
 import {
-  collectionSlugs,
   getCollection,
   isCollectionSlug,
 } from "@/data/collections";
@@ -14,9 +13,9 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return collectionSlugs.map((slug) => ({ slug }));
-}
+// Collection pages fetch products from the live API — skip build-time pre-render
+// so Vercel deploys succeed even when Render is cold or unreachable during build.
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;

@@ -1,4 +1,4 @@
-import { getApiBaseUrl } from "@/lib/api";
+import { fetchWithTimeout, getApiBaseUrl } from "@/lib/api";
 import type { CollectionProduct } from "@/data/collections";
 import type { CollectionSlug } from "@/data/collections";
 
@@ -9,7 +9,7 @@ const PRODUCT_REVALIDATE_SECONDS = 60;
 
 async function publicGet<T>(path: string, tags: string[]): Promise<T> {
   const url = new URL(path, getApiBaseUrl());
-  const response = await fetch(url.toString(), {
+  const response = await fetchWithTimeout(url.toString(), {
     next: { revalidate: PRODUCT_REVALIDATE_SECONDS, tags },
   });
   if (!response.ok) {

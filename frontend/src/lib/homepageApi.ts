@@ -1,4 +1,4 @@
-import { getApiBaseUrl } from "@/lib/api";
+import { fetchWithTimeout, getApiBaseUrl } from "@/lib/api";
 
 export type HomepageProductCard = {
   id: string;
@@ -26,9 +26,12 @@ export type HomepageData = {
 };
 
 export async function fetchHomepage(): Promise<HomepageData> {
-  const response = await fetch(new URL("/api/homepage", getApiBaseUrl()).toString(), {
-    next: { revalidate: 60, tags: ["homepage"] },
-  });
+  const response = await fetchWithTimeout(
+    new URL("/api/homepage", getApiBaseUrl()).toString(),
+    {
+      next: { revalidate: 60, tags: ["homepage"] },
+    },
+  );
   if (!response.ok) {
     throw new Error("Failed to load homepage");
   }
