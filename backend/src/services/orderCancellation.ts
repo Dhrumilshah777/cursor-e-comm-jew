@@ -47,7 +47,7 @@ export async function cancelOrderForUser(
       deliveryAddress: true,
       statusEvents: { orderBy: { eventAt: "asc" } },
       returnRequests: { take: 1 },
-      user: { select: { phone: true, name: true } },
+      user: { select: { phone: true, name: true, email: true } },
     },
   });
 
@@ -183,7 +183,10 @@ export async function cancelOrderForUser(
   }
 
   void notifyOrderCancelled({
+    customerEmail: order.user.email,
     customerPhone: order.user.phone,
+    customerName: order.user.name,
+    orderId: order.id,
     orderNumber: order.orderNumber,
     refundAmount: quote.refundAmount,
     refundStatus: paymentStatus,

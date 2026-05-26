@@ -187,7 +187,10 @@ export async function approveReturnRequest(id: string) {
 
     const customerPhone = returnRequest.order.user.phone;
     void notifyReturnApproved({
+      customerEmail: returnRequest.order.user.email,
       customerPhone,
+      customerName: returnRequest.order.user.name,
+      orderId: returnRequest.order.id,
       orderNumber: returnRequest.order.orderNumber,
       pickupScheduledFor: returnRequest.pickupScheduledFor,
     });
@@ -257,7 +260,10 @@ export async function updateReturnStatus(
 
   if (status === "REJECTED") {
     void notifyReturnRejected({
+      customerEmail: updated.order.user.email,
       customerPhone: updated.order.user.phone,
+      customerName: updated.order.user.name,
+      orderId: updated.order.id,
       orderNumber: updated.order.orderNumber,
     });
   }

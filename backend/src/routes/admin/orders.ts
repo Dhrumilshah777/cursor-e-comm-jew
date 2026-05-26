@@ -8,6 +8,11 @@ import {
   syncAdminOrderShiprocket,
   updateAdminOrder,
 } from "../../services/adminOrders.js";
+import {
+  buildInvoicePdfBuffer,
+  getInvoiceOrderById,
+  invoicePdfFilename,
+} from "../../services/invoice.js";
 
 export const adminOrdersRouter = Router();
 
@@ -23,6 +28,27 @@ adminOrdersRouter.get("/", async (req, res) => {
   } catch (error) {
     console.error("GET /api/admin/orders failed:", error);
     res.status(500).json({ error: "Failed to load orders" });
+  }
+});
+
+adminOrdersRouter.get("/:id/invoice", async (req, res) => {
+  try {
+    const order = await getInvoiceOrderById(req.params.id);
+    if (!order) {
+      res.status(404).json({ error: "Order not found" });
+      return;
+    }
+
+    const pdf = await buildInvoicePdfBuffer(order);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${invoicePdfFilename(order.orderNumber)}"`,
+    );
+    res.send(pdf);
+  } catch (error) {
+    console.error(`GET /api/admin/orders/${req.params.id}/invoice failed:`, error);
+    res.status(500).json({ error: "Failed to generate invoice" });
   }
 });
 

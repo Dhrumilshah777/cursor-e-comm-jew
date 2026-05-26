@@ -41,6 +41,10 @@ export async function sendTransactionalEmail(input: {
   subject: string;
   html: string;
   text: string;
+  attachment?: {
+    filename: string;
+    content: Buffer;
+  };
 }): Promise<boolean> {
   const resend = getResendClient();
   if (!resend) {
@@ -61,6 +65,16 @@ export async function sendTransactionalEmail(input: {
       subject: input.subject,
       html: input.html,
       text: input.text,
+      ...(input.attachment
+        ? {
+            attachments: [
+              {
+                filename: input.attachment.filename,
+                content: input.attachment.content,
+              },
+            ],
+          }
+        : {}),
     });
 
     if (result.error) {

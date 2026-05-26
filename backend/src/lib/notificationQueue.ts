@@ -16,6 +16,10 @@ export type EmailNotificationJob = {
   subject: string;
   html: string;
   text: string;
+  attachment?: {
+    filename: string;
+    contentBase64: string;
+  };
 };
 
 export type NotificationJobPayload = SmsNotificationJob | EmailNotificationJob;
@@ -31,6 +35,14 @@ async function deliverNotification(payload: NotificationJobPayload): Promise<voi
     subject: payload.subject,
     html: payload.html,
     text: payload.text,
+    ...(payload.attachment
+      ? {
+          attachment: {
+            filename: payload.attachment.filename,
+            content: Buffer.from(payload.attachment.contentBase64, "base64"),
+          },
+        }
+      : {}),
   });
 }
 
@@ -59,8 +71,31 @@ export async function enqueueNotification(payload: NotificationJobPayload): Prom
 
 export async function enqueueEmailNotification(
   payload: Omit<EmailNotificationJob, "channel">,
+  options?: { jobId?: string },
 ): Promise<void> {
-  await enqueueNotification({ channel: "email", ...payload });
+  const queue = getQueue(QUEUE_NAMES.notifications);
+
+  const jobPayload: EmailNotificationJob = { channel: "email", ...payload };
+
+  if (!queue) {
+    void deliverNotification(jobPayload).catch((error) => {
+      console.error(`[Notify:${payload.kind}] inline send failed:`, error);
+    });
+    return;
+  }
+
+  try {
+    await queue.add(payload.kind, jobPayload, {
+      attempts: 5,
+      backoff: { type: "exponential", delay: 5000 },
+      ...(options?.jobId ? { jobId: options.jobId } : {}),
+    });
+  } catch (error) {
+    console.error(`[Notify:${payload.kind}] enqueue failed, sending inline:`, error);
+    void deliverNotification(jobPayload).catch((sendError) => {
+      console.error(`[Notify:${payload.kind}] inline send also failed:`, sendError);
+    });
+  }
 }
 
 export async function enqueueSmsNotification(

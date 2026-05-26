@@ -392,9 +392,12 @@ export async function initiateReturnRefundOnItemReceived(returnRequestId: string
     console.error(`Failed to enqueue return refund ${returnRequest.id}:`, error);
   }
 
-  if (updated.order.user.phone) {
+  if (updated.order.user.phone || updated.order.user.email) {
     void notifyRefundInitiated({
+      customerEmail: updated.order.user.email,
       customerPhone: updated.order.user.phone,
+      customerName: updated.order.user.name,
+      orderId: updated.order.id,
       orderNumber: updated.order.orderNumber,
       amountPaise: lineTotalPaise,
     });

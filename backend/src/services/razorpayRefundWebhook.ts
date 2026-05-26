@@ -105,6 +105,7 @@ async function handleCancelledOrderRefundWebhook(
   orderId: string,
 ) {
   const refundId = refund.id;
+  const amountPaise = refund.amount ?? 0;
 
   if (event === "refund.created") {
     await prisma.order.update({
@@ -120,6 +121,22 @@ async function handleCancelledOrderRefundWebhook(
 
   if (event === "refund.processed") {
     await updateCancelledOrderRefundStatus(orderId, "CREDITED", new Date());
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { user: true },
+    });
+    if (order?.user.phone || order?.user.email) {
+      void notifyRefundProcessed({
+        customerEmail: order.user.email,
+        customerPhone: order.user.phone,
+        customerName: order.user.name,
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        amountPaise: amountPaise || order.totalPaise,
+      });
+    }
+
     return { ok: true as const, event, orderId };
   }
 
@@ -178,9 +195,12 @@ async function handleReturnRefundWebhook(
       });
     });
 
-    if (returnRequest.order.user.phone) {
+    if (returnRequest.order.user.phone || returnRequest.order.user.email) {
       void notifyRefundProcessed({
+        customerEmail: returnRequest.order.user.email,
         customerPhone: returnRequest.order.user.phone,
+        customerName: returnRequest.order.user.name,
+        orderId: returnRequest.order.id,
         orderNumber: returnRequest.order.orderNumber,
         amountPaise: amountPaise || returnRequest.refundAmountPaise || 0,
       });

@@ -2,6 +2,15 @@ import {
   buildAdminNewOrderEmail,
   buildOrderConfirmationEmail,
 } from "./emailTemplates/orderEmails.js";
+import {
+  buildOrderCancelledEmail,
+  buildOrderDeliveredEmail,
+  buildOrderShippedEmail,
+  buildRefundInitiatedEmail,
+  buildRefundProcessedEmail,
+  buildReturnApprovedEmail,
+  buildReturnRejectedEmail,
+} from "./emailTemplates/transactionalEmails.js";
 import { buildOrderEmailData } from "./orderEmailMapper.js";
 import {
   adminAlertEmail,
@@ -11,6 +20,7 @@ import {
   enqueueEmailNotification,
   enqueueSmsNotification,
 } from "./notificationQueue.js";
+import { generateInvoicePdf } from "./invoice/generateInvoicePdf.js";
 
 const STORE_NAME = process.env.STORE_NAME?.trim() || "Dhrumil Jewellers";
 
@@ -22,6 +32,39 @@ function adminPhone(): string | null {
   return raw;
 }
 
+type EmailMessage = {
+  subject: string;
+  html: string;
+  text: string;
+};
+
+async function sendCustomerEmail(
+  email: string | null | undefined,
+  kind: string,
+  message: EmailMessage,
+  options?: { jobId?: string; attachment?: { filename: string; content: Buffer } },
+): Promise<void> {
+  if (!email?.trim()) return;
+  await enqueueEmailNotification(
+    {
+      kind,
+      to: email.trim().toLowerCase(),
+      subject: message.subject,
+      html: message.html,
+      text: message.text,
+      ...(options?.attachment
+        ? {
+            attachment: {
+              filename: options.attachment.filename,
+              contentBase64: options.attachment.content.toString("base64"),
+            },
+          }
+        : {}),
+    },
+    options?.jobId ? { jobId: options.jobId } : undefined,
+  );
+}
+
 type OrderPlacedNotificationInput = {
   order: Parameters<typeof buildOrderEmailData>[0];
   customerEmail: string;
@@ -31,15 +74,31 @@ type OrderPlacedNotificationInput = {
 
 export async function notifyOrderPlaced(input: OrderPlacedNotificationInput) {
   const emailData = buildOrderEmailData(input.order, input.customerEmail);
-
   const confirmationEmail = buildOrderConfirmationEmail(emailData);
-  await enqueueEmailNotification({
-    kind: "order-confirmed",
-    to: input.customerEmail,
-    subject: confirmationEmail.subject,
-    html: confirmationEmail.html,
-    text: confirmationEmail.text,
-  });
+
+  let invoiceAttachment: { filename: string; content: Buffer } | undefined;
+  try {
+    const pdf = await generateInvoicePdf(input.order);
+    invoiceAttachment = {
+      filename: `invoice-${input.order.orderNumber}.pdf`,
+      content: pdf,
+    };
+  } catch (error) {
+    console.error(
+      `[Notify] Invoice PDF failed for ${input.order.orderNumber}:`,
+      error,
+    );
+  }
+
+  await sendCustomerEmail(
+    input.customerEmail,
+    "order-confirmed",
+    confirmationEmail,
+    {
+      jobId: `email-order-confirmed-${input.order.id}`,
+      attachment: invoiceAttachment,
+    },
+  );
 
   const adminEmail = adminAlertEmail();
   if (adminEmail) {
@@ -107,12 +166,40 @@ export async function notifyAdminOrderPlaced(input: {
   });
 }
 
+export async function notifyOrderShipped(input: {
+  customerEmail?: string | null;
+  customerPhone?: string | null;
+  customerName?: string | null;
+  orderId: string;
+  orderNumber: string;
+  courier?: string | null;
+  trackingNumber?: string | null;
+  expectedDelivery?: string | null;
+}) {
+  await sendCustomerEmail(
+    input.customerEmail,
+    "order-shipped",
+    buildOrderShippedEmail(input),
+    { jobId: `email-order-shipped-${input.orderId}` },
+  );
+}
+
 export async function notifyOrderCancelled(input: {
+  customerEmail?: string | null;
   customerPhone: string;
+  customerName?: string | null;
+  orderId: string;
   orderNumber: string;
   refundAmount: string;
   refundStatus?: string;
 }) {
+  await sendCustomerEmail(
+    input.customerEmail,
+    "order-cancelled",
+    buildOrderCancelledEmail(input),
+    { jobId: `email-order-cancelled-${input.orderId}` },
+  );
+
   const status = input.refundStatus ?? "Refund initiated";
   const body = `${STORE_NAME}: Order ${input.orderNumber} has been cancelled. ${status} for ${input.refundAmount}. Credited to your original payment method in 5-7 business days.`;
   await enqueueSmsNotification({
@@ -140,9 +227,19 @@ export async function notifyAdminOrderCancelled(input: {
 }
 
 export async function notifyOrderDelivered(input: {
+  customerEmail?: string | null;
   customerPhone: string;
+  customerName?: string | null;
+  orderId: string;
   orderNumber: string;
 }) {
+  await sendCustomerEmail(
+    input.customerEmail,
+    "order-delivered",
+    buildOrderDeliveredEmail(input),
+    { jobId: `email-order-delivered-${input.orderId}` },
+  );
+
   const body = `${STORE_NAME}: Your order ${input.orderNumber} has been delivered. Thank you for shopping with us!`;
   await enqueueSmsNotification({
     kind: "order-delivered",
@@ -171,9 +268,19 @@ export async function notifyAdminReturnRequested(input: {
 }
 
 export async function notifyReturnRejected(input: {
+  customerEmail?: string | null;
   customerPhone: string;
+  customerName?: string | null;
+  orderId: string;
   orderNumber: string;
 }) {
+  await sendCustomerEmail(
+    input.customerEmail,
+    "return-rejected",
+    buildReturnRejectedEmail(input),
+    { jobId: `email-return-rejected-${input.orderId}` },
+  );
+
   const body = `${STORE_NAME}: Your return request for order ${input.orderNumber} could not be approved. Contact Client Care for help.`;
   await enqueueSmsNotification({
     kind: "return-rejected",
@@ -183,10 +290,20 @@ export async function notifyReturnRejected(input: {
 }
 
 export async function notifyReturnApproved(input: {
+  customerEmail?: string | null;
   customerPhone: string;
+  customerName?: string | null;
+  orderId: string;
   orderNumber: string;
   pickupScheduledFor?: string | null;
 }) {
+  await sendCustomerEmail(
+    input.customerEmail,
+    "return-approved",
+    buildReturnApprovedEmail(input),
+    { jobId: `email-return-approved-${input.orderId}` },
+  );
+
   const pickupLine = input.pickupScheduledFor
     ? ` Pickup: ${input.pickupScheduledFor}.`
     : " Courier will contact you before pickup.";
@@ -199,10 +316,20 @@ export async function notifyReturnApproved(input: {
 }
 
 export async function notifyRefundProcessed(input: {
+  customerEmail?: string | null;
   customerPhone: string;
+  customerName?: string | null;
+  orderId: string;
   orderNumber: string;
   amountPaise: number;
 }) {
+  await sendCustomerEmail(
+    input.customerEmail,
+    "refund-processed",
+    buildRefundProcessedEmail(input),
+    { jobId: `email-refund-processed-${input.orderId}-${input.amountPaise}` },
+  );
+
   const body = `${STORE_NAME}: Refund ${formatInrFromPaise(input.amountPaise)} for order ${input.orderNumber} has been processed to your original payment method (5-7 business days).`;
   await enqueueSmsNotification({
     kind: "refund-processed",
@@ -227,10 +354,20 @@ export async function notifyAdminRefundFailed(input: {
 }
 
 export async function notifyRefundInitiated(input: {
+  customerEmail?: string | null;
   customerPhone: string;
+  customerName?: string | null;
+  orderId: string;
   orderNumber: string;
   amountPaise: number;
 }) {
+  await sendCustomerEmail(
+    input.customerEmail,
+    "refund-initiated",
+    buildRefundInitiatedEmail(input),
+    { jobId: `email-refund-initiated-${input.orderId}-${input.amountPaise}` },
+  );
+
   const body = `${STORE_NAME}: Refund of ${formatInrFromPaise(input.amountPaise)} initiated for order ${input.orderNumber}. You will receive it in 5-7 business days.`;
   await enqueueSmsNotification({
     kind: "refund-initiated",

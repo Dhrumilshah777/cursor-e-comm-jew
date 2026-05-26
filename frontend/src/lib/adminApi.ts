@@ -332,6 +332,32 @@ export async function fetchAdminOrderById(orderId: string) {
   return data.order;
 }
 
+export async function downloadAdminOrderInvoice(
+  orderId: string,
+  orderNumber: string,
+): Promise<void> {
+  const response = await fetch(
+    new URL(`/api/admin/orders/${orderId}/invoice`, getApiBaseUrl()).toString(),
+    { credentials: "include", cache: "no-store" },
+  );
+
+  if (response.status === 401) {
+    throw new Error("LOGIN_REQUIRED");
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to download invoice");
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `invoice-${orderNumber}.pdf`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export async function syncAdminOrderShiprocket(orderId: string) {
   const data = await adminFetch<{ order: AdminOrderDetail; synced: boolean }>(
     `/api/admin/orders/${orderId}/sync-shiprocket`,

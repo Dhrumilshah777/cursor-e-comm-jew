@@ -1,5 +1,6 @@
 import type { AccountOrder } from "@/data/accountOrders";
 import type { CancellationInfo } from "@/lib/cancellation";
+import { getApiBaseUrl } from "@/lib/api";
 import { customerFetch } from "@/lib/customerFetch";
 
 type OrdersResponse = { orders: AccountOrder[] };
@@ -46,4 +47,30 @@ export async function cancelOrder(
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+export async function downloadOrderInvoice(
+  orderId: string,
+  orderNumber: string,
+): Promise<void> {
+  const response = await fetch(
+    new URL(`/api/orders/${orderId}/invoice`, getApiBaseUrl()).toString(),
+    { credentials: "include", cache: "no-store" },
+  );
+
+  if (response.status === 401) {
+    throw new Error("LOGIN_REQUIRED");
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to download invoice");
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `invoice-${orderNumber}.pdf`;
+  link.click();
+  URL.revokeObjectURL(url);
 }

@@ -17,6 +17,14 @@ export function startNotificationsWorker() {
           subject: payload.subject,
           html: payload.html,
           text: payload.text,
+          ...(payload.attachment
+            ? {
+                attachment: {
+                  filename: payload.attachment.filename,
+                  content: Buffer.from(payload.attachment.contentBase64, "base64"),
+                },
+              }
+            : {}),
         });
         return;
       }

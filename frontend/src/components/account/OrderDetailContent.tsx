@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import {
   getOrderStatusClass,
   type AccountOrder,
@@ -7,6 +10,7 @@ import {
 import { getReturnRequestPath } from "@/data/returnRequest";
 import CancelOrderSection from "@/components/account/CancelOrderSection";
 import StatusTimeline from "@/components/StatusTimeline";
+import { downloadOrderInvoice } from "@/lib/ordersApi";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -47,10 +51,25 @@ export default function OrderDetailContent({
   whatsappHref,
   onOrderUpdated,
 }: OrderDetailContentProps) {
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
+  const [invoiceError, setInvoiceError] = useState<string | null>(null);
+
   const whatsappMessage = encodeURIComponent(
     `Hi, I need help with my order ${order.orderNumber}.`,
   );
   const whatsappOrderHref = `${whatsappHref}?text=${whatsappMessage}`;
+
+  async function handleDownloadInvoice() {
+    setDownloadingInvoice(true);
+    setInvoiceError(null);
+    try {
+      await downloadOrderInvoice(order.id, order.orderNumber);
+    } catch {
+      setInvoiceError("Could not download invoice. Please try again.");
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  }
 
   return (
     <div className="mt-8 space-y-8">
@@ -214,6 +233,24 @@ export default function OrderDetailContent({
               </dt>
               <dd className="mt-1 font-mono text-xs text-zinc-900">
                 {order.payment.transactionId}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
+                GST invoice
+              </dt>
+              <dd className="mt-2">
+                <button
+                  type="button"
+                  onClick={handleDownloadInvoice}
+                  disabled={downloadingInvoice}
+                  className="inline-flex cursor-pointer border border-zinc-900 px-4 py-2 text-[10px] font-light uppercase tracking-[0.16em] text-zinc-900 transition hover:bg-zinc-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {downloadingInvoice ? "Downloading…" : "Download invoice PDF"}
+                </button>
+                {invoiceError ? (
+                  <p className="mt-2 text-xs font-light text-red-700">{invoiceError}</p>
+                ) : null}
               </dd>
             </div>
           </dl>

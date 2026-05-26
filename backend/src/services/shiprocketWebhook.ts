@@ -1,6 +1,6 @@
 import type { OrderStatus } from "../generated/prisma/client.js";
 import { orderStatusEventLabel } from "../lib/format.js";
-import { notifyOrderDelivered } from "../lib/notifications.js";
+import { notifyOrderDelivered, notifyOrderShipped } from "../lib/notifications.js";
 import { metaToOrderUpdate, parseShiprocketMetaFromSources } from "../lib/shiprocketMeta.js";
 import { prisma } from "../lib/prisma.js";
 
@@ -119,7 +119,7 @@ async function findOrderFromWebhook(payload: ShiprocketWebhookPayload) {
     where: { OR: orConditions },
     include: {
       statusEvents: { orderBy: { eventAt: "desc" }, take: 1 },
-      user: { select: { phone: true } },
+      user: { select: { phone: true, name: true, email: true } },
     },
   });
 }
@@ -248,9 +248,24 @@ export async function handleShiprocketWebhook(payload: ShiprocketWebhookPayload)
     `[Shiprocket Webhook] Order ${order.orderNumber} updated: ${order.status} → ${mappedStatus}`,
   );
 
-  if (mappedStatus === "DELIVERED" && order.user.phone) {
+  if (mappedStatus === "SHIPPED" && order.status !== "SHIPPED") {
+    void notifyOrderShipped({
+      customerEmail: order.user.email,
+      customerName: order.user.name,
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      courier: courier ?? order.courier,
+      trackingNumber: awb ?? order.trackingNumber,
+      expectedDelivery: order.expectedDelivery,
+    });
+  }
+
+  if (mappedStatus === "DELIVERED" && (order.user.phone || order.user.email)) {
     void notifyOrderDelivered({
+      customerEmail: order.user.email,
       customerPhone: order.user.phone,
+      customerName: order.user.name,
+      orderId: order.id,
       orderNumber: order.orderNumber,
     });
   }

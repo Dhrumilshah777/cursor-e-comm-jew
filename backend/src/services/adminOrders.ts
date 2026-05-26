@@ -8,6 +8,7 @@ import {
 } from "./shiprocketFulfillment.js";
 import { syncShiprocketMetaToOrder } from "./shiprocketSync.js";
 import type { OrderStatus } from "../generated/prisma/client.js";
+import { notifyOrderShipped } from "../lib/notifications.js";
 
 const orderInclude = {
   items: { include: { product: true } },
@@ -183,6 +184,18 @@ export async function updateAdminOrder(
     });
   });
 
+  if (data.status === "SHIPPED" && existing.status !== "SHIPPED") {
+    void notifyOrderShipped({
+      customerEmail: order.user.email,
+      customerName: order.user.name,
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      courier: order.courier,
+      trackingNumber: order.trackingNumber,
+      expectedDelivery: order.expectedDelivery,
+    });
+  }
+
   return {
     order: mapAdminOrderToDto(order),
     ...(shiprocketLog?.length ? { shiprocketLog } : {}),
@@ -256,6 +269,18 @@ export async function addOrderStatusEvent(
   });
 
   if (!order) return null;
+
+  if (input.status === "SHIPPED" && existing.status !== "SHIPPED") {
+    void notifyOrderShipped({
+      customerEmail: order.user.email,
+      customerName: order.user.name,
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      courier: order.courier,
+      trackingNumber: order.trackingNumber,
+      expectedDelivery: order.expectedDelivery,
+    });
+  }
 
   return {
     order: mapAdminOrderToDto(order),

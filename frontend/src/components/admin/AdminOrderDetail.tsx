@@ -11,6 +11,7 @@ import {
 import {
   fetchAdminOrderById,
   AdminOrderStatusError,
+  downloadAdminOrderInvoice,
   syncAdminOrderShiprocket,
   updateAdminOrderStatus,
   type AdminOrderDetail,
@@ -63,6 +64,7 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [shiprocketLog, setShiprocketLog] = useState<ShiprocketLogEntry[] | null>(null);
   const [syncingShiprocket, setSyncingShiprocket] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -84,6 +86,21 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  const handleDownloadInvoice = async () => {
+    if (!order) return;
+    setDownloadingInvoice(true);
+    setSaveMessage(null);
+    try {
+      await downloadAdminOrderInvoice(order.id, order.orderNumber);
+    } catch (err) {
+      setSaveMessage(
+        err instanceof Error ? err.message : "Failed to download invoice",
+      );
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  };
 
   const handleShiprocketSync = async () => {
     setSyncingShiprocket(true);
@@ -429,6 +446,14 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
             <InfoRow label="Net amount received" value={order.total} />
           )}
         </dl>
+        <button
+          type="button"
+          onClick={handleDownloadInvoice}
+          disabled={downloadingInvoice}
+          className="mt-4 border border-zinc-900 px-4 py-2 text-[10px] font-normal uppercase tracking-[0.14em] text-zinc-900 transition hover:bg-zinc-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {downloadingInvoice ? "Downloading…" : "Download GST invoice PDF"}
+        </button>
       </Section>
 
       <Section title="Shipment & warehouse pickup">

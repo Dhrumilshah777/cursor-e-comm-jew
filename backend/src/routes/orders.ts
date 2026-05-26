@@ -19,6 +19,11 @@ import {
   getOrdersForPhone,
   getOrdersForUserId,
 } from "../services/orders.js";
+import {
+  buildInvoicePdfBuffer,
+  getInvoiceOrderForUser,
+  invoicePdfFilename,
+} from "../services/invoice.js";
 
 export const ordersRouter = Router();
 
@@ -130,6 +135,33 @@ ordersRouter.post("/:orderId/cancel", requireCustomer, cancelOrderLimiter, async
     }
     console.error(`POST /api/orders/${orderId}/cancel failed:`, error);
     res.status(500).json({ error: "Failed to cancel order" });
+  }
+});
+
+ordersRouter.get("/:orderId/invoice", requireCustomer, async (req: CustomerRequest, res) => {
+  const orderId = req.params.orderId;
+  if (!orderId || Array.isArray(orderId)) {
+    res.status(400).json({ error: "orderId is required" });
+    return;
+  }
+
+  try {
+    const order = await getInvoiceOrderForUser(orderId, req.customer!.userId);
+    if (!order) {
+      res.status(404).json({ error: "Order not found" });
+      return;
+    }
+
+    const pdf = await buildInvoicePdfBuffer(order);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${invoicePdfFilename(order.orderNumber)}"`,
+    );
+    res.send(pdf);
+  } catch (error) {
+    console.error(`GET /api/orders/${orderId}/invoice failed:`, error);
+    res.status(500).json({ error: "Failed to generate invoice" });
   }
 });
 
