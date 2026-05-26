@@ -104,33 +104,11 @@ export default async function ProductPage({ params }: PageProps) {
             <p className="mt-1.5 text-[11px] font-normal capitalize tracking-[0.08em] text-zinc-500">
               (Inclusive all taxes)
             </p>
-            {(() => {
-              const soldOut = product.inStock === false;
-              const lowStock =
-                !soldOut &&
-                typeof product.stockCount === "number" &&
-                typeof product.lowStockThreshold === "number" &&
-                product.stockCount > 0 &&
-                product.stockCount <= product.lowStockThreshold;
-
-              if (soldOut) {
-                return (
-                  <p className="mt-3 inline-block bg-zinc-900 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.22em] text-white">
-                    Sold out
-                  </p>
-                );
-              }
-              if (lowStock) {
-                return (
-                  <p className="mt-3 inline-block bg-amber-500 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.22em] text-white">
-                    {product.stockCount === 1
-                      ? "Last one left"
-                      : `Only ${product.stockCount} left`}
-                  </p>
-                );
-              }
-              return null;
-            })()}
+            {product.inStock === false ? (
+              <p className="mt-3 inline-block bg-zinc-900 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.22em] text-white">
+                Sold out
+              </p>
+            ) : null}
 
             <p className="mt-4 text-sm font-light leading-relaxed text-zinc-600">
               Crafted with precision and finished for everyday elegance. A

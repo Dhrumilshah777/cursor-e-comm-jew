@@ -44,12 +44,6 @@ function matchesPriceFilter(amount: number, filter: PriceFilter) {
 
 function ProductCard({ product }: { product: CollectionProduct }) {
   const soldOut = product.inStock === false;
-  const lowStock =
-    !soldOut &&
-    typeof product.stockCount === "number" &&
-    typeof product.lowStockThreshold === "number" &&
-    product.stockCount > 0 &&
-    product.stockCount <= product.lowStockThreshold;
 
   return (
     <Link
@@ -72,11 +66,6 @@ function ProductCard({ product }: { product: CollectionProduct }) {
               Sold out
             </span>
           </div>
-        ) : null}
-        {lowStock ? (
-          <span className="absolute left-2.5 top-2.5 z-10 bg-amber-500/95 px-2 py-1 text-[9px] font-medium uppercase tracking-[0.16em] text-white sm:left-3 sm:top-3 sm:text-[10px]">
-            {product.stockCount === 1 ? "Last one" : `Only ${product.stockCount} left`}
-          </span>
         ) : null}
         <WishlistButton productId={product.id} />
       </div>

@@ -67,7 +67,7 @@ export default function Navbar() {
   }, [closeMenu]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white pt-4 sm:pt-5">
+    <header className="sticky top-0 z-[70] bg-white pt-4 sm:pt-5">
       {/* Top tier — hamburger | logo (center) | WhatsApp + retailer */}
       <div className="border-b border-zinc-200 lg:border-b-0">
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-8">
@@ -171,7 +171,7 @@ export default function Navbar() {
 
       {/* Mobile / tablet menu overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-black/30 transition-opacity duration-300 lg:hidden ${
+        className={`fixed inset-0 z-[60] bg-black/30 transition-opacity duration-300 lg:hidden ${
           menuOpen
             ? "visible opacity-100"
             : "invisible opacity-0 pointer-events-none"
@@ -182,10 +182,10 @@ export default function Navbar() {
 
       <nav
         id="mobile-nav-menu"
-        className={`fixed left-0 right-0 top-[calc(4rem+1px)] z-50 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-zinc-200 bg-white px-6 py-6 shadow-lg transition-all duration-300 sm:top-[calc(4.5rem+1px)] sm:max-h-[calc(100vh-4.5rem)] lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-[65] w-[min(20rem,88vw)] overflow-y-auto border-r border-zinc-200 bg-white px-6 pb-8 pt-24 shadow-xl transition-transform duration-300 ease-out lg:hidden ${
           menuOpen
-            ? "visible translate-y-0 opacity-100"
-            : "invisible -translate-y-2 opacity-0 pointer-events-none"
+            ? "translate-x-0"
+            : "-translate-x-full pointer-events-none"
         }`}
         aria-label="Mobile"
         aria-hidden={!menuOpen}
