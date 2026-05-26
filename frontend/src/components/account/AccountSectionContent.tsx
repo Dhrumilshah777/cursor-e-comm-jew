@@ -1,4 +1,5 @@
 import MyOrdersContent from "@/components/account/MyOrdersContent";
+import MyWishlistContent from "@/components/account/MyWishlistContent";
 import { getAccountItemById } from "@/data/accountSections";
 
 function sectionDescription(sectionId: string): string {
@@ -30,6 +31,8 @@ export default function AccountSectionContent({
 
       {sectionId === "my-orders" ? (
         <MyOrdersContent />
+      ) : sectionId === "wishlist" ? (
+        <MyWishlistContent />
       ) : (
         <div className="mt-8 border border-zinc-100 bg-zinc-50/40 px-5 py-8 sm:px-8 sm:py-10">
           {sectionId === "overview" ? (

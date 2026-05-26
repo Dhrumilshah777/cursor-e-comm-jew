@@ -91,6 +91,7 @@ model User {
   orders    Order[]
   cart      Cart?
   checkoutPayments CheckoutPayment[]
+  wishlistItems WishlistItem[]
 
   @@map("users")
 }
@@ -171,6 +172,20 @@ model CartItem {
   @@map("cart_items")
 }
 
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId, createdAt])
+  @@map("wishlist_items")
+}
+
 model OtpCode {
   id        String   @id @default(cuid())
   phone     String
@@ -232,6 +247,7 @@ model Product {
 
   orderItems OrderItem[]
   cartItems  CartItem[]
+  wishlistItems WishlistItem[]
   homepageFeatures HomepageFeature[]
 
   @@index([category])

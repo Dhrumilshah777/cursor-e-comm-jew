@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import WishlistButton from "@/components/wishlist/WishlistButton";
 
 type ProductDetailActionsProps = {
+  productId: string;
   productName: string;
   slug: string;
 };
@@ -11,10 +13,10 @@ const iconButtonClass =
   "flex h-8 w-8 cursor-pointer items-center justify-center text-zinc-700 transition-colors hover:text-zinc-900 sm:h-9 sm:w-9";
 
 export default function ProductDetailActions({
+  productId,
   productName,
   slug,
 }: ProductDetailActionsProps) {
-  const [wishlisted, setWishlisted] = useState(false);
   const [shareHint, setShareHint] = useState<string | null>(null);
 
   const handleShare = async () => {
@@ -52,18 +54,11 @@ export default function ProductDetailActions({
       >
         <i className="fa-solid fa-share-nodes text-sm sm:text-base" aria-hidden="true" />
       </button>
-      <button
-        type="button"
-        onClick={() => setWishlisted((active) => !active)}
-        className={iconButtonClass}
-        aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-        aria-pressed={wishlisted}
-      >
-        <i
-          className={`text-sm sm:text-base ${wishlisted ? "fa-solid fa-heart" : "fa-regular fa-heart"}`}
-          aria-hidden="true"
-        />
-      </button>
+      <WishlistButton
+        productId={productId}
+        redirectPath={`/products/${slug}`}
+        variant="icon"
+      />
     </div>
   );
 }

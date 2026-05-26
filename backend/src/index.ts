@@ -24,6 +24,7 @@ import { startStockCleanupWorker } from "./workers/stockCleanupWorker.js";
 import { adminRouter } from "./routes/admin/index.js";
 import { authRouter } from "./routes/auth.js";
 import { cartRouter } from "./routes/cart.js";
+import { wishlistRouter } from "./routes/wishlist.js";
 import { checkoutRouter } from "./routes/checkout.js";
 import { handleRazorpayWebhook } from "./services/razorpayCheckout.js";
 import { ordersRouter } from "./routes/orders.js";
@@ -153,6 +154,7 @@ app.use("/api", globalApiLimiter);
 
 app.use("/api/auth", authRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/wishlist", wishlistRouter);
 app.use("/api/checkout", checkoutRouter);
 app.use("/api/orders", ordersRouter);
 

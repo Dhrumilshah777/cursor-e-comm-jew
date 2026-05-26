@@ -90,6 +90,7 @@ export default async function ProductPage({ params }: PageProps) {
                 </span>
               </p>
               <ProductDetailActions
+                productId={product.id}
                 productName={product.name}
                 slug={product.slug}
               />

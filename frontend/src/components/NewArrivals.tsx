@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Jost } from "next/font/google";
 import { useCallback, useEffect, useRef, useState } from "react";
+import WishlistButton from "@/components/wishlist/WishlistButton";
 const jost = Jost({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
@@ -115,8 +116,6 @@ function chunkItems(items: ProductItem[], size: number) {
 }
 
 function ProductCard({ product }: { product: ProductItem }) {
-  const [wishlisted, setWishlisted] = useState(false);
-
   return (
     <Link href={product.href} className="group flex w-full flex-col gap-3">
       <div className="relative aspect-square w-full overflow-hidden bg-zinc-100">
@@ -127,24 +126,7 @@ function ProductCard({ product }: { product: ProductItem }) {
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           sizes="(max-width: 1024px) 45vw, 12vw"
         />
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setWishlisted((active) => !active);
-          }}
-          className="absolute right-2.5 top-2.5 z-10 flex h-8 w-8 cursor-pointer items-center justify-center bg-white/90 text-zinc-800 transition-colors hover:bg-white sm:right-3 sm:top-3 sm:h-9 sm:w-9"
-          aria-label={
-            wishlisted ? "Remove from wishlist" : "Add to wishlist"
-          }
-          aria-pressed={wishlisted}
-        >
-          <i
-            className={`text-sm leading-none sm:text-base ${wishlisted ? "fa-solid fa-heart" : "fa-regular fa-heart"}`}
-            aria-hidden="true"
-          />
-        </button>
+        <WishlistButton productId={product.id} />
       </div>
       <div className="space-y-1 text-left">
         <p className="text-xs font-normal uppercase tracking-[0.14em] text-zinc-900 sm:text-[13px] lg:text-[11px] lg:tracking-[0.18em]">
