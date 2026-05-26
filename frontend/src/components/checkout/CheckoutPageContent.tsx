@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
+import { isAnalyticsConfigured, trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 import {
   createRazorpayCheckoutOrder,
   fetchCheckoutAddresses,
@@ -68,6 +69,18 @@ export default function CheckoutPageContent() {
   const [availableCoupons, setAvailableCoupons] = useState<AvailableCheckoutCoupon[]>([]);
   const [loadingCoupons, setLoadingCoupons] = useState(false);
   const [couponsError, setCouponsError] = useState<string | null>(null);
+  const checkoutTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (loading || !cart || cart.items.length === 0 || checkoutTrackedRef.current) {
+      return;
+    }
+
+    checkoutTrackedRef.current = true;
+    if (isAnalyticsConfigured()) {
+      trackBeginCheckout(cart);
+    }
+  }, [cart, loading]);
 
   useEffect(() => {
     let cancelled = false;
@@ -253,6 +266,9 @@ export default function CheckoutPageContent() {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
+            if (isAnalyticsConfigured()) {
+              trackPurchase(order);
+            }
             await refreshCart();
             router.replace(`/account/my-orders/${order.id}`);
           } catch (err) {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ConditionalFooter from "@/components/ConditionalFooter";
+import AnalyticsScripts from "@/components/analytics/AnalyticsScripts";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -37,6 +38,7 @@ export default function RootLayout({
         className="flex min-h-full flex-col font-sans"
         suppressHydrationWarning
       >
+        <AnalyticsScripts />
         <Providers>
           <Navbar />
           <main className="flex flex-1 flex-col">{children}</main>

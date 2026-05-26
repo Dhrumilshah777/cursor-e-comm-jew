@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import type { CollectionProduct } from "@/data/collections";
+import type { AnalyticsProductInput } from "@/lib/analytics";
 import WishlistButton from "@/components/wishlist/WishlistButton";
 
 type ProductDetailActionsProps = {
   productId: string;
   productName: string;
   slug: string;
+  analyticsProduct?: AnalyticsProductInput;
 };
 
 const iconButtonClass =
@@ -16,6 +19,7 @@ export default function ProductDetailActions({
   productId,
   productName,
   slug,
+  analyticsProduct,
 }: ProductDetailActionsProps) {
   const [shareHint, setShareHint] = useState<string | null>(null);
 
@@ -58,6 +62,7 @@ export default function ProductDetailActions({
         productId={productId}
         redirectPath={`/products/${slug}`}
         variant="icon"
+        analyticsProduct={analyticsProduct}
       />
     </div>
   );

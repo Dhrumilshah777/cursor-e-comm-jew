@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type MouseEvent } from "react";
+import type { AnalyticsProductInput } from "@/lib/analytics";
+import { isAnalyticsConfigured, trackAddToWishlist } from "@/lib/analytics";
 import { useWishlist } from "@/components/wishlist/WishlistProvider";
 
 type WishlistButtonProps = {
@@ -9,6 +11,7 @@ type WishlistButtonProps = {
   redirectPath?: string;
   variant?: "card" | "icon";
   className?: string;
+  analyticsProduct?: AnalyticsProductInput;
 };
 
 const cardClassName =
@@ -22,6 +25,7 @@ export default function WishlistButton({
   redirectPath,
   variant = "card",
   className,
+  analyticsProduct,
 }: WishlistButtonProps) {
   const router = useRouter();
   const { isWishlisted, toggleWishlist } = useWishlist();
@@ -37,6 +41,13 @@ export default function WishlistButton({
 
     try {
       await toggleWishlist(productId);
+      if (!active && isAnalyticsConfigured()) {
+        trackAddToWishlist(
+          analyticsProduct ?? {
+            id: productId,
+          },
+        );
+      }
     } catch (error) {
       if (error instanceof Error && error.message === "LOGIN_REQUIRED") {
         const redirect = encodeURIComponent(

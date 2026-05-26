@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
+import { isAnalyticsConfigured, trackAddToCart } from "@/lib/analytics";
 import { addToCart } from "@/lib/cartApi";
 
 type AddToBagButtonProps = {
@@ -33,6 +34,10 @@ export default function AddToBagButton({
     try {
       const cart = await addToCart(productId, { size: ringSize });
       setCart(cart);
+      const addedItem = cart.items.find((item) => item.product.id === productId);
+      if (addedItem && isAnalyticsConfigured()) {
+        trackAddToCart(addedItem.product);
+      }
       setStatus("added");
       setMessage("Added to your bag");
       window.setTimeout(() => {

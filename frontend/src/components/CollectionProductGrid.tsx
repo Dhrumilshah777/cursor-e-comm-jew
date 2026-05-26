@@ -67,7 +67,15 @@ function ProductCard({ product }: { product: CollectionProduct }) {
             </span>
           </div>
         ) : null}
-        <WishlistButton productId={product.id} />
+        <WishlistButton
+          productId={product.id}
+          analyticsProduct={{
+            id: product.id,
+            name: product.name,
+            category: product.category,
+            price: product.priceBreakup.total,
+          }}
+        />
       </div>
       <div className={`space-y-1 text-left ${soldOut ? "opacity-70" : ""}`}>
         <p className="text-xs font-normal uppercase tracking-[0.14em] text-zinc-900 sm:text-[13px] lg:tracking-[0.18em]">

@@ -126,7 +126,10 @@ function ProductCard({ product }: { product: ProductItem }) {
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           sizes="(max-width: 1024px) 45vw, 12vw"
         />
-        <WishlistButton productId={product.id} />
+        <WishlistButton
+          productId={product.id}
+          analyticsProduct={{ id: product.id, name: product.name }}
+        />
       </div>
       <div className="space-y-1 text-left">
         <p className="text-xs font-normal uppercase tracking-[0.14em] text-zinc-900 sm:text-[13px] lg:text-[11px] lg:tracking-[0.18em]">

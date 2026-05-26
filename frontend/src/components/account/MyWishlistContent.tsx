@@ -38,7 +38,16 @@ function WishlistProductCard({ product }: { product: CollectionProduct }) {
             sizes="(max-width: 768px) 50vw, 25vw"
           />
         </Link>
-        <WishlistButton productId={product.id} redirectPath="/account/wishlist" />
+        <WishlistButton
+          productId={product.id}
+          redirectPath="/account/wishlist"
+          analyticsProduct={{
+            id: product.id,
+            name: product.name,
+            category: product.category,
+            price: product.priceBreakup.total,
+          }}
+        />
       </div>
       <div className="space-y-1">
         <Link

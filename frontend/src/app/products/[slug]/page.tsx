@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Jost } from "next/font/google";
 import AddToBagButton from "@/components/cart/AddToBagButton";
+import ProductViewTracker from "@/components/analytics/ProductViewTracker";
 import ProductDetailActions from "@/components/ProductDetailActions";
 import ProductImageGallery from "@/components/ProductImageGallery";
 import ProductPincodeCheck from "@/components/ProductPincodeCheck";
@@ -45,6 +46,7 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <div className={`${jost.className} bg-white`}>
+      <ProductViewTracker product={product} />
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-2 text-[11px] font-light uppercase tracking-[0.18em] text-zinc-500 sm:text-xs sm:tracking-[0.2em]">
@@ -93,6 +95,12 @@ export default async function ProductPage({ params }: PageProps) {
                 productId={product.id}
                 productName={product.name}
                 slug={product.slug}
+                analyticsProduct={{
+                  id: product.id,
+                  name: product.name,
+                  category: product.category,
+                  price: product.priceBreakup.total,
+                }}
               />
             </div>
             <h1 className="mt-3 text-2xl font-light uppercase tracking-[0.12em] text-zinc-950 sm:text-3xl lg:mt-2">
