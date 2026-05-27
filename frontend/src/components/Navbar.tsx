@@ -4,9 +4,9 @@ import Link from "next/link";
 import { Great_Vibes } from "next/font/google";
 import { useCallback, useEffect, useState } from "react";
 import {
-  IoClose,
+  IoCloseOutline,
   IoLogoWhatsapp,
-  IoMenu,
+  IoMenuOutline,
   IoPersonOutline,
 } from "react-icons/io5";
 import CartNavLink from "@/components/cart/CartNavLink";
@@ -88,9 +88,9 @@ export default function Navbar() {
               aria-label={menuOpen ? "Close menu" : "Open menu"}
             >
               {menuOpen ? (
-                <IoClose className="text-xl" aria-hidden="true" />
+                <IoCloseOutline className="text-[1.35rem]" aria-hidden="true" />
               ) : (
-                <IoMenu className="text-xl" aria-hidden="true" />
+                <IoMenuOutline className="text-[1.35rem]" aria-hidden="true" />
               )}
             </button>
 
@@ -204,7 +204,7 @@ export default function Navbar() {
             className="flex h-10 w-10 items-center justify-center text-xl text-zinc-800 transition-opacity hover:opacity-70"
             aria-label="Close menu"
           >
-            <IoClose className="text-xl" aria-hidden="true" />
+            <IoCloseOutline className="text-[1.35rem]" aria-hidden="true" />
           </button>
         </div>
 
