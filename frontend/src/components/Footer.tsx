@@ -3,6 +3,19 @@
 import Link from "next/link";
 import { Great_Vibes, Jost } from "next/font/google";
 import { FormEvent, useState, type ReactNode } from "react";
+import type { IconType } from "react-icons";
+import {
+  IoCarOutline,
+  IoCardOutline,
+  IoLockClosedOutline,
+  IoLogoFacebook,
+  IoLogoInstagram,
+  IoLogoPaypal,
+  IoLogoPinterest,
+  IoLogoWhatsapp,
+  IoRibbonOutline,
+  IoShieldCheckmarkOutline,
+} from "react-icons/io5";
 
 const jost = Jost({
   subsets: ["latin"],
@@ -43,17 +56,17 @@ const socialLinks = [
   {
     href: "https://instagram.com",
     label: "Instagram",
-    icon: "fa-brands fa-instagram",
+    Icon: IoLogoInstagram,
   },
   {
     href: "https://facebook.com",
     label: "Facebook",
-    icon: "fa-brands fa-facebook-f",
+    Icon: IoLogoFacebook,
   },
   {
     href: "https://pinterest.com",
     label: "Pinterest",
-    icon: "fa-brands fa-pinterest-p",
+    Icon: IoLogoPinterest,
   },
 ] as const;
 
@@ -62,19 +75,19 @@ const legalLinks = [
   { href: "/terms-and-conditions", label: "Terms & Conditions" },
 ] as const;
 
-const trustItems = [
-  { icon: "fa-solid fa-lock", label: "SSL Secure" },
-  { icon: "fa-solid fa-certificate", label: "Hallmarked Gold" },
-  { icon: "fa-solid fa-truck-fast", label: "Insured Shipping" },
-  { icon: "fa-solid fa-shield-halved", label: "Secure Checkout" },
-] as const;
+const trustItems: { Icon: IconType; label: string }[] = [
+  { Icon: IoLockClosedOutline, label: "SSL Secure" },
+  { Icon: IoRibbonOutline, label: "Hallmarked Gold" },
+  { Icon: IoCarOutline, label: "Insured Shipping" },
+  { Icon: IoShieldCheckmarkOutline, label: "Secure Checkout" },
+];
 
-const paymentIcons = [
-  { icon: "fa-brands fa-cc-visa", label: "Visa" },
-  { icon: "fa-brands fa-cc-mastercard", label: "Mastercard" },
-  { icon: "fa-brands fa-cc-amex", label: "American Express" },
-  { icon: "fa-brands fa-cc-paypal", label: "PayPal" },
-] as const;
+const paymentIcons: { Icon: IconType; label: string }[] = [
+  { Icon: IoCardOutline, label: "Visa" },
+  { Icon: IoCardOutline, label: "Mastercard" },
+  { Icon: IoCardOutline, label: "American Express" },
+  { Icon: IoLogoPaypal, label: "PayPal" },
+];
 
 const linkClass =
   "text-sm font-light text-zinc-600 transition-colors hover:text-zinc-900";
@@ -209,7 +222,7 @@ export default function Footer() {
               Timeless jewellery crafted with elegance and precision.
             </p>
             <div className="mt-6 flex items-center gap-4">
-              {socialLinks.map(({ href, label, icon }) => (
+              {socialLinks.map(({ href, label, Icon }) => (
                 <a
                   key={label}
                   href={href}
@@ -218,7 +231,7 @@ export default function Footer() {
                   className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-300 text-zinc-700 transition hover:border-zinc-500 hover:text-zinc-900"
                   aria-label={label}
                 >
-                  <i className={`${icon} text-sm`} aria-hidden="true" />
+                  <Icon className="text-sm" aria-hidden="true" />
                 </a>
               ))}
             </div>
@@ -262,10 +275,7 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 transition-colors hover:text-zinc-900"
                   >
-                    <i
-                      className="fa-brands fa-whatsapp text-base"
-                      aria-hidden="true"
-                    />
+                    <IoLogoWhatsapp className="text-base" aria-hidden="true" />
                     WhatsApp
                   </a>
                 </li>
@@ -284,27 +294,24 @@ export default function Footer() {
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 lg:flex-row lg:gap-8">
             <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-6">
-              {trustItems.map(({ icon, label }) => (
+              {trustItems.map(({ Icon, label }) => (
                 <span
                   key={label}
                   className="flex items-center gap-2 text-xs font-light text-zinc-600"
                 >
-                  <i
-                    className={`${icon} text-sm text-zinc-700`}
-                    aria-hidden="true"
-                  />
+                  <Icon className="text-sm text-zinc-700" aria-hidden="true" />
                   {label}
                 </span>
               ))}
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {paymentIcons.map(({ icon, label }) => (
+              {paymentIcons.map(({ Icon, label }) => (
                 <span
                   key={label}
                   className="flex h-8 items-center justify-center text-2xl text-zinc-500"
                   title={label}
                 >
-                  <i className={icon} aria-label={label} />
+                  <Icon aria-label={label} />
                 </span>
               ))}
             </div>

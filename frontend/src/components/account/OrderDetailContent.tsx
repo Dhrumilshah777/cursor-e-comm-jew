@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { IoLogoWhatsapp } from "react-icons/io5";
 import {
   getOrderStatusClass,
   type AccountOrder,
@@ -418,7 +419,7 @@ export default function OrderDetailContent({
             rel="noopener noreferrer"
             className="inline-flex cursor-pointer items-center gap-2 border border-zinc-300 bg-white px-5 py-2.5 text-[10px] font-light uppercase tracking-[0.16em] text-zinc-800 transition hover:border-zinc-500"
           >
-            <i className="fa-brands fa-whatsapp text-base" aria-hidden="true" />
+            <IoLogoWhatsapp className="text-base" aria-hidden="true" />
             WhatsApp support
           </a>
           <Link

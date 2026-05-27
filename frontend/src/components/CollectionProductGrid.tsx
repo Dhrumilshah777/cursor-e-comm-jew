@@ -4,6 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Jost } from "next/font/google";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  IoCheckmark,
+  IoChevronDown,
+  IoOptionsOutline,
+  IoSwapVertical,
+} from "react-icons/io5";
 import type { CollectionProduct } from "@/data/collections";
 import WishlistButton from "@/components/wishlist/WishlistButton";
 
@@ -146,7 +152,7 @@ function CollectionToolbar({
           aria-expanded={filterOpen}
           aria-controls="collection-filter-panel"
         >
-          <i className="fa-solid fa-sliders text-sm" aria-hidden="true" />
+          <IoOptionsOutline className="text-sm" aria-hidden="true" />
           Filter
           {activeFilters.length > 0 ? (
             <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-900 px-1 text-[9px] text-white">
@@ -161,10 +167,10 @@ function CollectionToolbar({
           aria-expanded={sortOpen}
           aria-controls="collection-sort-panel"
         >
-          <i className="fa-solid fa-arrow-down-wide-short text-sm" aria-hidden="true" />
+          <IoSwapVertical className="text-sm" aria-hidden="true" />
           Sort
-          <i
-            className={`fa-solid fa-chevron-down text-[10px] transition-transform ${sortOpen ? "rotate-180" : ""}`}
+          <IoChevronDown
+            className={`text-[10px] transition-transform ${sortOpen ? "rotate-180" : ""}`}
             aria-hidden="true"
           />
         </button>
@@ -233,7 +239,7 @@ function CollectionToolbar({
             >
               {option.label}
               {sort === option.value ? (
-                <i className="fa-solid fa-check text-xs" aria-hidden="true" />
+                <IoCheckmark className="text-xs" aria-hidden="true" />
               ) : null}
             </button>
           ))}

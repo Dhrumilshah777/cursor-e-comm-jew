@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IoCallOutline, IoLogoWhatsapp } from "react-icons/io5";
 
 type ReturnAssistanceProps = {
   whatsappHref: string;
@@ -31,14 +32,14 @@ export default function ReturnAssistance({
           rel="noopener noreferrer"
           className="inline-flex cursor-pointer items-center gap-2 border border-zinc-300 bg-white px-5 py-2.5 text-[10px] font-light uppercase tracking-[0.16em] text-zinc-800 transition hover:border-zinc-500"
         >
-          <i className="fa-brands fa-whatsapp text-base" aria-hidden="true" />
+          <IoLogoWhatsapp className="text-base" aria-hidden="true" />
           WhatsApp support
         </a>
         <a
           href={telLink}
           className="inline-flex cursor-pointer items-center gap-2 border border-zinc-300 bg-white px-5 py-2.5 text-[10px] font-light uppercase tracking-[0.16em] text-zinc-800 transition hover:border-zinc-500"
         >
-          <i className="fa-solid fa-phone text-sm" aria-hidden="true" />
+          <IoCallOutline className="text-sm" aria-hidden="true" />
           Call client care
         </a>
         <Link

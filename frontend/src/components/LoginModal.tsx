@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { IoClose } from "react-icons/io5";
 import OtpVerifyForm from "@/components/auth/OtpVerifyForm";
 import PhoneLoginForm from "@/components/auth/PhoneLoginForm";
 
@@ -67,7 +68,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
           className="absolute right-4 top-4 flex h-8 w-8 cursor-pointer items-center justify-center text-lg text-zinc-500 transition hover:text-zinc-900"
           aria-label="Close"
         >
-          <i className="fa-solid fa-xmark" aria-hidden="true" />
+          <IoClose className="text-lg" aria-hidden="true" />
         </button>
 
         <p className="text-[10px] font-light uppercase tracking-[0.28em] text-zinc-500">

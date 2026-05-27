@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { IoBagHandleOutline } from "react-icons/io5";
 import { useCart } from "@/components/cart/CartProvider";
 
 const linkClass =
@@ -11,7 +12,7 @@ export default function CartNavLink({ onNavigate }: { onNavigate?: () => void })
 
   return (
     <Link href="/cart" className={linkClass} onClick={onNavigate}>
-      <i className="fa-solid fa-bag-shopping text-base leading-none" aria-hidden="true" />
+      <IoBagHandleOutline className="text-base leading-none" aria-hidden="true" />
       <span className="hidden min-[400px]:inline">Bag</span>
       {itemCount > 0 ? (
         <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-900 px-1 text-[9px] font-normal text-white">

@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { Great_Vibes } from "next/font/google";
 import { useCallback, useEffect, useState } from "react";
+import {
+  IoClose,
+  IoLogoWhatsapp,
+  IoMenu,
+  IoPersonOutline,
+} from "react-icons/io5";
 import CartNavLink from "@/components/cart/CartNavLink";
 import LoginModal from "@/components/LoginModal";
 
@@ -81,10 +87,11 @@ export default function Navbar() {
               aria-controls="mobile-nav-menu"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
             >
-              <i
-                className={`leading-none ${menuOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}`}
-                aria-hidden="true"
-              />
+              {menuOpen ? (
+                <IoClose className="text-xl" aria-hidden="true" />
+              ) : (
+                <IoMenu className="text-xl" aria-hidden="true" />
+              )}
             </button>
 
             <nav
@@ -122,8 +129,8 @@ export default function Navbar() {
                 rel="noopener noreferrer"
                 className={`flex items-center gap-2 ${linkTop}`}
               >
-                <i
-                  className="fa-brands fa-whatsapp text-base leading-none sm:text-[inherit]"
+                <IoLogoWhatsapp
+                  className="text-base leading-none sm:text-[inherit]"
                   aria-hidden="true"
                 />
                 <span className="hidden min-[400px]:inline">WHATSAPP</span>
@@ -144,8 +151,8 @@ export default function Navbar() {
                 aria-haspopup="dialog"
                 aria-expanded={loginOpen}
               >
-                <i
-                  className="fa-regular fa-user text-base leading-none sm:text-[inherit]"
+                <IoPersonOutline
+                  className="text-base leading-none sm:text-[inherit]"
                   aria-hidden="true"
                 />
                 <span className="hidden min-[400px]:inline">LOGIN</span>
@@ -182,7 +189,7 @@ export default function Navbar() {
 
       <nav
         id="mobile-nav-menu"
-        className={`fixed inset-y-0 left-0 z-[65] w-[min(20rem,88vw)] overflow-y-auto border-r border-zinc-200 bg-white px-6 pb-8 pt-24 shadow-xl transition-transform duration-300 ease-out lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-[65] w-[min(20rem,88vw)] overflow-y-auto border-r border-zinc-200 bg-white shadow-xl transition-transform duration-300 ease-out lg:hidden ${
           menuOpen
             ? "translate-x-0"
             : "-translate-x-full pointer-events-none"
@@ -190,7 +197,18 @@ export default function Navbar() {
         aria-label="Mobile"
         aria-hidden={!menuOpen}
       >
-        <div className="mx-auto max-w-md">
+        <div className="sticky top-0 z-10 flex items-center justify-end border-b border-zinc-100 bg-white px-4 py-3">
+          <button
+            type="button"
+            onClick={closeMenu}
+            className="flex h-10 w-10 items-center justify-center text-xl text-zinc-800 transition-opacity hover:opacity-70"
+            aria-label="Close menu"
+          >
+            <IoClose className="text-xl" aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="px-6 pb-8 pt-6">
           <p className="mb-2 text-[10px] font-light uppercase tracking-[0.28em] text-zinc-400">
             Explore
           </p>

@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type MouseEvent } from "react";
-import type { AnalyticsProductInput } from "@/lib/analytics";
-import { isAnalyticsConfigured, trackAddToWishlist } from "@/lib/analytics";
+import { IoHeart, IoHeartOutline } from "react-icons/io5";
+import { isAnalyticsConfigured, trackAddToWishlist, type AnalyticsProductInput } from "@/lib/analytics";
 import { useWishlist } from "@/components/wishlist/WishlistProvider";
 
 type WishlistButtonProps = {
@@ -73,10 +73,11 @@ export default function WishlistButton({
       aria-label={active ? "Remove from wishlist" : "Add to wishlist"}
       aria-pressed={active}
     >
-      <i
-        className={`text-sm leading-none sm:text-base ${active ? "fa-solid fa-heart text-zinc-900" : "fa-regular fa-heart"}`}
-        aria-hidden="true"
-      />
+      {active ? (
+        <IoHeart className="text-sm text-zinc-900 sm:text-base" aria-hidden="true" />
+      ) : (
+        <IoHeartOutline className="text-sm sm:text-base" aria-hidden="true" />
+      )}
     </button>
   );
 }

@@ -4,7 +4,6 @@ import ConditionalFooter from "@/components/ConditionalFooter";
 import AnalyticsScripts from "@/components/analytics/AnalyticsScripts";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./globals.css";
 
 const geistSans = Geist({

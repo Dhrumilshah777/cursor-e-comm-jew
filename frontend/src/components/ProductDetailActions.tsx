@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { CollectionProduct } from "@/data/collections";
-import type { AnalyticsProductInput } from "@/lib/analytics";
-import WishlistButton from "@/components/wishlist/WishlistButton";
+import { IoShareSocialOutline } from "react-icons/io5";
+import type { AnalyticsProductInput } from "@/lib/analytics";import WishlistButton from "@/components/wishlist/WishlistButton";
 
 type ProductDetailActionsProps = {
   productId: string;
@@ -56,7 +55,7 @@ export default function ProductDetailActions({
         className={iconButtonClass}
         aria-label="Share product"
       >
-        <i className="fa-solid fa-share-nodes text-sm sm:text-base" aria-hidden="true" />
+        <IoShareSocialOutline className="text-sm sm:text-base" aria-hidden="true" />
       </button>
       <WishlistButton
         productId={productId}
