@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ConditionalFooter from "@/components/ConditionalFooter";
 import AnalyticsScripts from "@/components/analytics/AnalyticsScripts";
+import InitialSiteLoader from "@/components/InitialSiteLoader";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
 import "./globals.css";
@@ -38,6 +39,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <AnalyticsScripts />
+        <InitialSiteLoader />
         <Providers>
           <Navbar />
           <main className="flex flex-1 flex-col">{children}</main>
