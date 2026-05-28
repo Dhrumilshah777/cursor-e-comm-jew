@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 import { Great_Vibes } from "next/font/google";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   IoCloseOutline,
-  IoLogoWhatsapp,
   IoMenuOutline,
   IoPersonOutline,
+  IoSearchOutline,
 } from "react-icons/io5";
 import CartNavLink from "@/components/cart/CartNavLink";
 import LoginModal from "@/components/LoginModal";
-import NavbarSearch from "@/components/NavbarSearch";
+import SearchOverlay from "@/components/SearchOverlay";
 
 const logoScript = Great_Vibes({
   weight: "400",
@@ -34,12 +34,8 @@ const mainNavLinks = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
-
-  const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "");
-  const whatsappHref = waNumber
-    ? `https://wa.me/${waNumber}`
-    : "https://wa.me/";
 
   const linkTop =
     "text-[11px] font-light uppercase tracking-[0.22em] text-zinc-800 transition-colors hover:text-zinc-500";
@@ -49,21 +45,29 @@ export default function Navbar() {
     "block py-3 text-sm font-light uppercase tracking-[0.2em] text-zinc-800 transition-colors hover:text-zinc-500";
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
 
   useEffect(() => {
+    if (searchOpen) return;
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [menuOpen]);
+  }, [menuOpen, searchOpen]);
 
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeMenu();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (searchOpen) {
+          closeSearch();
+          return;
+        }
+        closeMenu();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [closeMenu]);
+  }, [closeMenu, closeSearch, searchOpen]);
 
   useEffect(() => {
     const onResize = () => {
@@ -75,10 +79,8 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-[70] bg-white pt-4 sm:pt-5">
-      {/* Top tier — hamburger | logo (center) | WhatsApp + retailer */}
       <div className="border-b border-zinc-200 lg:border-b-0">
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-8">
-          {/* Left — hamburger (mobile) / utility links (desktop) */}
           <div className="flex min-w-0 flex-1 items-center justify-start lg:min-w-0">
             <button
               type="button"
@@ -107,7 +109,6 @@ export default function Navbar() {
             </nav>
           </div>
 
-          {/* Logo — always centered */}
           <Link
             href="/"
             className="absolute left-1/2 shrink-0 -translate-x-1/2 px-3 text-center sm:px-6 lg:static lg:translate-x-0 lg:justify-self-center"
@@ -121,21 +122,25 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Right — WhatsApp + login */}
           <div className="flex min-w-0 flex-1 items-center justify-end">
             <div className="flex shrink-0 items-center gap-2 sm:gap-3 lg:gap-4">
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex items-center gap-2 ${linkTop}`}
+              <button
+                type="button"
+                onClick={() => {
+                  closeMenu();
+                  setSearchOpen(true);
+                }}
+                className={`flex cursor-pointer items-center gap-2 ${linkTop}`}
+                aria-expanded={searchOpen}
+                aria-controls="search-overlay"
+                aria-label="Open search"
               >
-                <IoLogoWhatsapp
+                <IoSearchOutline
                   className="text-base leading-none sm:text-[inherit]"
                   aria-hidden="true"
                 />
-                <span className="hidden min-[400px]:inline">WHATSAPP</span>
-              </a>
+                <span className="hidden min-[400px]:inline">SEARCH</span>
+              </button>
               <span
                 className="h-7 w-px shrink-0 bg-zinc-300"
                 aria-hidden="true"
@@ -163,7 +168,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Desktop main nav */}
       <div className="hidden border-b border-zinc-200 lg:block">
         <nav
           className="mx-auto flex max-w-7xl items-center justify-center gap-9 px-6 pt-3.5 pb-7 lg:px-8"
@@ -177,19 +181,6 @@ export default function Navbar() {
         </nav>
       </div>
 
-      <div className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
-          <Suspense
-            fallback={
-              <div className="mx-auto h-[42px] max-w-2xl animate-pulse border border-zinc-200 bg-zinc-50" />
-            }
-          >
-            <NavbarSearch className="mx-auto max-w-2xl" />
-          </Suspense>
-        </div>
-      </div>
-
-      {/* Mobile / tablet menu overlay */}
       <div
         className={`fixed inset-0 z-[60] bg-black/30 transition-opacity duration-300 lg:hidden ${
           menuOpen
@@ -222,9 +213,6 @@ export default function Navbar() {
         </div>
 
         <div className="px-6 pb-8 pt-6">
-          <Suspense fallback={<div className="mb-6 h-[42px] animate-pulse bg-zinc-100" />}>
-            <NavbarSearch className="mb-6" />
-          </Suspense>
           <p className="mb-2 text-[10px] font-light uppercase tracking-[0.28em] text-zinc-400">
             Explore
           </p>
@@ -252,6 +240,8 @@ export default function Navbar() {
           </ul>
         </div>
       </nav>
+
+      <SearchOverlay open={searchOpen} onClose={closeSearch} />
 
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </header>
