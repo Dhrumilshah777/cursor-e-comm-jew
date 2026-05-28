@@ -15,6 +15,20 @@ const popularSearches = [
   { label: "Bracelets", href: "/collections/bracelets" },
 ] as const;
 
+const SUGGESTED_COUNT = 5;
+
+function pickRandomProducts(
+  products: CollectionProduct[],
+  count: number,
+): CollectionProduct[] {
+  const shuffled = [...products];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, count);
+}
+
 type SearchOverlayProps = {
   open: boolean;
   onClose: () => void;
@@ -26,6 +40,8 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<CollectionProduct[]>([]);
   const [loading, setLoading] = useState(false);
+  const [randomProducts, setRandomProducts] = useState<CollectionProduct[]>([]);
+  const [loadingRandom, setLoadingRandom] = useState(true);
 
   useEffect(() => {
     if (!open) {
@@ -47,6 +63,36 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [open, onClose]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      setLoadingRandom(true);
+      try {
+        const url = new URL("/api/products", getApiBaseUrl());
+        const response = await fetch(url.toString(), {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          setRandomProducts([]);
+          return;
+        }
+        const data = (await response.json()) as { products: CollectionProduct[] };
+        setRandomProducts(pickRandomProducts(data.products, SUGGESTED_COUNT));
+      } catch {
+        if (!controller.signal.aborted) {
+          setRandomProducts([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingRandom(false);
+        }
+      }
+    })();
+
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -166,9 +212,43 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             </p>
 
             {query.trim().length < 2 ? (
-              <p className="mt-4 text-sm font-light text-zinc-500">
-                Start typing to see suggestions.
-              </p>
+              loadingRandom ? (
+                <p className="mt-4 text-sm font-light text-zinc-500">Loading…</p>
+              ) : randomProducts.length > 0 ? (
+                <ul className="mt-4 space-y-3">
+                  {randomProducts.map((product) => (
+                    <li key={product.id}>
+                      <Link
+                        href={`/products/${product.slug}`}
+                        onClick={onClose}
+                        className="flex items-center gap-3 transition hover:opacity-80"
+                      >
+                        <div className="relative h-12 w-12 shrink-0 overflow-hidden bg-zinc-200">
+                          <Image
+                            src={product.image}
+                            alt={product.alt}
+                            fill
+                            className="object-cover"
+                            sizes="48px"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-light text-zinc-800">
+                            {product.name}
+                          </p>
+                          <p className="text-xs font-light text-zinc-500">
+                            {product.price}
+                          </p>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-4 text-sm font-light text-zinc-500">
+                  No products available right now.
+                </p>
+              )
             ) : loading ? (
               <p className="mt-4 text-sm font-light text-zinc-500">Searching…</p>
             ) : suggestions.length > 0 ? (
