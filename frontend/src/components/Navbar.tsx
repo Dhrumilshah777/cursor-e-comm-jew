@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Great_Vibes } from "next/font/google";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
   IoCloseOutline,
@@ -10,8 +11,12 @@ import {
   IoSearchOutline,
 } from "react-icons/io5";
 import CartNavLink from "@/components/cart/CartNavLink";
-import LoginModal from "@/components/LoginModal";
 import SearchOverlay from "@/components/SearchOverlay";
+import {
+  CUSTOMER_AUTH_CHANGED_EVENT,
+  fetchCustomerMe,
+  type CustomerUser,
+} from "@/lib/customerAuth";
 
 const logoScript = Great_Vibes({
   weight: "400",
@@ -33,9 +38,10 @@ const mainNavLinks = [
 ] as const;
 
 export default function Navbar() {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
+  const [customer, setCustomer] = useState<CustomerUser | null>(null);
 
   const linkTop =
     "text-[11px] font-light uppercase tracking-[0.22em] text-zinc-800 transition-colors hover:text-zinc-500";
@@ -46,6 +52,33 @@ export default function Navbar() {
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const closeSearch = useCallback(() => setSearchOpen(false), []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCustomer = () => {
+      fetchCustomerMe()
+        .then((user) => {
+          if (!cancelled) setCustomer(user);
+        })
+        .catch(() => {
+          if (!cancelled) setCustomer(null);
+        });
+    };
+
+    loadCustomer();
+    window.addEventListener(CUSTOMER_AUTH_CHANGED_EVENT, loadCustomer);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener(CUSTOMER_AUTH_CHANGED_EVENT, loadCustomer);
+    };
+  }, []);
+
+  const handleAccountClick = useCallback(() => {
+    closeMenu();
+    router.push(customer ? "/account" : "/login");
+  }, [closeMenu, customer, router]);
 
   useEffect(() => {
     if (searchOpen) return;
@@ -152,16 +185,17 @@ export default function Navbar() {
               />
               <button
                 type="button"
-                onClick={() => setLoginOpen(true)}
+                onClick={handleAccountClick}
                 className={`flex cursor-pointer items-center gap-2 ${linkTop}`}
-                aria-haspopup="dialog"
-                aria-expanded={loginOpen}
+                aria-label={customer ? "Account" : "Login"}
               >
                 <IoPersonOutline
                   className="text-base leading-none sm:text-[inherit]"
                   aria-hidden="true"
                 />
-                <span className="hidden min-[400px]:inline">LOGIN</span>
+                <span className="hidden min-[400px]:inline">
+                  {customer ? "ACCOUNT" : "LOGIN"}
+                </span>
               </button>
             </div>
           </div>
@@ -242,8 +276,6 @@ export default function Navbar() {
       </nav>
 
       <SearchOverlay open={searchOpen} onClose={closeSearch} />
-
-      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </header>
   );
 }
