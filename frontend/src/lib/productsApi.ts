@@ -33,6 +33,22 @@ export async function fetchProducts(
   }
 }
 
+export async function searchProducts(query: string): Promise<CollectionProduct[]> {
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  const path = `/api/products?q=${encodeURIComponent(trimmed)}`;
+  try {
+    const data = await publicGet<ProductsResponse>(path, [
+      "products",
+      `search:${trimmed.toLowerCase()}`,
+    ]);
+    return data.products;
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchProductBySlug(
   slug: string,
 ): Promise<CollectionProduct | null> {

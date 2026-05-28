@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Great_Vibes } from "next/font/google";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import {
   IoCloseOutline,
   IoLogoWhatsapp,
@@ -11,6 +11,7 @@ import {
 } from "react-icons/io5";
 import CartNavLink from "@/components/cart/CartNavLink";
 import LoginModal from "@/components/LoginModal";
+import NavbarSearch from "@/components/NavbarSearch";
 
 const logoScript = Great_Vibes({
   weight: "400",
@@ -176,6 +177,18 @@ export default function Navbar() {
         </nav>
       </div>
 
+      <div className="border-b border-zinc-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+          <Suspense
+            fallback={
+              <div className="mx-auto h-[42px] max-w-2xl animate-pulse border border-zinc-200 bg-zinc-50" />
+            }
+          >
+            <NavbarSearch className="mx-auto max-w-2xl" />
+          </Suspense>
+        </div>
+      </div>
+
       {/* Mobile / tablet menu overlay */}
       <div
         className={`fixed inset-0 z-[60] bg-black/30 transition-opacity duration-300 lg:hidden ${
@@ -209,6 +222,9 @@ export default function Navbar() {
         </div>
 
         <div className="px-6 pb-8 pt-6">
+          <Suspense fallback={<div className="mb-6 h-[42px] animate-pulse bg-zinc-100" />}>
+            <NavbarSearch className="mb-6" />
+          </Suspense>
           <p className="mb-2 text-[10px] font-light uppercase tracking-[0.28em] text-zinc-400">
             Explore
           </p>

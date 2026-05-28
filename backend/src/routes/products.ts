@@ -10,9 +10,15 @@ export const productsRouter = Router();
 productsRouter.get("/", async (req, res) => {
   const category =
     typeof req.query.category === "string" ? req.query.category.trim() : undefined;
+  const search =
+    typeof req.query.q === "string"
+      ? req.query.q.trim()
+      : typeof req.query.search === "string"
+        ? req.query.search.trim()
+        : undefined;
 
   try {
-    const products = await getProducts(category || undefined);
+    const products = await getProducts({ category, search });
     res.json({ products });
   } catch (error) {
     console.error("GET /api/products failed:", error);

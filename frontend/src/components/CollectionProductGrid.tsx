@@ -256,9 +256,13 @@ function CollectionToolbar({
 export default function CollectionProductGrid({
   products,
   categoryName,
+  emptyMessage = "No products match your filters. Try adjusting or clearing filters.",
+  showToolbar = true,
 }: {
   products: CollectionProduct[];
   categoryName: string;
+  emptyMessage?: string;
+  showToolbar?: boolean;
 }) {
   const [sort, setSort] = useState<SortOption>("featured");
   const [activeFilters, setActiveFilters] = useState<PriceFilter[]>([]);
@@ -331,28 +335,30 @@ export default function CollectionProductGrid({
           <CollectionBreadcrumbs categoryName={categoryName} />
         </div>
 
-        <div ref={toolbarRef} className="relative">
-          <CollectionToolbar
-            sort={sort}
-            onSortChange={(value) => {
-              setSort(value);
-              setSortOpen(false);
-            }}
-            activeFilters={activeFilters}
-            onToggleFilter={handleToggleFilter}
-            onClearFilters={() => setActiveFilters([])}
-            filterOpen={filterOpen}
-            sortOpen={sortOpen}
-            onToggleFilterPanel={() => {
-              setFilterOpen((open) => !open);
-              setSortOpen(false);
-            }}
-            onToggleSortPanel={() => {
-              setSortOpen((open) => !open);
-              setFilterOpen(false);
-            }}
-          />
-        </div>
+        {showToolbar ? (
+          <div ref={toolbarRef} className="relative">
+            <CollectionToolbar
+              sort={sort}
+              onSortChange={(value) => {
+                setSort(value);
+                setSortOpen(false);
+              }}
+              activeFilters={activeFilters}
+              onToggleFilter={handleToggleFilter}
+              onClearFilters={() => setActiveFilters([])}
+              filterOpen={filterOpen}
+              sortOpen={sortOpen}
+              onToggleFilterPanel={() => {
+                setFilterOpen((open) => !open);
+                setSortOpen(false);
+              }}
+              onToggleSortPanel={() => {
+                setSortOpen((open) => !open);
+                setFilterOpen(false);
+              }}
+            />
+          </div>
+        ) : null}
 
         {displayedProducts.length > 0 ? (
           <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-8 sm:mt-8 sm:gap-x-4 sm:gap-y-10 lg:grid-cols-4 lg:gap-x-5">
@@ -362,7 +368,7 @@ export default function CollectionProductGrid({
           </div>
         ) : (
           <p className="mt-10 text-center text-sm font-light text-zinc-600">
-            No products match your filters. Try adjusting or clearing filters.
+            {emptyMessage}
           </p>
         )}
       </div>

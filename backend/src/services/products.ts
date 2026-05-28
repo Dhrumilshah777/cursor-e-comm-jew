@@ -3,15 +3,34 @@ import { prisma } from "../lib/prisma.js";
 import { mapProductToDto, type CollectionProductDto } from "../lib/productMapper.js";
 import { redisKeys } from "../lib/redis.js";
 
-export async function getProducts(category?: string): Promise<CollectionProductDto[]> {
+export type ProductListFilters = {
+  category?: string;
+  search?: string;
+};
+
+export async function getProducts(
+  filters: ProductListFilters = {},
+): Promise<CollectionProductDto[]> {
+  const category = filters.category?.trim() || undefined;
+  const search = filters.search?.trim() || undefined;
+
   return cachedJson(
-    redisKeys.productsList(category),
+    redisKeys.productsList(category, search),
     PRODUCT_CACHE_TTL_SECONDS,
     async () => {
       const products = await prisma.product.findMany({
         where: {
           isActive: true,
           ...(category ? { category } : {}),
+          ...(search
+            ? {
+                OR: [
+                  { name: { contains: search, mode: "insensitive" } },
+                  { sku: { contains: search, mode: "insensitive" } },
+                  { slug: { contains: search, mode: "insensitive" } },
+                ],
+              }
+            : {}),
         },
         orderBy: { name: "asc" },
       });

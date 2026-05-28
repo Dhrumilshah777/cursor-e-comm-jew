@@ -13,8 +13,8 @@ export const redisKeys = {
   otpPending: (phone: string) => `wj:otp:pending:${phone}`,
   otpSendLock: (inflightKey: string) => `wj:otp:send-lock:${inflightKey}`,
   shiprocketToken: () => "wj:shiprocket:auth-token",
-  productsList: (category?: string) =>
-    `wj:cache:products:list:${category ?? "all"}`,
+  productsList: (category?: string, search?: string) =>
+    `wj:cache:products:list:${category ?? "all"}:${search ?? ""}`,
   productBySlug: (slug: string) => `wj:cache:products:slug:${slug}`,
   productRelated: (slug: string, limit: number) =>
     `wj:cache:products:related:${slug}:${limit}`,
