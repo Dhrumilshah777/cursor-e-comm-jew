@@ -1,5 +1,4 @@
 import { fetchWithTimeout, getApiBaseUrl } from "@/lib/api";
-import { getMockHomepage, isMockDataEnabled } from "@/lib/mockData";
 
 export type HomepageProductCard = {
   id: string;
@@ -27,23 +26,14 @@ export type HomepageData = {
 };
 
 export async function fetchHomepage(): Promise<HomepageData> {
-  if (isMockDataEnabled()) {
-    return getMockHomepage();
+  const response = await fetchWithTimeout(
+    new URL("/api/homepage", getApiBaseUrl()).toString(),
+    {
+      next: { revalidate: 60, tags: ["homepage"] },
+    },
+  );
+  if (!response.ok) {
+    throw new Error("Failed to load homepage");
   }
-
-  try {
-    const response = await fetchWithTimeout(
-      new URL("/api/homepage", getApiBaseUrl()).toString(),
-      {
-        next: { revalidate: 60, tags: ["homepage"] },
-        timeoutMs: 4_000,
-      },
-    );
-    if (!response.ok) {
-      throw new Error("Failed to load homepage");
-    }
-    return response.json() as Promise<HomepageData>;
-  } catch {
-    return getMockHomepage();
-  }
+  return response.json() as Promise<HomepageData>;
 }
