@@ -7,6 +7,13 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import { IoCloseOutline, IoSearchOutline } from "react-icons/io5";
 import type { CollectionProduct } from "@/data/collections";
 import { getApiBaseUrl } from "@/lib/api";
+import {
+  getMockProducts,
+  isMockDataEnabled,
+  searchMockProducts,
+} from "@/lib/mockData";
+
+const CLIENT_FETCH_TIMEOUT_MS = 4_000;
 
 const popularSearches = [
   { label: "Rings", href: "/collections/rings" },
@@ -66,32 +73,48 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 
   useEffect(() => {
     const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), CLIENT_FETCH_TIMEOUT_MS);
 
     (async () => {
       setLoadingRandom(true);
       try {
+        if (isMockDataEnabled()) {
+          setRandomProducts(
+            pickRandomProducts(getMockProducts(), SUGGESTED_COUNT),
+          );
+          return;
+        }
+
         const url = new URL("/api/products", getApiBaseUrl());
         const response = await fetch(url.toString(), {
           signal: controller.signal,
         });
         if (!response.ok) {
-          setRandomProducts([]);
+          setRandomProducts(
+            pickRandomProducts(getMockProducts(), SUGGESTED_COUNT),
+          );
           return;
         }
         const data = (await response.json()) as { products: CollectionProduct[] };
         setRandomProducts(pickRandomProducts(data.products, SUGGESTED_COUNT));
       } catch {
         if (!controller.signal.aborted) {
-          setRandomProducts([]);
+          setRandomProducts(
+            pickRandomProducts(getMockProducts(), SUGGESTED_COUNT),
+          );
         }
       } finally {
+        window.clearTimeout(timeoutId);
         if (!controller.signal.aborted) {
           setLoadingRandom(false);
         }
       }
     })();
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
@@ -103,23 +126,29 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
     }
 
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(async () => {
+    const timeoutId = window.setTimeout(() => controller.abort(), CLIENT_FETCH_TIMEOUT_MS);
+    const searchTimeoutId = window.setTimeout(async () => {
       setLoading(true);
       try {
+        if (isMockDataEnabled()) {
+          setSuggestions(searchMockProducts(trimmed).slice(0, 6));
+          return;
+        }
+
         const url = new URL("/api/products", getApiBaseUrl());
         url.searchParams.set("q", trimmed);
         const response = await fetch(url.toString(), {
           signal: controller.signal,
         });
         if (!response.ok) {
-          setSuggestions([]);
+          setSuggestions(searchMockProducts(trimmed).slice(0, 6));
           return;
         }
         const data = (await response.json()) as { products: CollectionProduct[] };
         setSuggestions(data.products.slice(0, 6));
       } catch {
         if (!controller.signal.aborted) {
-          setSuggestions([]);
+          setSuggestions(searchMockProducts(trimmed).slice(0, 6));
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -131,6 +160,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
     return () => {
       controller.abort();
       window.clearTimeout(timeoutId);
+      window.clearTimeout(searchTimeoutId);
     };
   }, [open, query]);
 
