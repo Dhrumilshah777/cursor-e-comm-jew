@@ -102,7 +102,7 @@ function ProductCard({ product }: { product: TopStyleProduct }) {
 
 export default function TopStyles({
   items = products,
-  brandName = "Jewelry",
+  brandName = "Amit Ornaments",
 }: {
   items?: TopStyleProduct[];
   brandName?: string;

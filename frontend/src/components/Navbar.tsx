@@ -149,7 +149,7 @@ export default function Navbar() {
             onClick={closeMenu}
           >
             <span
-              className={`${logoScript.className} block whitespace-nowrap text-[1.35rem] leading-tight text-zinc-950 sm:text-[1.85rem]`}
+              className={`${logoScript.className} block whitespace-nowrap text-[1.75rem] leading-tight text-zinc-950 sm:text-[1.85rem] lg:text-[2.25rem]`}
             >
               Amit Ornaments
             </span>
