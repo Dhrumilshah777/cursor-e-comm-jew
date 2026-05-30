@@ -213,9 +213,9 @@ export default function Footer() {
               aria-label="Home"
             >
               <span
-                className={`${logoScript.className} block text-4xl leading-none text-zinc-950 sm:text-[2.75rem]`}
+                className={`${logoScript.className} block text-[2.25rem] leading-none text-zinc-950 sm:text-[2.5rem]`}
               >
-                Jewelry
+                Amit Ornaments
               </span>
             </Link>
             <p className="mt-4 max-w-sm text-sm font-light leading-relaxed text-zinc-600">

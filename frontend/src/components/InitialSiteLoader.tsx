@@ -58,9 +58,9 @@ export default function InitialSiteLoader() {
       aria-label="Loading website"
     >
       <span
-        className={`${logoScript.className} animate-pulse text-[2.25rem] leading-none text-zinc-950 sm:text-[3rem]`}
+        className={`${logoScript.className} animate-pulse text-[1.85rem] leading-none text-zinc-950 sm:text-[2.5rem]`}
       >
-        Jewelry
+        Amit Ornaments
       </span>
     </div>
   );
