@@ -36,6 +36,13 @@ export const goldRatePerGram: Record<GoldPurity, number> =
 
 export const DEFAULT_GST_PERCENT = 3;
 
+/** Drops the final rupee digit (e.g. 366708 → 36670). */
+export function removeLastPriceDigit(amount: number): number {
+  const whole = Math.round(amount);
+  if (whole < 10) return whole;
+  return Math.floor(whole / 10);
+}
+
 export function parseNetWeightGrams(weight: string): number {
   const grams = parseFloat(weight.replace(/[^\d.]/g, ""));
   return Number.isFinite(grams) ? grams : 0;
@@ -72,15 +79,15 @@ export function calculatePriceBreakup(input: {
 
   return {
     netWeightGrams: input.netWeightGrams,
-    pricePerGram,
+    pricePerGram: removeLastPriceDigit(pricePerGram),
     purity: input.purity,
-    goldValue,
-    makingCharge,
+    goldValue: removeLastPriceDigit(goldValue),
+    makingCharge: removeLastPriceDigit(makingCharge),
     makingChargeDisplay,
-    subtotal,
-    gst,
+    subtotal: removeLastPriceDigit(subtotal),
+    gst: removeLastPriceDigit(gst),
     gstPercent,
-    total,
+    total: removeLastPriceDigit(total),
   };
 }
 
