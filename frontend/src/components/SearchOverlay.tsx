@@ -2,11 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Jost } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { IoCloseOutline, IoSearchOutline } from "react-icons/io5";
 import type { CollectionProduct } from "@/data/collections";
 import { getApiBaseUrl } from "@/lib/api";
+
+const jost = Jost({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  display: "swap",
+});
 
 const popularSearches = [
   { label: "Rings", href: "/collections/rings" },
@@ -150,7 +157,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
     <>
       <div
         id="search-overlay"
-        className={`fixed inset-0 z-[80] min-h-[100dvh] overflow-y-auto bg-[#f5f1ed] transition-transform duration-300 ease-out ${
+        className={`${jost.className} fixed inset-0 z-[80] min-h-[100dvh] overflow-y-auto bg-[#f5f1ed] transition-transform duration-300 ease-out ${
           open ? "translate-y-0" : "-translate-y-full pointer-events-none"
         }`}
         role="dialog"
