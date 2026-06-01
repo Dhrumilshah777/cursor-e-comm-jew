@@ -34,6 +34,295 @@ import {
 // on the checkout page and the cleanup worker that releases stale carts.
 const CHECKOUT_TTL_MS = 15 * 60 * 1000;
 
+const CHECKOUT_STATUS = {
+  PENDING: "pending",
+  PROCESSING: "processing",
+  COMPLETED: "completed",
+  EXPIRED: "expired",
+  FAILED: "failed",
+} as const;
+
+/** How long the loser of a verify/webhook race waits for the winner to finish. */
+const FULFILL_POLL_INTERVAL_MS = 250;
+const FULFILL_POLL_TIMEOUT_MS = 20_000;
+
+type CheckoutSessionRecord = {
+  id: string;
+  userId: string;
+  razorpayOrderId: string;
+  addressJson: string;
+  customerEmail: string | null;
+  couponId: string | null;
+  couponCode: string | null;
+  discountPaise: number;
+  amountPaise: number;
+  expiresAt: Date;
+  status: string;
+  shopOrderId: string | null;
+};
+
+async function loadOrderDtoForSession(shopOrderId: string, userId?: string) {
+  const order = await prisma.order.findFirst({
+    where: {
+      id: shopOrderId,
+      ...(userId ? { userId } : {}),
+    },
+    include: {
+      items: { include: { product: true } },
+      deliveryAddress: true,
+      statusEvents: { orderBy: { eventAt: "asc" } },
+    },
+  });
+  if (!order) return null;
+  const { mapOrderToDto } = await import("../lib/orderMapper.js");
+  return mapOrderToDto(order);
+}
+
+/** Atomically take ownership of a pending checkout so only one path creates the order. */
+async function claimCheckoutForFulfillment(sessionId: string): Promise<boolean> {
+  const result = await prisma.checkoutPayment.updateMany({
+    where: {
+      id: sessionId,
+      status: CHECKOUT_STATUS.PENDING,
+      expiresAt: { gte: new Date() },
+    },
+    data: { status: CHECKOUT_STATUS.PROCESSING },
+  });
+  return result.count === 1;
+}
+
+/** Allow verify/webhook retry after a transient order-creation failure. */
+async function releaseProcessingCheckout(sessionId: string): Promise<void> {
+  await prisma.checkoutPayment.updateMany({
+    where: { id: sessionId, status: CHECKOUT_STATUS.PROCESSING },
+    data: { status: CHECKOUT_STATUS.PENDING },
+  });
+}
+
+async function markCheckoutCompleted(
+  sessionId: string,
+  shopOrderId: string,
+): Promise<boolean> {
+  const result = await prisma.checkoutPayment.updateMany({
+    where: { id: sessionId, status: CHECKOUT_STATUS.PROCESSING },
+    data: {
+      status: CHECKOUT_STATUS.COMPLETED,
+      shopOrderId,
+    },
+  });
+  return result.count === 1;
+}
+
+/**
+ * If we crashed after creating the order but before linking the session,
+ * recover by matching the Razorpay payment id stored on the order.
+ */
+async function tryLinkOrphanedOrder(
+  sessionId: string,
+  userId: string,
+  paymentId: string,
+): Promise<string | null> {
+  const order = await prisma.order.findFirst({
+    where: { userId, transactionId: paymentId },
+    select: { id: true },
+    orderBy: { placedAt: "desc" },
+  });
+  if (!order) return null;
+
+  const linked = await prisma.checkoutPayment.updateMany({
+    where: {
+      id: sessionId,
+      status: CHECKOUT_STATUS.PROCESSING,
+      shopOrderId: null,
+    },
+    data: {
+      status: CHECKOUT_STATUS.COMPLETED,
+      shopOrderId: order.id,
+    },
+  });
+
+  if (linked.count === 1) {
+    await reconcileStockAfterOrder(sessionId, order.id).catch((error) => {
+      console.error("[inventory] reconciliation after orphan link failed:", error);
+    });
+  }
+
+  return order.id;
+}
+
+/** Wait for the winning verify/webhook handler to finish order creation. */
+async function waitForCheckoutFulfillment(
+  sessionId: string,
+  userId: string,
+  paymentId: string,
+): Promise<string | null> {
+  const deadline = Date.now() + FULFILL_POLL_TIMEOUT_MS;
+
+  while (Date.now() < deadline) {
+    const session = await prisma.checkoutPayment.findUnique({
+      where: { id: sessionId },
+      select: { status: true, shopOrderId: true },
+    });
+    if (!session) return null;
+
+    if (session.status === CHECKOUT_STATUS.COMPLETED && session.shopOrderId) {
+      return session.shopOrderId;
+    }
+
+    if (session.status === CHECKOUT_STATUS.PROCESSING) {
+      const recovered = await tryLinkOrphanedOrder(sessionId, userId, paymentId);
+      if (recovered) return recovered;
+    }
+
+    if (
+      session.status !== CHECKOUT_STATUS.PENDING &&
+      session.status !== CHECKOUT_STATUS.PROCESSING
+    ) {
+      return null;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, FULFILL_POLL_INTERVAL_MS));
+  }
+
+  return tryLinkOrphanedOrder(sessionId, userId, paymentId);
+}
+
+type FulfillPaidCheckoutResult =
+  | { order: NonNullable<Awaited<ReturnType<typeof loadOrderDtoForSession>>> }
+  | { error: string; message?: string };
+
+/**
+ * Idempotent checkout completion used by both `/razorpay/verify` and the
+ * Razorpay webhook. A single `updateMany … status = pending` claim ensures
+ * verify + webhook cannot both create orders for the same payment.
+ */
+async function fulfillPaidCheckoutSession(
+  session: CheckoutSessionRecord,
+  paymentId: string,
+  options?: { requireUserId?: string; verifyRazorpayAmount?: boolean },
+): Promise<FulfillPaidCheckoutResult> {
+  if (options?.requireUserId && session.userId !== options.requireUserId) {
+    return { error: "CHECKOUT_SESSION_NOT_FOUND" };
+  }
+
+  if (session.status === CHECKOUT_STATUS.COMPLETED && session.shopOrderId) {
+    const existing = await loadOrderDtoForSession(
+      session.shopOrderId,
+      options?.requireUserId,
+    );
+    if (existing) return { order: existing };
+  }
+
+  if (
+    session.status === CHECKOUT_STATUS.PENDING &&
+    session.expiresAt < new Date()
+  ) {
+    await releaseCheckoutSessionStock(session.id, "expired").catch((error) => {
+      console.error(
+        `[inventory] failed to release expired session ${session.id}:`,
+        error,
+      );
+    });
+    return { error: "CHECKOUT_SESSION_EXPIRED" };
+  }
+
+  if (options?.verifyRazorpayAmount) {
+    const razorpayOrder = await fetchRazorpayOrder(session.razorpayOrderId);
+    if (razorpayOrder.amount !== session.amountPaise) {
+      return { error: "PAYMENT_AMOUNT_MISMATCH" };
+    }
+  }
+
+  const claimed = await claimCheckoutForFulfillment(session.id);
+
+  if (!claimed) {
+    const shopOrderId = await waitForCheckoutFulfillment(
+      session.id,
+      session.userId,
+      paymentId,
+    );
+    if (!shopOrderId) {
+      return { error: "ORDER_FAILED" };
+    }
+
+    const existing = await loadOrderDtoForSession(
+      shopOrderId,
+      options?.requireUserId,
+    );
+    if (existing) return { order: existing };
+    return { error: "ORDER_FAILED" };
+  }
+
+  const result = await placeOrderForCheckoutSession(
+    session.userId,
+    {
+      addressJson: session.addressJson,
+      customerEmail: session.customerEmail,
+      couponId: session.couponId,
+      couponCode: session.couponCode,
+      discountPaise: session.discountPaise,
+    },
+    "Razorpay",
+    paymentId,
+  );
+
+  if ("error" in result) {
+    await releaseProcessingCheckout(session.id).catch((error) => {
+      console.error(
+        `[checkout] failed to release processing session ${session.id}:`,
+        error,
+      );
+    });
+    return {
+      error: String(result.error),
+      ...("message" in result && result.message
+        ? { message: String(result.message) }
+        : {}),
+    };
+  }
+
+  if (!("order" in result)) {
+    await releaseProcessingCheckout(session.id).catch((error) => {
+      console.error(
+        `[checkout] failed to release processing session ${session.id}:`,
+        error,
+      );
+    });
+    return { error: "ORDER_FAILED" };
+  }
+
+  const marked = await markCheckoutCompleted(session.id, result.order.id);
+  if (!marked) {
+    const shopOrderId = await waitForCheckoutFulfillment(
+      session.id,
+      session.userId,
+      paymentId,
+    );
+    if (shopOrderId) {
+      const existing = await loadOrderDtoForSession(
+        shopOrderId,
+        options?.requireUserId,
+      );
+      if (existing) return { order: existing };
+    }
+    console.error(
+      `[checkout] order ${result.order.id} created but session ${session.id} not marked completed`,
+    );
+  }
+
+  await reconcileStockAfterOrder(session.id, result.order.id).catch((error) => {
+    console.error("[inventory] reconciliation failed:", error);
+  });
+
+  const order = await loadOrderDtoForSession(
+    result.order.id,
+    options?.requireUserId,
+  );
+  if (order) return { order };
+
+  return { order: result.order };
+}
+
 async function placeOrderForCheckoutSession(
   userId: string,
   session: {
@@ -260,13 +549,13 @@ async function releaseCheckoutSessionStock(
     select: { id: true, status: true, itemsJson: true },
   });
 
-  if (!session || session.status !== "pending") return;
+  if (!session || session.status !== CHECKOUT_STATUS.PENDING) return;
 
   const items = parseCheckoutItems(session.itemsJson);
 
   await prisma.$transaction(async (tx) => {
     const updated = await tx.checkoutPayment.updateMany({
-      where: { id: session.id, status: "pending" },
+      where: { id: session.id, status: CHECKOUT_STATUS.PENDING },
       data: { status: reason },
     });
     if (updated.count === 0) return;
@@ -298,77 +587,14 @@ export async function verifyRazorpayCheckoutAndPlaceOrder(
     where: { razorpayOrderId: input.razorpayOrderId },
   });
 
-  if (!session || session.userId !== userId) {
+  if (!session) {
     return { error: "CHECKOUT_SESSION_NOT_FOUND" as const };
   }
 
-  if (session.status === "completed" && session.shopOrderId) {
-    const order = await prisma.order.findFirst({
-      where: { id: session.shopOrderId, userId },
-      include: {
-        items: { include: { product: true } },
-        deliveryAddress: true,
-        statusEvents: { orderBy: { eventAt: "asc" } },
-      },
-    });
-    if (order) {
-      const { mapOrderToDto } = await import("../lib/orderMapper.js");
-      return { order: mapOrderToDto(order) };
-    }
-  }
-
-  if (session.expiresAt < new Date()) {
-    // Reservation lapsed before the user finished paying — release the
-    // hold so other shoppers can buy the items. Razorpay will refund
-    // the captured payment via its standard auto-refund flow.
-    await releaseCheckoutSessionStock(session.id, "expired").catch((error) => {
-      console.error(
-        `[inventory] failed to release expired session ${session.id}:`,
-        error,
-      );
-    });
-    return { error: "CHECKOUT_SESSION_EXPIRED" as const };
-  }
-
-  const razorpayOrder = await fetchRazorpayOrder(input.razorpayOrderId);
-  if (razorpayOrder.amount !== session.amountPaise) {
-    return { error: "PAYMENT_AMOUNT_MISMATCH" as const };
-  }
-
-  const result = await placeOrderForCheckoutSession(
-    userId,
-    {
-      addressJson: session.addressJson,
-      customerEmail: session.customerEmail,
-      couponId: session.couponId,
-      couponCode: session.couponCode,
-      discountPaise: session.discountPaise,
-    },
-    "Razorpay",
-    input.razorpayPaymentId,
-  );
-
-  if ("error" in result) {
-    return result;
-  }
-
-  if (!("order" in result)) {
-    return { error: "ORDER_FAILED" as const };
-  }
-
-  await prisma.checkoutPayment.update({
-    where: { id: session.id },
-    data: {
-      status: "completed",
-      shopOrderId: result.order.id,
-    },
+  return fulfillPaidCheckoutSession(session, input.razorpayPaymentId, {
+    requireUserId: userId,
+    verifyRazorpayAmount: true,
   });
-
-  await reconcileStockAfterOrder(session.id, result.order.id).catch((error) => {
-    console.error("[inventory] reconciliation failed:", error);
-  });
-
-  return result;
 }
 
 export async function handleRazorpayWebhook(rawBody: string, signature: string) {
@@ -414,7 +640,7 @@ export async function handleRazorpayWebhook(rawBody: string, signature: string) 
       where: { razorpayOrderId: payment.order_id },
       select: { id: true, status: true },
     });
-    if (session && session.status === "pending") {
+    if (session && session.status === CHECKOUT_STATUS.PENDING) {
       await releaseCheckoutSessionStock(session.id, "failed").catch((error) => {
         console.error(
           `[inventory] failed to release session ${session.id} on payment.failed:`,
@@ -438,39 +664,26 @@ export async function handleRazorpayWebhook(rawBody: string, signature: string) 
     where: { razorpayOrderId: payment.order_id },
   });
 
-  if (!session || session.status === "completed") {
+  if (!session) {
     return { ok: true as const };
   }
 
-  const result = await placeOrderForCheckoutSession(
-    session.userId,
-    {
-      addressJson: session.addressJson,
-      customerEmail: session.customerEmail,
-      couponId: session.couponId,
-      couponCode: session.couponCode,
-      discountPaise: session.discountPaise,
-    },
-    "Razorpay",
-    payment.id,
-  );
+  if (session.status === CHECKOUT_STATUS.COMPLETED) {
+    return { ok: true as const };
+  }
+
+  const result = await fulfillPaidCheckoutSession(session, payment.id, {
+    verifyRazorpayAmount: true,
+  });
 
   if ("error" in result) {
+    console.error(
+      `[Razorpay Webhook] fulfillment failed for ${payment.order_id}:`,
+      result.error,
+      result.message ?? "",
+    );
     return { error: "ORDER_FAILED" as const };
   }
-
-  if (!("order" in result)) {
-    return { error: "ORDER_FAILED" as const };
-  }
-
-  await prisma.checkoutPayment.update({
-    where: { id: session.id },
-    data: { status: "completed", shopOrderId: result.order.id },
-  });
-
-  await reconcileStockAfterOrder(session.id, result.order.id).catch((error) => {
-    console.error("[inventory] webhook reconciliation failed:", error);
-  });
 
   return { ok: true as const };
 }
