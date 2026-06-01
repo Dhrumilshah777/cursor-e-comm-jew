@@ -36,6 +36,29 @@ export async function getGoldRateSettings(): Promise<GoldRatesDto> {
   return buildGoldRatesDto(await readRate24FromDb());
 }
 
+/** Lightweight public snapshot for clients to detect gold-rate changes. */
+export async function getGoldRatePublicSnapshot(): Promise<{
+  rate24ktPerGram: number;
+  updatedAt: string;
+}> {
+  const settings = await prisma.goldRateSettings.findUnique({
+    where: { id: SETTINGS_ID },
+    select: { rate24ktRupeesPerGram: true, updatedAt: true },
+  });
+
+  if (!settings) {
+    return {
+      rate24ktPerGram: DEFAULT_RATE_24KT_RUPEES_PER_GRAM,
+      updatedAt: new Date(0).toISOString(),
+    };
+  }
+
+  return {
+    rate24ktPerGram: Number.parseFloat(settings.rate24ktRupeesPerGram.toString()),
+    updatedAt: settings.updatedAt.toISOString(),
+  };
+}
+
 export async function recalculateAllProductPrices(): Promise<number> {
   const products = await prisma.product.findMany();
 

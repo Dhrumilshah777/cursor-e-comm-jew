@@ -37,6 +37,7 @@ import { homepageRouter } from "./routes/homepage.js";
 
 import { returnsRouter } from "./routes/returns.js";
 import { deliveryRouter } from "./routes/delivery.js";
+import { goldRatesRouter } from "./routes/goldRates.js";
 
 
 
@@ -164,6 +165,7 @@ app.use("/api/orders", ordersRouter);
 
 app.use("/api/products", publicReadLimiter, productsRouter);
 app.use("/api/homepage", publicReadLimiter, homepageRouter);
+app.use("/api/gold-rates", publicReadLimiter, goldRatesRouter);
 app.use("/api/delivery", publicReadLimiter, deliveryRouter);
 
 app.use("/api/returns", returnsRouter);
