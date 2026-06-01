@@ -9,6 +9,9 @@ export type SmsNotificationJob = {
   body: string;
 };
 
+/** SMS + WhatsApp (when TWILIO_WHATSAPP_FROM is set). */
+export type PhoneNotificationJob = SmsNotificationJob;
+
 export type EmailNotificationJob = {
   channel: "email";
   kind: string;
@@ -98,8 +101,38 @@ export async function enqueueEmailNotification(
   }
 }
 
+export async function enqueuePhoneNotification(
+  payload: Omit<PhoneNotificationJob, "channel">,
+  options?: { jobId?: string },
+): Promise<void> {
+  const queue = getQueue(QUEUE_NAMES.notifications);
+  const jobPayload: PhoneNotificationJob = { channel: "sms", ...payload };
+
+  if (!queue) {
+    void deliverNotification(jobPayload).catch((error) => {
+      console.error(`[Notify:${payload.kind}] inline send failed:`, error);
+    });
+    return;
+  }
+
+  try {
+    await queue.add(payload.kind, jobPayload, {
+      attempts: 5,
+      backoff: { type: "exponential", delay: 5000 },
+      ...(options?.jobId ? { jobId: options.jobId } : {}),
+    });
+  } catch (error) {
+    console.error(`[Notify:${payload.kind}] enqueue failed, sending inline:`, error);
+    void deliverNotification(jobPayload).catch((sendError) => {
+      console.error(`[Notify:${payload.kind}] inline send also failed:`, sendError);
+    });
+  }
+}
+
+/** @deprecated Use enqueuePhoneNotification — sends SMS and WhatsApp when configured. */
 export async function enqueueSmsNotification(
   payload: Omit<SmsNotificationJob, "channel">,
+  options?: { jobId?: string },
 ): Promise<void> {
-  await enqueueNotification({ channel: "sms", ...payload });
+  await enqueuePhoneNotification(payload, options);
 }

@@ -30,7 +30,7 @@ export function startNotificationsWorker() {
       }
 
       console.log(
-        `[Notify:${payload.kind}] sending SMS to ${payload.to.replace(/\d(?=\d{4})/g, "*")}`,
+        `[Notify:${payload.kind}] sending SMS + WhatsApp to ${payload.to.replace(/\d(?=\d{4})/g, "*")}`,
       );
       await sendTransactionalMessage(payload.to, payload.body);
     },

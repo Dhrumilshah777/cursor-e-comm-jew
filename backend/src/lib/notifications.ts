@@ -18,9 +18,10 @@ import {
 } from "./resendEmail.js";
 import {
   enqueueEmailNotification,
-  enqueueSmsNotification,
+  enqueuePhoneNotification,
 } from "./notificationQueue.js";
 import { generateInvoicePdf } from "./invoice/generateInvoicePdf.js";
+import { prisma } from "./prisma.js";
 
 const STORE_NAME = process.env.STORE_NAME?.trim() || "Dhrumil Jewellers";
 
@@ -30,6 +31,13 @@ function adminPhone(): string | null {
     process.env.ADMIN_PHONE?.trim() ||
     null;
   return raw;
+}
+
+export function resolveCustomerPhone(
+  deliveryPhone?: string | null,
+  userPhone?: string | null,
+): string {
+  return deliveryPhone?.trim() || userPhone?.trim() || "";
 }
 
 type EmailMessage = {
@@ -123,6 +131,10 @@ export async function notifyOrderPlaced(input: OrderPlacedNotificationInput) {
       orderNumber: input.order.orderNumber,
       totalPaise: input.order.totalPaise,
     });
+  } else {
+    console.warn(
+      `[Notify] Order ${input.order.orderNumber} — no customer phone; SMS/WhatsApp skipped`,
+    );
   }
 
   await notifyAdminOrderPlaced({
@@ -139,7 +151,7 @@ export async function notifyOrderConfirmed(input: {
   totalPaise: number;
 }) {
   const body = `${STORE_NAME}: Order ${input.orderNumber} confirmed. Total ${formatInrFromPaise(input.totalPaise)}. Track in My Orders on our website. Thank you!`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "order-confirmed",
     to: input.customerPhone,
     body,
@@ -159,7 +171,7 @@ export async function notifyAdminOrderPlaced(input: {
   }
   const customerLabel = input.customerName?.trim() || input.customerPhone;
   const body = `${STORE_NAME} Admin: New order ${input.orderNumber} placed. Total ${formatInrFromPaise(input.totalPaise)}. Customer ${customerLabel} (${input.customerPhone}). Check Admin Orders.`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "admin-order-placed",
     to: admin,
     body,
@@ -182,6 +194,30 @@ export async function notifyOrderShipped(input: {
     buildOrderShippedEmail(input),
     { jobId: `email-order-shipped-${input.orderId}` },
   );
+
+  const phone = input.customerPhone?.trim();
+  if (!phone) {
+    console.warn(
+      `[Notify] Order ${input.orderNumber} shipped — no customer phone; SMS/WhatsApp skipped`,
+    );
+    return;
+  }
+
+  const courierLine = input.courier ? ` via ${input.courier}` : "";
+  const trackingLine = input.trackingNumber
+    ? ` Tracking: ${input.trackingNumber}.`
+    : "";
+  const etaLine = input.expectedDelivery ? ` ETA: ${input.expectedDelivery}.` : "";
+  const body = `${STORE_NAME}: Order ${input.orderNumber} shipped${courierLine}.${trackingLine}${etaLine} Track in My Orders.`;
+
+  await enqueuePhoneNotification(
+    {
+      kind: "order-shipped",
+      to: phone,
+      body,
+    },
+    { jobId: `phone-order-shipped-${input.orderId}` },
+  );
 }
 
 export async function notifyOrderCancelled(input: {
@@ -202,7 +238,7 @@ export async function notifyOrderCancelled(input: {
 
   const status = input.refundStatus ?? "Refund initiated";
   const body = `${STORE_NAME}: Order ${input.orderNumber} has been cancelled. ${status} for ${input.refundAmount}. Credited to your original payment method in 5-7 business days.`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "order-cancelled",
     to: input.customerPhone,
     body,
@@ -219,11 +255,59 @@ export async function notifyAdminOrderCancelled(input: {
   if (!admin) return;
   const status = input.refundStatus ?? "Refund initiated";
   const body = `${STORE_NAME} Admin: Order ${input.orderNumber} cancelled by customer ${input.customerPhone}. ${status} — ${input.refundAmount}. Check Admin Orders.`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "admin-order-cancelled",
     to: admin,
     body,
   });
+}
+
+/** Shipment cancelled in Shiprocket (not a customer-initiated store cancellation). */
+export async function notifyOrderCancelledOnShiprocket(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      user: { select: { phone: true, email: true, name: true } },
+      deliveryAddress: { select: { phone: true, name: true } },
+    },
+  });
+
+  if (!order) return;
+
+  const customerPhone = order.deliveryAddress.phone.trim() || order.user.phone?.trim() || "";
+  const customerLabel = order.deliveryAddress.name.trim() || order.user.name?.trim() || customerPhone;
+
+  if (customerPhone) {
+    const body = `${STORE_NAME}: Order ${order.orderNumber} shipment was cancelled. We will contact you if any action is needed. Check My Orders on our website.`;
+    await enqueuePhoneNotification(
+      {
+        kind: "order-shiprocket-cancelled",
+        to: customerPhone,
+        body,
+      },
+      { jobId: `phone-shiprocket-cancelled-${order.id}` },
+    );
+  } else {
+    console.warn(
+      `[Notify] Shiprocket cancel for ${order.orderNumber} — no customer phone; SMS/WhatsApp skipped`,
+    );
+  }
+
+  const admin = adminPhone();
+  if (!admin) {
+    console.warn("[Notify] ADMIN_ALERT_PHONE not set — skip admin Shiprocket cancel alert");
+    return;
+  }
+
+  const body = `${STORE_NAME} Admin: Order ${order.orderNumber} cancelled on Shiprocket. Customer ${customerLabel}${customerPhone ? ` (${customerPhone})` : ""}. Check Admin Orders.`;
+  await enqueuePhoneNotification(
+    {
+      kind: "admin-shiprocket-cancelled",
+      to: admin,
+      body,
+    },
+    { jobId: `phone-admin-shiprocket-cancelled-${order.id}` },
+  );
 }
 
 export async function notifyOrderDelivered(input: {
@@ -240,10 +324,18 @@ export async function notifyOrderDelivered(input: {
     { jobId: `email-order-delivered-${input.orderId}` },
   );
 
+  const phone = input.customerPhone?.trim();
+  if (!phone) {
+    console.warn(
+      `[Notify] Order ${input.orderNumber} delivered — no customer phone; SMS/WhatsApp skipped`,
+    );
+    return;
+  }
+
   const body = `${STORE_NAME}: Your order ${input.orderNumber} has been delivered. Thank you for shopping with us!`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "order-delivered",
-    to: input.customerPhone,
+    to: phone,
     body,
   });
 }
@@ -260,7 +352,7 @@ export async function notifyAdminReturnRequested(input: {
     return;
   }
   const body = `${STORE_NAME} Admin: New return request for ${input.orderNumber} (${input.productName}). Reason: ${input.reason}. Customer ${input.customerPhone}. Check Admin Returns.`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "admin-return-requested",
     to: admin,
     body,
@@ -282,7 +374,7 @@ export async function notifyReturnRejected(input: {
   );
 
   const body = `${STORE_NAME}: Your return request for order ${input.orderNumber} could not be approved. Contact Client Care for help.`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "return-rejected",
     to: input.customerPhone,
     body,
@@ -308,7 +400,7 @@ export async function notifyReturnApproved(input: {
     ? ` Pickup: ${input.pickupScheduledFor}.`
     : " Courier will contact you before pickup.";
   const body = `${STORE_NAME}: Return approved for order ${input.orderNumber}.${pickupLine} Keep item packed with invoice and certificate.`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "return-approved",
     to: input.customerPhone,
     body,
@@ -331,7 +423,7 @@ export async function notifyRefundProcessed(input: {
   );
 
   const body = `${STORE_NAME}: Refund ${formatInrFromPaise(input.amountPaise)} for order ${input.orderNumber} has been processed to your original payment method (5-7 business days).`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "refund-processed",
     to: input.customerPhone,
     body,
@@ -346,7 +438,7 @@ export async function notifyAdminRefundFailed(input: {
   const admin = adminPhone();
   if (!admin) return;
   const body = `${STORE_NAME} Admin: Refund FAILED for return ${input.returnRequestId} (order ${input.orderNumber}).${input.reason ? ` ${input.reason}` : ""} Check Razorpay dashboard.`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "admin-refund-failed",
     to: admin,
     body,
@@ -369,7 +461,7 @@ export async function notifyRefundInitiated(input: {
   );
 
   const body = `${STORE_NAME}: Refund of ${formatInrFromPaise(input.amountPaise)} initiated for order ${input.orderNumber}. You will receive it in 5-7 business days.`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "refund-initiated",
     to: input.customerPhone,
     body,
@@ -384,7 +476,7 @@ export async function notifyAdminCancellationRefundFailed(input: {
   const admin = adminPhone();
   if (!admin) return;
   const body = `${STORE_NAME} Admin: Cancellation refund FAILED for order ${input.orderNumber} (${input.refundAmount}).${input.reason ? ` ${input.reason}` : ""} Refund needs manual action in Razorpay.`;
-  await enqueueSmsNotification({
+  await enqueuePhoneNotification({
     kind: "admin-cancel-refund-failed",
     to: admin,
     body,

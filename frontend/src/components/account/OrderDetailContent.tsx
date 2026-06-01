@@ -162,8 +162,9 @@ export default function OrderDetailContent({
         <SectionTitle>Order status</SectionTitle>
         {order.status === "Cancelled" ? (
           <p className="mt-3 text-sm font-light text-zinc-500">
-            This order was cancelled. Fulfillment tracking is no longer active — see refund
-            status below.
+            {order.cancelRefundAmount
+              ? "This order was cancelled. Fulfillment tracking is no longer active — see refund status below."
+              : "This order was cancelled on Shiprocket. Fulfillment is no longer active. Contact support if you need help."}
           </p>
         ) : null}
         <StatusTimeline

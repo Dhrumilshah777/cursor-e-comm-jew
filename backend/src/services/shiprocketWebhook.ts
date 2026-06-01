@@ -1,6 +1,6 @@
 import type { OrderStatus } from "../generated/prisma/client.js";
 import { orderStatusEventLabel } from "../lib/format.js";
-import { notifyOrderDelivered, notifyOrderShipped } from "../lib/notifications.js";
+import { notifyOrderCancelledOnShiprocket, notifyOrderDelivered, notifyOrderShipped, resolveCustomerPhone } from "../lib/notifications.js";
 import { metaToOrderUpdate, parseShiprocketMetaFromSources } from "../lib/shiprocketMeta.js";
 import { prisma } from "../lib/prisma.js";
 
@@ -119,6 +119,7 @@ async function findOrderFromWebhook(payload: ShiprocketWebhookPayload) {
     where: { OR: orConditions },
     include: {
       statusEvents: { orderBy: { eventAt: "desc" }, take: 1 },
+      deliveryAddress: { select: { phone: true, name: true } },
       user: { select: { phone: true, name: true, email: true } },
     },
   });
@@ -251,6 +252,7 @@ export async function handleShiprocketWebhook(payload: ShiprocketWebhookPayload)
   if (mappedStatus === "SHIPPED" && order.status !== "SHIPPED") {
     void notifyOrderShipped({
       customerEmail: order.user.email,
+      customerPhone: resolveCustomerPhone(order.deliveryAddress.phone, order.user.phone),
       customerName: order.user.name,
       orderId: order.id,
       orderNumber: order.orderNumber,
@@ -260,13 +262,25 @@ export async function handleShiprocketWebhook(payload: ShiprocketWebhookPayload)
     });
   }
 
-  if (mappedStatus === "DELIVERED" && (order.user.phone || order.user.email)) {
-    void notifyOrderDelivered({
-      customerEmail: order.user.email,
-      customerPhone: order.user.phone,
-      customerName: order.user.name,
-      orderId: order.id,
-      orderNumber: order.orderNumber,
+  if (mappedStatus === "DELIVERED") {
+    const customerPhone = resolveCustomerPhone(order.deliveryAddress.phone, order.user.phone);
+    if (customerPhone || order.user.email) {
+      void notifyOrderDelivered({
+        customerEmail: order.user.email,
+        customerPhone,
+        customerName: order.user.name,
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+      });
+    }
+  }
+
+  if (mappedStatus === "CANCELLED" && order.status !== "CANCELLED") {
+    void notifyOrderCancelledOnShiprocket(order.id).catch((error) => {
+      console.error(
+        `[Shiprocket Webhook] Cancel SMS failed for ${order.orderNumber}:`,
+        error,
+      );
     });
   }
 

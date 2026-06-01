@@ -111,7 +111,11 @@ export default function AdminOrderDetail({ orderId }: { orderId: string }) {
       if (updated.shiprocketFulfillmentLog?.length) {
         setShiprocketLog(updated.shiprocketFulfillmentLog);
       }
-      setSaveMessage("Shiprocket delivery and pickup details refreshed.");
+      setSaveMessage(
+        updated.statusCode === "CANCELLED"
+          ? "Shiprocket status synced — order is cancelled."
+          : "Shiprocket delivery and pickup details refreshed.",
+      );
     } catch (err) {
       setSaveMessage(
         err instanceof Error ? err.message : "Failed to refresh Shiprocket details",

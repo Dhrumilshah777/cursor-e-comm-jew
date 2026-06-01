@@ -86,6 +86,11 @@ export function isTwilioWhatsAppConfigured(): boolean {
   );
 }
 
+/** True when at least one phone channel (SMS or WhatsApp) can send transactional alerts. */
+export function isTransactionalPhoneConfigured(): boolean {
+  return isTwilioSmsConfigured() || isTwilioWhatsAppConfigured();
+}
+
 /** Fire-and-forget WhatsApp via Twilio. To must be opted in (sandbox: send join code first). */
 export async function sendWhatsApp(to: string, body: string): Promise<boolean> {
   const accountSid = process.env.TWILIO_ACCOUNT_SID?.trim();

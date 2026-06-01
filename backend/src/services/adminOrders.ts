@@ -6,9 +6,9 @@ import {
   getShiprocketLogFromError,
   type ShiprocketLogEntry,
 } from "./shiprocketFulfillment.js";
-import { syncShiprocketMetaToOrder } from "./shiprocketSync.js";
+import { syncShiprocketToOrder } from "./shiprocketSync.js";
 import type { OrderStatus } from "../generated/prisma/client.js";
-import { notifyOrderShipped } from "../lib/notifications.js";
+import { notifyOrderShipped, resolveCustomerPhone } from "../lib/notifications.js";
 
 const orderInclude = {
   items: { include: { product: true } },
@@ -70,14 +70,14 @@ export async function getAdminOrderById(id: string) {
 
   if (order.shiprocketShipmentId) {
     try {
-      await syncShiprocketMetaToOrder(id);
+      await syncShiprocketToOrder(id, { force: true });
       order =
         (await prisma.order.findUnique({
           where: { id },
           include: orderInclude,
         })) ?? order;
     } catch (error) {
-      console.warn(`Shiprocket meta sync for order ${id}:`, error);
+      console.warn(`Shiprocket sync for order ${id}:`, error);
     }
   }
 
@@ -94,7 +94,7 @@ export async function syncAdminOrderShiprocket(id: string) {
     return { order: mapAdminOrderToDto(existing), synced: false as const };
   }
 
-  await syncShiprocketMetaToOrder(id, { force: true });
+  await syncShiprocketToOrder(id, { force: true });
   const order = await prisma.order.findUnique({
     where: { id },
     include: orderInclude,
@@ -187,6 +187,7 @@ export async function updateAdminOrder(
   if (data.status === "SHIPPED" && existing.status !== "SHIPPED") {
     void notifyOrderShipped({
       customerEmail: order.user.email,
+      customerPhone: resolveCustomerPhone(order.deliveryAddress.phone, order.user.phone),
       customerName: order.user.name,
       orderId: order.id,
       orderNumber: order.orderNumber,
@@ -273,6 +274,7 @@ export async function addOrderStatusEvent(
   if (input.status === "SHIPPED" && existing.status !== "SHIPPED") {
     void notifyOrderShipped({
       customerEmail: order.user.email,
+      customerPhone: resolveCustomerPhone(order.deliveryAddress.phone, order.user.phone),
       customerName: order.user.name,
       orderId: order.id,
       orderNumber: order.orderNumber,

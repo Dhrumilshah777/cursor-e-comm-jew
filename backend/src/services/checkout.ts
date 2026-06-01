@@ -409,10 +409,15 @@ export async function placeOrderFromCart(
   });
 
   if (orderWithUser) {
+    const customerPhone =
+      orderWithUser.deliveryAddress.phone?.trim() ||
+      orderWithUser.user.phone?.trim() ||
+      "";
+
     void notifyOrderPlaced({
       order: orderWithUser,
       customerEmail,
-      customerPhone: orderWithUser.user.phone ?? "",
+      customerPhone,
       customerName: orderWithUser.user.name,
     });
   }

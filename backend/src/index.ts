@@ -16,6 +16,7 @@ import { loadGoldRatesFromDb } from "./services/goldRates.js";
 import { isQueueEnabled, shutdownQueues } from "./lib/queue.js";
 import { connectRedis, isRedisConfigured, pingRedis } from "./lib/redis.js";
 import { isResendConfigured } from "./lib/resendEmail.js";
+import { isTwilioSmsConfigured, isTwilioWhatsAppConfigured } from "./lib/twilioSms.js";
 import { createRateLimiter, ipKey } from "./middleware/rateLimit.js";
 import { startNotificationsWorker } from "./workers/notificationsWorker.js";
 import { startRefundsWorker } from "./workers/refundsWorker.js";
@@ -143,6 +144,8 @@ app.get("/api/health", async (_req, res) => {
       queues: isQueueEnabled() ? "running" : "inline",
       sentry: isSentryEnabled() ? "enabled" : "disabled",
       email: isResendConfigured() ? "enabled" : "disabled",
+      sms: isTwilioSmsConfigured() ? "enabled" : "disabled",
+      whatsapp: isTwilioWhatsAppConfigured() ? "enabled" : "disabled",
     });
   } catch {
     res.status(503).json({ ok: false, database: "disconnected" });
@@ -202,6 +205,20 @@ async function startServer() {
     );
   } catch (error) {
     console.error("[GoldRates] failed to load settings:", error);
+  }
+
+  if (!isTwilioSmsConfigured()) {
+    console.warn(
+      "[SMS] TWILIO_SMS_FROM or TWILIO_MESSAGING_SERVICE_SID not set — SMS alerts disabled (Twilio Verify for OTP uses a separate config).",
+    );
+  }
+  if (!isTwilioWhatsAppConfigured()) {
+    console.warn(
+      "[WhatsApp] TWILIO_WHATSAPP_FROM not set — WhatsApp alerts disabled. Set it to send order alerts on WhatsApp (sandbox: customer must join first).",
+    );
+  }
+  if (!process.env.ADMIN_ALERT_PHONE?.trim()) {
+    console.warn("[Notify] ADMIN_ALERT_PHONE not set — admin SMS/WhatsApp alerts disabled");
   }
 
   // Background workers

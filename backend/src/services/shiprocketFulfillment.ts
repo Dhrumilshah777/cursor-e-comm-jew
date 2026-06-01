@@ -13,7 +13,7 @@ import {
   metaToOrderUpdate,
   parseShiprocketMetaFromSources,
 } from "../lib/shiprocketMeta.js";
-import { syncShiprocketMetaToOrder } from "./shiprocketSync.js";
+import { syncShiprocketToOrder } from "./shiprocketSync.js";
 import type { Prisma } from "../generated/prisma/client.js";
 
 const DEFAULT_DIM_CM = 12;
@@ -183,7 +183,7 @@ export async function fulfillOrderOnShiprocket(
       summary: `Already synced (shipment_id=${order.shiprocketShipmentId}, AWB=${order.trackingNumber ?? "n/a"})`,
     };
     pushLog(orderNumber, log, entry);
-    await syncShiprocketMetaToOrder(orderId, { force: true });
+    await syncShiprocketToOrder(orderId, { force: true });
     const refreshed = await prisma.order.findUnique({ where: { id: orderId } });
     return { order: refreshed ?? order, log };
   }
@@ -322,7 +322,7 @@ export async function fulfillOrderOnShiprocket(
     },
   });
 
-  await syncShiprocketMetaToOrder(orderId, { force: true });
+  await syncShiprocketToOrder(orderId, { force: true });
   const syncedOrder =
     (await prisma.order.findUnique({ where: { id: orderId } })) ?? updated;
 
