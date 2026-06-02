@@ -44,6 +44,13 @@ export default function AccountNav() {
         >
           Overview
         </Link>
+        <Link
+          href="/account/my-orders"
+          className={`${navLinkClass("my-orders")} mt-0.5`}
+          scroll
+        >
+          My Orders
+        </Link>
       </div>
 
       {accountNavGroups.map((group) => (
@@ -52,7 +59,9 @@ export default function AccountNav() {
             {group.title}
           </p>
           <ul className="space-y-0.5">
-            {group.items.map((item) => (
+            {group.items
+              .filter((item) => item.id !== "my-orders")
+              .map((item) => (
               <li key={item.id}>
                 <Link
                   href={accountSectionPath(item.id)}

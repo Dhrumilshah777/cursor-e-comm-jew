@@ -261,6 +261,21 @@ export default function Navbar() {
           </ul>
 
           <p className="mb-2 mt-6 text-[10px] font-light uppercase tracking-[0.28em] text-zinc-400">
+            Account
+          </p>
+          <ul className="border-b border-zinc-100 pb-4">
+            <li>
+              <Link
+                href={customer ? "/account/my-orders" : "/login"}
+                className={linkMobile}
+                onClick={closeMenu}
+              >
+                My Orders
+              </Link>
+            </li>
+          </ul>
+
+          <p className="mb-2 mt-6 text-[10px] font-light uppercase tracking-[0.28em] text-zinc-400">
             More
           </p>
           <ul>
