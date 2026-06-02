@@ -1,6 +1,7 @@
 import CollectionsOverview, {
   CollectionsPageHero,
 } from "@/components/CollectionsOverview";
+import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "Collections | Wholesale Jewelry",
@@ -10,9 +11,12 @@ export const metadata = {
 
 export default function CollectionsPage() {
   return (
-    <div className="flex flex-1 flex-col overflow-x-hidden">
-      <CollectionsPageHero />
-      <CollectionsOverview />
-    </div>
+    <>
+      <div className="flex flex-col overflow-x-hidden">
+        <CollectionsPageHero />
+        <CollectionsOverview />
+      </div>
+      <Footer />
+    </>
   );
 }
