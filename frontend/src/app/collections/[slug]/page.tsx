@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import CategoryBanner from "@/components/CategoryBanner";
 import CollectionProductGrid from "@/components/CollectionProductGrid";
-import Footer from "@/components/Footer";
 import {
   getCollection,
   isCollectionSlug,
@@ -52,7 +51,6 @@ export default async function CollectionPage({ params }: PageProps) {
         products={products}
         categoryName={collection.name}
       />
-      <Footer />
     </>
   );
 }
