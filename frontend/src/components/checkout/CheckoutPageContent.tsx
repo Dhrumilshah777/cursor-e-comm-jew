@@ -9,7 +9,9 @@ import { useCart } from "@/components/cart/CartProvider";
 import { isAnalyticsConfigured, trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 import {
   createRazorpayCheckoutOrder,
+  deleteCheckoutAddress,
   fetchCheckoutAddresses,
+  updateCheckoutAddress,
   verifyRazorpayPayment,
   applyCheckoutCoupon,
   fetchAvailableCheckoutCoupons,
@@ -19,6 +21,7 @@ import {
 } from "@/lib/checkoutApi";
 import { fetchCustomerMe } from "@/lib/customerAuth";
 import { formatPaise } from "@/lib/pricing";
+import { IoEllipsisVertical } from "react-icons/io5";
 
 function phoneFromSaved(phone: string): string {
   const digits = phone.replace(/\D/g, "");
@@ -45,6 +48,10 @@ export default function CheckoutPageContent() {
   const [addressesLoading, setAddressesLoading] = useState(true);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [addressActionLoading, setAddressActionLoading] = useState(false);
+  const addressMenuRef = useRef<HTMLDivElement>(null);
 
   const [name, setName] = useState("");
   const [line1, setLine1] = useState("");
@@ -129,6 +136,22 @@ export default function CheckoutPageContent() {
     };
   }, [router]);
 
+  useEffect(() => {
+    if (!openMenuId) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        addressMenuRef.current &&
+        !addressMenuRef.current.contains(event.target as Node)
+      ) {
+        setOpenMenuId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openMenuId]);
+
   const getNewAddress = (): CheckoutAddress => ({
     name,
     line1,
@@ -139,6 +162,103 @@ export default function CheckoutPageContent() {
     phone,
     saveAddress,
   });
+
+  const isAddressFormVisible = showNewAddressForm || Boolean(editingAddressId);
+
+  const validateAddressFields = (): boolean => {
+    if (
+      !name.trim() ||
+      !line1.trim() ||
+      !city.trim() ||
+      !state.trim() ||
+      pincode.length !== 6 ||
+      phone.length !== 10
+    ) {
+      setError("Please complete the delivery address.");
+      return false;
+    }
+    return true;
+  };
+
+  const startEditAddress = (address: SavedCheckoutAddress) => {
+    setEditingAddressId(address.id);
+    setShowNewAddressForm(false);
+    setOpenMenuId(null);
+    setName(address.name);
+    setLine1(address.line1);
+    setLine2(address.line2);
+    setCity(address.city);
+    setState(address.state);
+    setPincode(address.pincode);
+    setPhone(phoneFromSaved(address.phone));
+    setError(null);
+  };
+
+  const cancelAddressForm = () => {
+    setEditingAddressId(null);
+    if (savedAddresses.length > 0) {
+      setShowNewAddressForm(false);
+      setSelectedAddressId(
+        savedAddresses.find((a) => a.isDefault)?.id ??
+          savedAddresses[0]?.id ??
+          null,
+      );
+    }
+    setError(null);
+  };
+
+  const handleSaveAddress = async () => {
+    if (!editingAddressId || !validateAddressFields()) return;
+
+    setAddressActionLoading(true);
+    setError(null);
+    try {
+      const updated = await updateCheckoutAddress(editingAddressId, getNewAddress());
+      setSavedAddresses((prev) =>
+        prev.map((address) => (address.id === updated.id ? updated : address)),
+      );
+      setEditingAddressId(null);
+      setShowNewAddressForm(false);
+      setSelectedAddressId(updated.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update address");
+    } finally {
+      setAddressActionLoading(false);
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: string) => {
+    if (!window.confirm("Delete this address?")) return;
+
+    setOpenMenuId(null);
+    setAddressActionLoading(true);
+    setError(null);
+    try {
+      await deleteCheckoutAddress(addressId);
+      const remaining = savedAddresses.filter((address) => address.id !== addressId);
+      setSavedAddresses(remaining);
+
+      if (editingAddressId === addressId) {
+        setEditingAddressId(null);
+      }
+
+      if (selectedAddressId === addressId) {
+        if (remaining.length > 0) {
+          setSelectedAddressId(
+            remaining.find((address) => address.isDefault)?.id ?? remaining[0]!.id,
+          );
+          setShowNewAddressForm(false);
+        } else {
+          setSelectedAddressId(null);
+          setShowNewAddressForm(true);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete address");
+    } finally {
+      setAddressActionLoading(false);
+    }
+  };
 
   const handleApplyCoupon = async (codeOverride?: string) => {
     const code = (codeOverride ?? couponInput).trim();
@@ -208,20 +328,15 @@ export default function CheckoutPageContent() {
     }
 
     const useSaved =
-      !showNewAddressForm && selectedAddressId && savedAddresses.length > 0;
+      !isAddressFormVisible && selectedAddressId && savedAddresses.length > 0;
 
-    if (!useSaved) {
-      if (
-        !name.trim() ||
-        !line1.trim() ||
-        !city.trim() ||
-        !state.trim() ||
-        pincode.length !== 6 ||
-        phone.length !== 10
-      ) {
-        setError("Please complete the delivery address.");
-        return;
-      }
+    if (editingAddressId) {
+      setError("Save or cancel your address changes before paying.");
+      return;
+    }
+
+    if (!useSaved && !validateAddressFields()) {
+      return;
     }
 
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
@@ -359,42 +474,83 @@ export default function CheckoutPageContent() {
               Delivery address
             </h2>
 
-            {hasSaved && !showNewAddressForm ? (
+            {hasSaved && !isAddressFormVisible ? (
               <div className="mt-4 space-y-3">
                 <ul className="space-y-3">
                   {savedAddresses.map((address) => {
                     const selected = selectedAddressId === address.id;
+                    const menuOpen = openMenuId === address.id;
                     return (
                       <li key={address.id}>
-                        <label
-                          className={`flex cursor-pointer gap-3 border px-4 py-4 transition ${
+                        <div
+                          className={`flex items-start border transition ${
                             selected
                               ? "border-zinc-900 bg-zinc-50"
                               : "border-zinc-200 bg-white hover:border-zinc-400"
                           }`}
                         >
-                          <input
-                            type="radio"
-                            name="savedAddress"
-                            checked={selected}
-                            onChange={() => setSelectedAddressId(address.id)}
-                            className="mt-1 h-4 w-4 border-zinc-300"
-                          />
-                          <span className="min-w-0 flex-1 text-sm font-light text-zinc-800">
-                            <span className="block text-[10px] font-normal uppercase tracking-[0.16em] text-zinc-500">
-                              {address.label}
+                          <label className="flex min-w-0 flex-1 cursor-pointer gap-3 px-4 py-4">
+                            <input
+                              type="radio"
+                              name="savedAddress"
+                              checked={selected}
+                              onChange={() => setSelectedAddressId(address.id)}
+                              className="mt-1 h-4 w-4 border-zinc-300"
+                            />
+                            <span className="min-w-0 flex-1 text-sm font-light text-zinc-800">
+                              <span className="block text-[10px] font-normal uppercase tracking-[0.16em] text-zinc-500">
+                                {address.label}
+                              </span>
+                              <span className="mt-1 block font-normal text-zinc-900">
+                                {address.name}
+                              </span>
+                              <span className="mt-1 block text-zinc-600">
+                                {formatAddressSummary(address)}
+                              </span>
+                              <span className="mt-1 block text-zinc-500">
+                                {phoneFromSaved(address.phone)}
+                              </span>
                             </span>
-                            <span className="mt-1 block font-normal text-zinc-900">
-                              {address.name}
-                            </span>
-                            <span className="mt-1 block text-zinc-600">
-                              {formatAddressSummary(address)}
-                            </span>
-                            <span className="mt-1 block text-zinc-500">
-                              {phoneFromSaved(address.phone)}
-                            </span>
-                          </span>
-                        </label>
+                          </label>
+                          <div
+                            ref={menuOpen ? addressMenuRef : undefined}
+                            className="relative shrink-0 self-stretch"
+                          >
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                setOpenMenuId(menuOpen ? null : address.id);
+                              }}
+                              disabled={addressActionLoading}
+                              className="flex h-full items-start px-3 py-4 text-zinc-500 transition hover:text-zinc-900 disabled:opacity-50"
+                              aria-label="Address options"
+                              aria-expanded={menuOpen}
+                            >
+                              <IoEllipsisVertical className="h-5 w-5" />
+                            </button>
+                            {menuOpen ? (
+                              <div className="absolute right-2 top-12 z-20 min-w-[7.5rem] border border-zinc-200 bg-white py-1 shadow-sm">
+                                <button
+                                  type="button"
+                                  onClick={() => startEditAddress(address)}
+                                  className="block w-full px-4 py-2 text-left text-sm font-light text-zinc-800 transition hover:bg-zinc-50"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteAddress(address.id)}
+                                  disabled={addressActionLoading}
+                                  className="block w-full px-4 py-2 text-left text-sm font-light text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
                       </li>
                     );
                   })}
@@ -402,6 +558,7 @@ export default function CheckoutPageContent() {
                 <button
                   type="button"
                   onClick={() => {
+                    setEditingAddressId(null);
                     setShowNewAddressForm(true);
                     setSelectedAddressId(null);
                   }}
@@ -415,14 +572,7 @@ export default function CheckoutPageContent() {
                 {hasSaved ? (
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowNewAddressForm(false);
-                      setSelectedAddressId(
-                        savedAddresses.find((a) => a.isDefault)?.id ??
-                          savedAddresses[0]?.id ??
-                          null,
-                      );
-                    }}
+                    onClick={cancelAddressForm}
                     className="mb-4 cursor-pointer text-[11px] font-light uppercase tracking-[0.16em] text-zinc-600 underline hover:text-zinc-900"
                   >
                     ← Use a saved address
@@ -514,15 +664,36 @@ export default function CheckoutPageContent() {
                     />
                   </label>
                 </div>
-                <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm font-light text-zinc-600">
-                  <input
-                    type="checkbox"
-                    checked={saveAddress}
-                    onChange={(e) => setSaveAddress(e.target.checked)}
-                    className="h-4 w-4 border-zinc-300"
-                  />
-                  Save this address for next time
-                </label>
+                {editingAddressId ? (
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={handleSaveAddress}
+                      disabled={addressActionLoading}
+                      className="cursor-pointer border border-zinc-900 bg-zinc-900 px-5 py-2.5 text-[11px] font-normal uppercase tracking-[0.16em] text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {addressActionLoading ? "Saving…" : "Save changes"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelAddressForm}
+                      disabled={addressActionLoading}
+                      className="cursor-pointer text-[11px] font-light uppercase tracking-[0.16em] text-zinc-600 underline hover:text-zinc-900 disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm font-light text-zinc-600">
+                    <input
+                      type="checkbox"
+                      checked={saveAddress}
+                      onChange={(e) => setSaveAddress(e.target.checked)}
+                      className="h-4 w-4 border-zinc-300"
+                    />
+                    Save this address for next time
+                  </label>
+                )}
               </div>
             )}
           </section>

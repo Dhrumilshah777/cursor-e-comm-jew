@@ -37,6 +37,27 @@ export async function fetchCheckoutAddresses() {
   return data.addresses;
 }
 
+export async function updateCheckoutAddress(
+  addressId: string,
+  address: CheckoutAddress,
+) {
+  const data = await customerFetch<{ address: SavedCheckoutAddress }>(
+    `/api/checkout/addresses/${encodeURIComponent(addressId)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(address),
+    },
+  );
+  return data.address;
+}
+
+export async function deleteCheckoutAddress(addressId: string) {
+  await customerFetch<{ ok: true }>(
+    `/api/checkout/addresses/${encodeURIComponent(addressId)}`,
+    { method: "DELETE" },
+  );
+}
+
 type RazorpayCreateOrderResponse = {
   keyId: string;
   razorpayOrderId: string;

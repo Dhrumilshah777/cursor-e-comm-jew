@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { requireCustomer, type CustomerRequest } from "../middleware/requireCustomer.js";
 import { createRateLimiter, ipKey, userKey } from "../middleware/rateLimit.js";
-import { listSavedAddressesForUser } from "../services/addresses.js";
+import {
+  deleteSavedAddressForUser,
+  listSavedAddressesForUser,
+  updateSavedAddressForUser,
+} from "../services/addresses.js";
 import { parseCheckoutAddressPayload } from "../services/checkoutAddresses.js";
 import { previewCheckoutCoupon, listAvailableCheckoutCoupons } from "../services/checkout.js";
 import {
@@ -108,6 +112,71 @@ checkoutRouter.get("/addresses", requireCustomer, async (req: CustomerRequest, r
   } catch (error) {
     console.error("GET /api/checkout/addresses failed:", error);
     res.status(500).json({ error: "Failed to load addresses" });
+  }
+});
+
+checkoutRouter.patch("/addresses/:id", requireCustomer, async (req: CustomerRequest, res) => {
+  const addressId = String(req.params.id);
+  const body = req.body ?? {};
+
+  const input = {
+    name: typeof body.name === "string" ? body.name : "",
+    line1: typeof body.line1 === "string" ? body.line1 : "",
+    line2: typeof body.line2 === "string" ? body.line2 : undefined,
+    city: typeof body.city === "string" ? body.city : "",
+    state: typeof body.state === "string" ? body.state : "",
+    pincode: typeof body.pincode === "string" ? body.pincode : "",
+    phone: typeof body.phone === "string" ? body.phone : "",
+    label: typeof body.label === "string" ? body.label : undefined,
+  };
+
+  try {
+    const result = await updateSavedAddressForUser(
+      req.customer!.userId,
+      addressId,
+      input,
+    );
+
+    if ("error" in result) {
+      if (result.error === "NOT_FOUND") {
+        res.status(404).json({ error: "Address not found" });
+        return;
+      }
+      res.status(400).json({
+        error: "message" in result ? result.message : "Invalid address",
+      });
+      return;
+    }
+
+    res.json({ address: result.address });
+  } catch (error) {
+    console.error("PATCH /api/checkout/addresses/:id failed:", error);
+    res.status(500).json({ error: "Failed to update address" });
+  }
+});
+
+checkoutRouter.delete("/addresses/:id", requireCustomer, async (req: CustomerRequest, res) => {
+  try {
+    const result = await deleteSavedAddressForUser(
+      req.customer!.userId,
+      String(req.params.id),
+    );
+
+    if ("error" in result) {
+      if (result.error === "NOT_FOUND") {
+        res.status(404).json({ error: "Address not found" });
+        return;
+      }
+      if (result.error === "IN_USE") {
+        res.status(409).json({ error: result.message });
+        return;
+      }
+    }
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("DELETE /api/checkout/addresses/:id failed:", error);
+    res.status(500).json({ error: "Failed to delete address" });
   }
 });
 
