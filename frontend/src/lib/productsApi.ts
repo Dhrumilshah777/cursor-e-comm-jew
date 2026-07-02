@@ -1,6 +1,12 @@
 import { fetchWithTimeout, getApiBaseUrl } from "@/lib/api";
 import type { CollectionProduct } from "@/data/collections";
 import type { CollectionSlug } from "@/data/collections";
+import {
+  getMockProductBySlug,
+  getMockProducts,
+  getMockRelatedProducts,
+  searchMockProducts,
+} from "@/lib/mockProducts";
 
 type ProductsResponse = { products: CollectionProduct[] };
 type ProductResponse = { product: CollectionProduct };
@@ -27,10 +33,13 @@ export async function fetchProducts(
   const tags = category ? ["products", `products:${category}`] : ["products"];
   try {
     const data = await publicGet<ProductsResponse>(path, tags);
-    return data.products;
+    if (data.products.length > 0) {
+      return data.products;
+    }
   } catch {
-    return [];
+    // Fall back to local mock catalog when the API is unavailable.
   }
+  return getMockProducts(category);
 }
 
 export async function searchProducts(query: string): Promise<CollectionProduct[]> {
@@ -43,10 +52,13 @@ export async function searchProducts(query: string): Promise<CollectionProduct[]
       "products",
       `search:${trimmed.toLowerCase()}`,
     ]);
-    return data.products;
+    if (data.products.length > 0) {
+      return data.products;
+    }
   } catch {
-    return [];
+    // Fall back to local mock catalog when the API is unavailable.
   }
+  return searchMockProducts(trimmed);
 }
 
 export async function fetchProductBySlug(
@@ -57,10 +69,13 @@ export async function fetchProductBySlug(
       "products",
       `product:${slug}`,
     ]);
-    return data.product;
+    if (data.product) {
+      return data.product;
+    }
   } catch {
-    return null;
+    // Fall back to local mock catalog when the API is unavailable.
   }
+  return getMockProductBySlug(slug);
 }
 
 export async function fetchRelatedProducts(
@@ -72,8 +87,11 @@ export async function fetchRelatedProducts(
       `/api/products/${slug}/related?limit=${limit}`,
       ["products", `product:${slug}:related`],
     );
-    return data.products;
+    if (data.products.length > 0) {
+      return data.products;
+    }
   } catch {
-    return [];
+    // Fall back to local mock catalog when the API is unavailable.
   }
+  return getMockRelatedProducts(slug, limit);
 }
