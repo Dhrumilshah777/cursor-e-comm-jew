@@ -294,7 +294,7 @@ const collectionProductsRaw: CollectionProductBase[] = [
     name: "Pearl Drop Earrings",
     category: "earrings",
     image:
-      "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
+      "https://emori.in/cdn/shop/files/E855-2.webp?v=1764746249&width=1080",
     alt: "Pearl drop earrings",
     price: "₹4,850",
   },
