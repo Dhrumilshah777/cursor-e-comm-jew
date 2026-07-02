@@ -24,12 +24,12 @@ export default function ProductImageGallery({
 
   return (
     <div className="flex flex-col gap-3 sm:gap-4">
-      <div className="relative aspect-square w-full bg-zinc-100">
+      <div className="relative aspect-square w-full overflow-hidden bg-zinc-100">
         <Image
           src={mainSrc}
           alt={alt}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-500 ease-in-out hover:scale-110"
           sizes="(max-width: 1024px) 100vw, 45vw"
           priority
         />
