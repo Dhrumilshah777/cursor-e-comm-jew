@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
         hostname: "palmonas.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "emori.in",
+        pathname: "/**",
+      },
     ],
   },
 };
