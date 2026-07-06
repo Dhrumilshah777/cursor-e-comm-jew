@@ -2,6 +2,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["192.168.1.10"],
   images: {
     remotePatterns: [
       {
@@ -22,6 +23,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "emori.in",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "ik.imagekit.io",
         pathname: "/**",
       },
     ],

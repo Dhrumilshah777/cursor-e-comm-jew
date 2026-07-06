@@ -1,3 +1,12 @@
+import {
+  applyPendantImageOverrides,
+  HEART_PENDANT_GALLERY,
+  HEART_PENDANT_IMAGE,
+  PENDANT_GPT_2,
+  PENDANT_GPT_3,
+} from "@/data/pendantAssets";
+import { DOLPHIN_EARRING_IMAGE } from "@/data/earringAssets";
+
 export type CollectionSlug =
   | "necklaces"
   | "bracelets"
@@ -98,8 +107,7 @@ export const collections: Record<CollectionSlug, CollectionConfig> = {
     slug: "pendants",
     name: "Pendants",
     tagline: "A focal point of refined brilliance",
-    bannerImage:
-      "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
+    bannerImage: HEART_PENDANT_IMAGE,
     bannerAlt: "Pendants collection banner",
   },
   mangalsutra: {
@@ -293,9 +301,8 @@ const collectionProductsRaw: CollectionProductBase[] = [
     slug: "pearl-drop-earrings",
     name: "Pearl Drop Earrings",
     category: "earrings",
-    image:
-      "https://emori.in/cdn/shop/files/E855-2.webp?v=1764746249&width=1080",
-    alt: "Pearl drop earrings",
+    image: DOLPHIN_EARRING_IMAGE,
+    alt: "Gold dolphin earrings and pendant set",
     price: "₹4,850",
   },
   {
@@ -533,8 +540,7 @@ const collectionProductsRaw: CollectionProductBase[] = [
     slug: "heart-pendant",
     name: "Heart Pendant",
     category: "pendants",
-    image:
-      "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
+    image: HEART_PENDANT_IMAGE,
     alt: "Heart pendant",
     price: "₹4,400",
   },
@@ -543,9 +549,8 @@ const collectionProductsRaw: CollectionProductBase[] = [
     slug: "initial-pendant",
     name: "Initial Pendant",
     category: "pendants",
-    image:
-      "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
-    alt: "Initial pendant",
+    image: PENDANT_GPT_2,
+    alt: "Gold dolphin pendant and earring set",
     price: "₹3,800",
   },
   {
@@ -553,9 +558,8 @@ const collectionProductsRaw: CollectionProductBase[] = [
     slug: "solitaire-pendant",
     name: "Solitaire Pendant",
     category: "pendants",
-    image:
-      "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
-    alt: "Solitaire pendant",
+    image: PENDANT_GPT_3,
+    alt: "Gold abstract pendant and earring set",
     price: "₹9,900",
   },
   {
@@ -951,7 +955,16 @@ export const collectionProducts: CollectionProduct[] = collectionProductsRaw.map
       sku: `JL-${product.category.slice(0, 2).toUpperCase()}${String(index + 1).padStart(4, "0")}`,
       weight,
       purity,
-      gallery: buildProductGallery(product.image, index),
+      gallery:
+        product.slug === "heart-pendant"
+          ? [...HEART_PENDANT_GALLERY]
+          : product.slug === "initial-pendant"
+            ? [PENDANT_GPT_2]
+            : product.slug === "solitaire-pendant"
+              ? [PENDANT_GPT_3]
+              : product.slug === "pearl-drop-earrings"
+                ? [DOLPHIN_EARRING_IMAGE]
+                : buildProductGallery(product.image, index),
       description: buildProductDescription(product, metal),
       makingCharge,
       gstPercent,

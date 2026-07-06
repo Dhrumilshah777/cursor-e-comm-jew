@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Jost, Playfair_Display } from "next/font/google";
 import type { CollectionConfig } from "@/data/collections";
-
 const jost = Jost({
   subsets: ["latin"],
   weight: ["300", "400", "500"],
@@ -36,8 +35,7 @@ export default function CategoryBanner({
           className="object-cover object-center"
           sizes="100vw"
           priority
-        />
-        {!hasBuiltInText ? (
+        />        {!hasBuiltInText ? (
           <>
             <div
               className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/20 to-transparent"

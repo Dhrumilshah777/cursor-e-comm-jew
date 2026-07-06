@@ -5,14 +5,20 @@ import {
   type CollectionProduct,
   type CollectionSlug,
 } from "@/data/collections";
+import { applyEarringImageOverrides } from "@/data/earringAssets";
+import { applyPendantImageOverrides } from "@/data/pendantAssets";
 
 function withStock(product: CollectionProduct): CollectionProduct {
-  if (product.stockCount !== undefined && product.inStock !== undefined) {
-    return product;
+  const withImages = applyEarringImageOverrides(
+    applyPendantImageOverrides(product),
+  );
+
+  if (withImages.stockCount !== undefined && withImages.inStock !== undefined) {
+    return withImages;
   }
 
   return {
-    ...product,
+    ...withImages,
     stockCount: 10,
     lowStockThreshold: 2,
     inStock: true,

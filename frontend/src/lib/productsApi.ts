@@ -1,6 +1,8 @@
 import { fetchWithTimeout, getApiBaseUrl } from "@/lib/api";
 import type { CollectionProduct } from "@/data/collections";
 import type { CollectionSlug } from "@/data/collections";
+import { applyEarringImageOverrides } from "@/data/earringAssets";
+import { applyPendantImageOverrides } from "@/data/pendantAssets";
 import {
   getMockProductBySlug,
   getMockProducts,
@@ -12,6 +14,18 @@ type ProductsResponse = { products: CollectionProduct[] };
 type ProductResponse = { product: CollectionProduct };
 
 const PRODUCT_REVALIDATE_SECONDS = 60;
+
+function applyCatalogImageOverrides(
+  product: CollectionProduct,
+): CollectionProduct {
+  return applyEarringImageOverrides(applyPendantImageOverrides(product));
+}
+
+function applyCatalogImageOverridesList(
+  products: CollectionProduct[],
+): CollectionProduct[] {
+  return products.map(applyCatalogImageOverrides);
+}
 
 async function publicGet<T>(path: string, tags: string[]): Promise<T> {
   const url = new URL(path, getApiBaseUrl());
@@ -34,7 +48,7 @@ export async function fetchProducts(
   try {
     const data = await publicGet<ProductsResponse>(path, tags);
     if (data.products.length > 0) {
-      return data.products;
+      return applyCatalogImageOverridesList(data.products);
     }
   } catch {
     // Fall back to local mock catalog when the API is unavailable.
@@ -53,7 +67,7 @@ export async function searchProducts(query: string): Promise<CollectionProduct[]
       `search:${trimmed.toLowerCase()}`,
     ]);
     if (data.products.length > 0) {
-      return data.products;
+      return applyCatalogImageOverridesList(data.products);
     }
   } catch {
     // Fall back to local mock catalog when the API is unavailable.
@@ -70,7 +84,7 @@ export async function fetchProductBySlug(
       `product:${slug}`,
     ]);
     if (data.product) {
-      return data.product;
+      return applyCatalogImageOverrides(data.product);
     }
   } catch {
     // Fall back to local mock catalog when the API is unavailable.
@@ -88,7 +102,7 @@ export async function fetchRelatedProducts(
       ["products", `product:${slug}:related`],
     );
     if (data.products.length > 0) {
-      return data.products;
+      return applyCatalogImageOverridesList(data.products);
     }
   } catch {
     // Fall back to local mock catalog when the API is unavailable.

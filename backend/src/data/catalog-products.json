@@ -304,7 +304,7 @@
     "slug": "pearl-drop-earrings",
     "name": "Pearl Drop Earrings",
     "category": "earrings",
-    "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
+    "image": "https://ik.imagekit.io/dqel2bwws/Jewelry%20Images/new-pen-dol.png",
     "alt": "Pearl drop earrings",
     "price": "₹3,327",
     "metal": "White Gold",
@@ -312,10 +312,7 @@
     "weight": "0.51 g",
     "purity": "14kt",
     "gallery": [
-      "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
-      "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
-      "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
-      "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg"
+      "https://ik.imagekit.io/dqel2bwws/Jewelry%20Images/new-pen-dol.png"
     ],
     "description": "Crafted in white gold, the Pearl Drop Earrings pairs a refined silhouette with everyday wearability. Finished by hand for a smooth, lasting shine and a comfortable fit you can wear from morning to evening. A versatile piece from our earrings—designed to layer easily or stand alone as a quiet statement. Each detail is checked for quality so your jewelry keeps its brilliance with gentle care.",
     "makingCharge": {
@@ -1182,7 +1179,7 @@
     "slug": "heart-pendant",
     "name": "Heart Pendant",
     "category": "pendants",
-    "image": "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
+    "image": "https://ik.imagekit.io/dqel2bwws/Jewelry%20Images/Pendant%20gpt.png",
     "alt": "Heart pendant",
     "price": "₹3,488",
     "metal": "White Gold",
@@ -1190,9 +1187,9 @@
     "weight": "0.55 g",
     "purity": "14kt",
     "gallery": [
-      "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
-      "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg",
-      "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg"
+      "https://ik.imagekit.io/dqel2bwws/Jewelry%20Images/Pendant%20gpt.png",
+      "/images/pendants/pendant-gpt-2.png",
+      "/images/pendants/pendant-gpt-3.png"
     ],
     "description": "Crafted in white gold, the Heart Pendant pairs a refined silhouette with everyday wearability. Finished by hand for a smooth, lasting shine and a comfortable fit you can wear from morning to evening. A versatile piece from our pendants—designed to layer easily or stand alone as a quiet statement. Each detail is checked for quality so your jewelry keeps its brilliance with gentle care.",
     "makingCharge": {
@@ -1218,18 +1215,15 @@
     "slug": "initial-pendant",
     "name": "Initial Pendant",
     "category": "pendants",
-    "image": "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
-    "alt": "Initial pendant",
+    "image": "/images/pendants/pendant-gpt-2.png",
+    "alt": "Gold dolphin pendant and earring set",
     "price": "₹1,057",
     "metal": "Yellow Gold",
     "sku": "JL-PE0034",
     "weight": "0.55 g",
     "purity": "18kt",
     "gallery": [
-      "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
-      "https://i.pinimg.com/1200x/47/17/32/4717327a9027cc7f683ae86644b18905.jpg",
-      "https://i.pinimg.com/1200x/89/46/14/8946149ece712e63fd4cd89e3d051dbc.jpg",
-      "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg"
+      "/images/pendants/pendant-gpt-2.png"
     ],
     "description": "Crafted in yellow gold, the Initial Pendant pairs a refined silhouette with everyday wearability. Finished by hand for a smooth, lasting shine and a comfortable fit you can wear from morning to evening. A versatile piece from our pendants—designed to layer easily or stand alone as a quiet statement. Each detail is checked for quality so your jewelry keeps its brilliance with gentle care.",
     "makingCharge": {
@@ -1255,18 +1249,15 @@
     "slug": "solitaire-pendant",
     "name": "Solitaire Pendant",
     "category": "pendants",
-    "image": "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
-    "alt": "Solitaire pendant",
+    "image": "/images/pendants/pendant-gpt-3.png",
+    "alt": "Gold abstract pendant and earring set",
     "price": "₹13",
     "metal": "Rose Gold",
     "sku": "JL-PE0035",
     "weight": "0.55 g",
     "purity": "22kt",
     "gallery": [
-      "https://i.pinimg.com/736x/57/21/fc/5721fc3ccfc5381ff09c753bc11692d1.jpg",
-      "https://i.pinimg.com/736x/91/7b/6b/917b6b5f464c44229dcc2bbfa2a954d7.jpg",
-      "https://i.pinimg.com/736x/bb/94/5f/bb945fbfb6d5a5c16647ad1f97b03ac5.jpg",
-      "https://i.pinimg.com/1200x/76/a4/5a/76a45a09a561e900917c4ee660f27e45.jpg"
+      "/images/pendants/pendant-gpt-3.png"
     ],
     "description": "Crafted in rose gold, the Solitaire Pendant pairs a refined silhouette with everyday wearability. Finished by hand for a smooth, lasting shine and a comfortable fit you can wear from morning to evening. A versatile piece from our pendants—designed to layer easily or stand alone as a quiet statement. Each detail is checked for quality so your jewelry keeps its brilliance with gentle care.",
     "makingCharge": {

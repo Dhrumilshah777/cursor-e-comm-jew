@@ -1,4 +1,5 @@
 import AudienceCollections from "@/components/AudienceCollections";
+import CustomDesignPoster from "@/components/CustomDesignPoster";
 import Reels, { type ReelItem } from "@/components/Reels";
 import HeroBanner from "@/components/HeroBanner";
 import NewArrivals, { type ProductItem } from "@/components/NewArrivals";
@@ -80,6 +81,7 @@ export default async function Home() {
       <ShopByCategory />
       <TopStyles items={topStyleItems} />
       <PromoBanner />
+      <CustomDesignPoster />
       <ShopByRecipient />
       <ShopByCollection />
       <NewArrivals items={newArrivalItems} />

@@ -17,8 +17,8 @@ const slides = [
     image:
       "https://i.pinimg.com/1200x/c0/42/c4/c042c4a5ef67184bb6cd2d59110af506.jpg",
     alt: "Featured jewelry",
-    title: "Pearls From Heaven",
-    subtitle: "New brand collection",
+    title: "Luxury Jewellery Without Paying For Diamonds",
+    subtitle: "",
     collectionHref: "/collections",
   },
   {
@@ -26,8 +26,8 @@ const slides = [
     image:
       "https://i.pinimg.com/1200x/6d/61/ed/6d61edaa4a69a1d21635f172eb548361.jpg",
     alt: "Featured jewelry",
-    title: "Layers of light",
-    subtitle: "New season essentials",
+    title: "Luxury Gold Jewellery. Designed for Everyday Elegance.",
+    subtitle: "",
     collectionHref: "/new-arrivals",
   },
 ] as const;
@@ -41,11 +41,6 @@ export default function HeroBanner() {
   const [index, setIndex] = useState(0);
   const count = slides.length;
   const current = slides[index];
-
-  const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "");
-  const whatsappHref = waNumber
-    ? `https://wa.me/${waNumber}`
-    : "https://wa.me/";
 
   const goNext = useCallback(() => {
     setIndex((i) => (i + 1) % count);
@@ -103,12 +98,14 @@ export default function HeroBanner() {
             aria-live="polite"
           >
             <div className="pointer-events-auto max-w-lg">
-              <h2 className="whitespace-nowrap text-3xl font-light tracking-wide text-white sm:text-4xl md:text-5xl lg:text-6xl">
+              <h2 className="max-w-xl text-3xl font-light leading-tight tracking-wide text-white sm:text-4xl md:max-w-2xl md:text-5xl lg:text-6xl">
                 {current.title}
               </h2>
-              <p className="mt-4 text-[11px] font-light uppercase tracking-[0.28em] text-white sm:text-xs">
-                {current.subtitle}
-              </p>
+              {current.subtitle ? (
+                <p className="mt-4 text-[11px] font-light uppercase tracking-[0.28em] text-white sm:text-xs">
+                  {current.subtitle}
+                </p>
+              ) : null}
               <div className="mt-7 flex flex-row flex-wrap items-center gap-3 sm:gap-4">
                 <Link
                   href={current.collectionHref}
@@ -116,14 +113,6 @@ export default function HeroBanner() {
                 >
                   View collection
                 </Link>
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${btnBase} bg-black text-white hover:opacity-90`}
-                >
-                  Enquire on WhatsApp
-                </a>
               </div>
             </div>
           </div>
